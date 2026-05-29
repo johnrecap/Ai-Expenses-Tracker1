@@ -42,7 +42,6 @@ class SyncCoordinator {
   Future<void> _pullRemote(String deviceId) async {
     try {
       final response = await apiClient.pullChanges(cursor: _lastCursor);
-      final changes = response['changes'] as List? ?? [];
       _lastCursor = response['nextCursor'] as int?;
     } catch (_) {
       // Pull failures are not critical - pending local changes will be pushed

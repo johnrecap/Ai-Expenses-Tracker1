@@ -73,7 +73,7 @@ class MonthlyFinancialStoryScreen extends StatelessWidget {
                       ],
                       if (reportState.expenses.isEmpty && !reportState.loading) ...[
                         const SizedBox(height: AppSpacing.md),
-                        _StoryPanel(
+                        const _StoryPanel(
                           icon: Icons.add_circle,
                           title: 'No expenses yet',
                           body: 'Start tracking your expenses to see your monthly financial story come to life.',

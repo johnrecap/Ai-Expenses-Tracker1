@@ -17,7 +17,6 @@ import 'package:expense_repository/src/firebase/firebase_saving_goal_repo.dart';
 import 'package:expense_repository/src/firebase/firebase_settings_repo.dart';
 import 'package:expense_repository/src/firebase/firebase_wallet_repo.dart';
 import 'package:expense_repository/src/local/local_repositories.dart';
-import 'package:expense_repository/src/local/local_repository_store.dart';
 import 'package:expense_repository/src/local/drift/drift_store.dart';
 import 'package:expense_repository/src/local/local_stubs.dart';
 import 'package:expense_repository/src/recurring_expense_repo.dart';
@@ -104,20 +103,6 @@ class AuthenticatedRepositoryFactory {
   AuthenticatedRepositoryBundle _createVpsLocalFirstBundle({required String userId}) {
     final store = DriftLocalRepositoryStore(userId: userId);
     final apiConfig = VpsApiConfig.fromEnvironment();
-    SyncCoordinator? coordinator;
-    if (apiConfig.isConfigured) {
-      coordinator = SyncCoordinator(
-        apiClient: VpsApiClient(
-          baseUri: Uri.parse(apiConfig.baseUrl),
-          tokenProvider: RepositoryFirebaseTokenProvider().call,
-        ),
-        queue: LocalSyncQueue(
-          pending: store.pendingChanges,
-          onUploaded: store.markUploadedChanges,
-          onChanged: store.markSyncChangesUpdated,
-        ),
-      );
-    }
     return AuthenticatedRepositoryBundle(
       expenseRepository: LocalExpenseRepository(store: store),
       categoryRepository: LocalCategoryRepository(store: store),

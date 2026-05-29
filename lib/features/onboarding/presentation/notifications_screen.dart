@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:expenses_tracker/core/theme/app_colors.dart';
@@ -41,7 +41,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       child: Container(
                         width: 40,
                         height: 40,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: AppColors.surfaceContainerHigh,
                           shape: BoxShape.circle,
                         ),
@@ -53,13 +53,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       ),
                     ),
                     const Spacer(),
-                    Row(
+                    const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         _ProgressDot(isActive: false),
-                        const SizedBox(width: 4),
+                        SizedBox(width: 4),
                         _ProgressDot(isActive: false),
-                        const SizedBox(width: 4),
+                        SizedBox(width: 4),
                         _ProgressDot(isActive: true),
                       ],
                     ),

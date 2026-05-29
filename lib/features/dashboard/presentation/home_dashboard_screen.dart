@@ -51,7 +51,7 @@ class HomeDashboardScreen extends StatelessWidget {
                       children: [
                         IconButton(
                           icon: const Icon(Icons.auto_awesome, color: AppColors.secondaryContainer, size: 22),
-                          onPressed: () => showModalBottomSheet(
+                          onPressed: () => showModalBottomSheet<void>(
                             context: context,
                             isScrollControlled: true,
                             backgroundColor: Colors.transparent,
@@ -230,7 +230,7 @@ class _HeroCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Container(
             height: 8,
-            decoration: BoxDecoration(color: AppColors.surfaceContainerHigh, borderRadius: AppRadii.pill),
+            decoration: const BoxDecoration(color: AppColors.surfaceContainerHigh, borderRadius: AppRadii.pill),
             child: FractionallySizedBox(
               alignment: AlignmentDirectional.centerStart,
               widthFactor: progress,
@@ -259,7 +259,7 @@ class _HeroCard extends StatelessWidget {
 class _InsightGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return const Row(
       children: [
         Expanded(
           child: _InsightCard(
@@ -270,7 +270,7 @@ class _InsightGrid extends StatelessWidget {
             subtitle: 'Spending is down 12%',
           ),
         ),
-        const SizedBox(width: AppSpacing.md),
+        SizedBox(width: AppSpacing.md),
         Expanded(
           child: _InsightCard(
             icon: Icons.flag,

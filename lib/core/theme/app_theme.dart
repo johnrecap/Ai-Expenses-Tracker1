@@ -41,7 +41,7 @@ class AppTheme {
           ),
         ),
       ),
-      inputDecorationTheme: InputDecorationTheme(
+      inputDecorationTheme: const InputDecorationTheme(
         filled: true,
         fillColor: AppColors.inputFill,
         border: OutlineInputBorder(
@@ -54,14 +54,14 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: AppRadii.pill,
-          borderSide: const BorderSide(color: AppColors.primary, width: 1),
+          borderSide: BorderSide(color: AppColors.primary, width: 1),
         ),
-        contentPadding: const EdgeInsetsDirectional.symmetric(
+        contentPadding: EdgeInsetsDirectional.symmetric(
           horizontal: 20,
           vertical: 16,
         ),
       ),
-      cardTheme: CardThemeData(
+      cardTheme: const CardThemeData(
         color: Colors.transparent,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: AppRadii.card),

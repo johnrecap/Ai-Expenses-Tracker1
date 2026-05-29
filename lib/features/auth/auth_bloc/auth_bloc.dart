@@ -59,7 +59,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthAuthenticated(user));
     } catch (error) {
       final currentUser = _authRepository.currentUser;
-      if (currentUser != null && !currentUser.isEmpty) {
+      if (currentUser != null && currentUser.isNotEmpty) {
         emit(AuthAuthenticated(currentUser));
         return;
       }

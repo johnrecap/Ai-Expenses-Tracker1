@@ -6,12 +6,11 @@ import 'package:expense_repository/expense_repository.dart';
 class ExchangeRateService {
   final String? _apiKey;
   final http.Client _client;
-  Map<String, double> _cache = {};
+  final Map<String, double> _cache = {};
   DateTime? _lastFetched;
 
-  ExchangeRateService({String? apiKey, http.Client? client})
-      : _apiKey = apiKey,
-        _client = client ?? http.Client();
+  ExchangeRateService({this._apiKey, http.Client? client})
+      : _client = client ?? http.Client();
 
   Future<double> getRate(String fromCurrency, String toCurrency) async {
     if (fromCurrency == toCurrency) return 1.0;

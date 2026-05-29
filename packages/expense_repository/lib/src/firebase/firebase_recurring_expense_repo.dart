@@ -49,8 +49,8 @@ class FirebaseRecurringExpenseRepository implements RecurringExpenseRepository {
   };
 
   RecurringExpense _fromDoc(Map<String, dynamic> d) {
-    DateTime ts(v) => v is Timestamp ? v.toDate() : DateTime.now();
-    DateTime? nts(v) => v is Timestamp ? v.toDate() : null;
+    DateTime ts(dynamic v) => v is Timestamp ? v.toDate() : DateTime.now();
+    DateTime? nts(dynamic v) => v is Timestamp ? v.toDate() : null;
     return RecurringExpense(
       recurringExpenseId: d['recurringExpenseId'] as String? ?? '',
       userId: d['userId'] as String? ?? '',

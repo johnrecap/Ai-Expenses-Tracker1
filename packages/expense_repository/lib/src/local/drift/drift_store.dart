@@ -385,102 +385,102 @@ class DriftLocalRepositoryStore implements LocalStoreInterface {
     _db
         .into(_db.expenses)
         .insertOnConflictUpdate(_modelToDriftExpense(e))
-        .catchError((_) {});
+        .catchError((_) => 0);
   }
 
   void _deleteExpenseFromDb(String id) {
     (_db.delete(_db.expenses)..where((t) => t.expenseId.equals(id)))
         .go()
-        .catchError((_) {});
+        .catchError((_) => 0);
   }
 
   void _persistCategory(Category c) {
     _db
         .into(_db.categories)
         .insertOnConflictUpdate(_modelToDriftCategory(c))
-        .catchError((_) {});
+        .catchError((_) => 0);
   }
 
   void _persistBudget(Budget b) {
     _db
         .into(_db.budgets)
         .insertOnConflictUpdate(_modelToDriftBudget(b))
-        .catchError((_) {});
+        .catchError((_) => 0);
   }
 
   void _persistSettings(UserSettings s) {
     _db
         .into(_db.settings)
         .insertOnConflictUpdate(_modelToDriftSettings(s))
-        .catchError((_) {});
+        .catchError((_) => 0);
   }
 
   void _persistGoal(SavingGoal g) {
     _db
         .into(_db.goals)
         .insertOnConflictUpdate(_modelToDriftSavingGoal(g))
-        .catchError((_) {});
+        .catchError((_) => 0);
   }
 
   void _deleteGoalFromDb(String id) {
     (_db.delete(_db.goals)..where((t) => t.goalId.equals(id)))
         .go()
-        .catchError((_) {});
+        .catchError((_) => 0);
   }
 
   void _persistWallet(WalletAccount w) {
     _db
         .into(_db.wallets)
         .insertOnConflictUpdate(_modelToDriftWallet(w))
-        .catchError((_) {});
+        .catchError((_) => 0);
   }
 
   void _persistTransfer(Transfer t) {
     _db
         .into(_db.transfers)
         .insertOnConflictUpdate(_modelToDriftTransfer(t))
-        .catchError((_) {});
+        .catchError((_) => 0);
   }
 
   void _persistCategoryBudget(CategoryBudget b) {
     _db
         .into(_db.categoryBudgets)
         .insertOnConflictUpdate(_modelToDriftCategoryBudget(b))
-        .catchError((_) {});
+        .catchError((_) => 0);
   }
 
   void _persistCategoryAlias(CategoryAlias a) {
     _db
         .into(_db.categoryAliases)
         .insertOnConflictUpdate(_modelToDriftCategoryAlias(a))
-        .catchError((_) {});
+        .catchError((_) => 0);
   }
 
   void _deleteCategoryAliasFromDb(String id) {
     (_db.delete(_db.categoryAliases)..where((t) => t.aliasId.equals(id)))
         .go()
-        .catchError((_) {});
+        .catchError((_) => 0);
   }
 
   void _persistRecurringExpense(RecurringExpense e) {
     _db
         .into(_db.recurringExpenses)
         .insertOnConflictUpdate(_modelToDriftRecurringExpense(e))
-        .catchError((_) {});
+        .catchError((_) => 0);
   }
 
   void _deleteRecurringExpenseFromDb(String id) {
     (_db.delete(_db.recurringExpenses)
           ..where((t) => t.recurringExpenseId.equals(id)))
         .go()
-        .catchError((_) {});
+        .catchError((_) => 0);
   }
 
   void _persistAiActionLog(AiActionLog l) {
     _db
         .into(_db.aiActionLogs)
         .insertOnConflictUpdate(_modelToDriftAiActionLog(l))
-        .catchError((_) {});
+        .catchError((_) => 0);
   }
 
   // -----------------------------------------------------------------------

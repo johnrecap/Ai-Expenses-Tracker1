@@ -4,14 +4,14 @@ import 'package:expense_repository/expense_repository.dart';
 class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
   final BudgetRepository _repo;
 
-  BudgetBloc(this._repo) : super(BudgetInitial()) {
+  BudgetBloc(this._repo) : super(const BudgetInitial()) {
     on<BudgetLoad>(_onLoad);
     on<BudgetUpdated>(_onBudget);
     on<BudgetSave>(_onSave);
   }
 
   Future<void> _onLoad(BudgetLoad event, Emitter<BudgetState> emit) async {
-    emit(BudgetLoading());
+    emit(const BudgetLoading());
     try {
       await for (final budget in _repo.watchCurrentMonthBudget(month: event.month, year: event.year)) {
         if (budget != null) add(BudgetUpdated(budget));

@@ -1,5 +1,4 @@
 import 'package:expense_repository/expense_repository.dart';
-import '../sync/sync_change.dart';
 
 /// Shared interface for local stores (in-memory or SQLite-backed).
 ///

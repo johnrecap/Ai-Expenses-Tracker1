@@ -31,7 +31,7 @@ class SavingGoalEntity {
   };
 
   static SavingGoalEntity fromDocument(Map<String, dynamic> data) {
-    final ts = (v) => v is Timestamp ? v.toDate() : null;
+    final ts = (dynamic v) => v is Timestamp ? v.toDate() : null;
     return SavingGoalEntity(
       goalId: data['goalId'] as String? ?? '',
       userId: data['userId'] as String? ?? '',

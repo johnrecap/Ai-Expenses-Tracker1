@@ -129,7 +129,7 @@ class _IdentityCard extends StatelessWidget {
         ]),
         const SizedBox(height: AppSpacing.md),
         const Divider(color: AppColors.surfaceContainerHigh),
-        _Row(icon: Icons.email_outlined, label: 'Email', value: state.user.email?.trim().isNotEmpty == true ? state.user.email!.trim() : 'N/A'),
+        _Row(icon: Icons.email_outlined, label: 'Email', value: state.user.email.trim().isNotEmpty ? state.user.email.trim() : 'N/A'),
         _Row(icon: Icons.login_outlined, label: 'Provider', value: state.capabilities.providerLabel),
         _Row(
           icon: Icons.badge_outlined, label: 'Account ID', value: state.user.userId,
@@ -203,7 +203,7 @@ class _ActionsCard extends StatelessWidget {
   }
 
   Future<void> _showEmailDialog(BuildContext context) async {
-    final ctrl = TextEditingController(text: state.user.email ?? '');
+    final ctrl = TextEditingController(text: state.user.email);
     final result = await showDialog<String>(
       context: context,
       builder: (_) => AlertDialog(

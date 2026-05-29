@@ -4,36 +4,36 @@ import 'package:expense_repository/expense_repository.dart';
 class CreateExpenseBloc extends Bloc<CreateExpenseEvent, CreateExpenseState> {
   final ExpenseRepository expenseRepository;
 
-  CreateExpenseBloc(this.expenseRepository) : super(CreateExpenseInitial()) {
+  CreateExpenseBloc(this.expenseRepository) : super(const CreateExpenseInitial()) {
     on<CreateExpense>(_onCreate);
     on<UpdateExpense>(_onUpdate);
     on<DeleteExpense>(_onDelete);
   }
 
   Future<void> _onCreate(CreateExpense event, Emitter<CreateExpenseState> emit) async {
-    emit(CreateExpenseLoading());
+    emit(const CreateExpenseLoading());
     try {
       await expenseRepository.createExpense(event.expense);
-      emit(CreateExpenseSuccess());
+      emit(const CreateExpenseSuccess());
     } catch (e) {
       emit(const CreateExpenseFailure('Failed to save expense.'));    }
   }
 
   Future<void> _onUpdate(UpdateExpense event, Emitter<CreateExpenseState> emit) async {
-    emit(CreateExpenseLoading());
+    emit(const CreateExpenseLoading());
     try {
       await expenseRepository.updateExpense(event.expense);
-      emit(CreateExpenseSuccess());
+      emit(const CreateExpenseSuccess());
     } catch (e) {
       emit(const CreateExpenseFailure('Failed to update expense.'));
     }
   }
 
   Future<void> _onDelete(DeleteExpense event, Emitter<CreateExpenseState> emit) async {
-    emit(CreateExpenseLoading());
+    emit(const CreateExpenseLoading());
     try {
       await expenseRepository.deleteExpense(event.expenseId);
-      emit(CreateExpenseSuccess());
+      emit(const CreateExpenseSuccess());
     } catch (e) {
       emit(const CreateExpenseFailure('Failed to delete expense.'));
     }

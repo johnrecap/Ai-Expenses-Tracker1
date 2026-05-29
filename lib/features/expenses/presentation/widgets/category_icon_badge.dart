@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:expenses_tracker/core/theme/app_colors.dart';
 
 class CategoryIconBadge extends StatelessWidget {
@@ -53,7 +53,7 @@ class CategoryIconBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final icon = _iconForName(iconName);
-    final color = Color(colorValue ?? AppColors.surfaceContainerHigh.value);
+    final color = Color(colorValue ?? AppColors.surfaceContainerHigh.toARGB32());
 
     return Container(
       width: size,

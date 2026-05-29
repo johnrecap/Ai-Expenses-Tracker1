@@ -38,7 +38,7 @@ class SettingsScreen extends StatelessWidget {
                     const SizedBox(height: AppSpacing.md),
                     _DataSection(),
                     const SizedBox(height: AppSpacing.md),
-                    _ProfileSection(context),
+                    _profileSection(context),
                     const SizedBox(height: AppSpacing.md),
                     _SupportSection(),
                     const SizedBox(height: AppSpacing.md),
@@ -106,7 +106,7 @@ class _SecuritySection extends StatelessWidget {
             title: Text('PIN Lock', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
             subtitle: Text('Require PIN to open the app', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
             value: state.appLockEnabled,
-            activeColor: AppColors.primary,
+            activeThumbColor: AppColors.primary,
             onChanged: state.isBusy ? null : (v) => _toggleLock(context, v),
           ),
           if (state.appLockEnabled && state.hasPin)
@@ -122,7 +122,7 @@ class _SecuritySection extends StatelessWidget {
             subtitle: Text(state.biometricAvailable ? 'Use fingerprint or face' : 'Not available on this device',
                 style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
             value: state.biometricEnabled,
-            activeColor: AppColors.primary,
+            activeThumbColor: AppColors.primary,
             onChanged: (state.isBusy || !state.appLockEnabled || !state.hasPin || !state.biometricAvailable)
                 ? null : (v) => cubit?.setBiometricEnabled(v),
           ),
@@ -140,7 +140,7 @@ class _SecuritySection extends StatelessWidget {
   }
 
   Future<void> _openPinScreen(BuildContext context, {bool changeExisting = false}) async {
-    await Navigator.push(context, MaterialPageRoute(
+    await Navigator.push(context, MaterialPageRoute<void>(
       builder: (_) => BlocProvider.value(
         value: context.read<AppLockCubit>(),
         child: CreatePinScreen(changeExistingPin: changeExisting),
@@ -190,7 +190,7 @@ class _NotificationSection extends StatelessWidget {
           title: Text('Push Notifications', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
           subtitle: Text('Get alerts for budgets and bills', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
           value: true,
-          activeColor: AppColors.primary,
+          activeThumbColor: AppColors.primary,
           onChanged: (_) {},
         ),
       ],
@@ -254,7 +254,7 @@ class _DataSection extends StatelessWidget {
   }
 }
 
-Widget _ProfileSection(BuildContext context) {
+Widget _profileSection(BuildContext context) {
   return _Section(
     title: 'Account',
     subtitle: 'Profile and subscription',
@@ -338,7 +338,7 @@ class _DangerSection extends StatelessWidget {
   }
 
   Future<void> _showDeleteDialog(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
+    await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Delete Account'),

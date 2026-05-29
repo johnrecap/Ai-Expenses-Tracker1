@@ -49,7 +49,7 @@ class FirebaseWalletAccountRepository implements WalletAccountRepository {
   };
 
   WalletAccount _walletFromDoc(Map<String, dynamic> d) {
-    DateTime ts(v) => v is Timestamp ? v.toDate() : DateTime.now();
+    DateTime ts(dynamic v) => v is Timestamp ? v.toDate() : DateTime.now();
     return WalletAccount(
       walletId: d['walletId'] as String? ?? '',
       userId: d['userId'] as String? ?? '',
@@ -100,7 +100,7 @@ class FirebaseTransferRepository implements TransferRepository {
   }
 
   Transfer _transferFromDoc(Map<String, dynamic> d) {
-    DateTime ts(v) => v is Timestamp ? v.toDate() : DateTime.now();
+    DateTime ts(dynamic v) => v is Timestamp ? v.toDate() : DateTime.now();
     return Transfer(
       transferId: d['transferId'] as String? ?? '',
       userId: d['userId'] as String? ?? '',

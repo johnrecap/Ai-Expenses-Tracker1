@@ -14,14 +14,14 @@ Future<void> main() async {
 
   try {
     await Firebase.initializeApp();
-  } catch (e, st) {
+  } catch (e) {
     runApp(_FirebaseErrorApp(error: e));
     return;
   }
 
   try {
     await AnalyticsService.instance.initialize();
-  } catch (e, st) {
+  } catch (e) {
     debugPrint('Analytics init failed (403 likely = API not enabled in console): $e');
   }
 
@@ -30,35 +30,6 @@ Future<void> main() async {
   }
 
   runApp(const App());
-}
-
-class _ErrorApp extends StatelessWidget {
-  final String error;
-  const _ErrorApp(this.error);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                const SizedBox(height: 24),
-                const Text('Something went wrong', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 12),
-                Text(error, style: TextStyle(color: Colors.grey[600], fontSize: 12), textAlign: TextAlign.center),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _FirebaseErrorApp extends StatelessWidget {
@@ -91,7 +62,7 @@ class _FirebaseErrorApp extends StatelessWidget {
                       await Firebase.initializeApp();
                       if (context.mounted) {
                         Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (_) => const App()),
+                          MaterialPageRoute<void>(builder: (_) => const App()),
                         );
                       }
                     } catch (_) {}

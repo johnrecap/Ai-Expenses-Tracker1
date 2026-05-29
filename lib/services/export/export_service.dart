@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:csv/csv.dart';
-import 'package:excel/excel.dart';
+import 'package:excel/excel.dart' show Excel, CellIndex, TextCellValue, DoubleCellValue;
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -21,16 +21,16 @@ class ExportService {
     final sheet = excel['Expenses'];
     final headers = ['Date', 'Category', 'Amount', 'Payment Method', 'Description'];
     for (var i = 0; i < headers.length; i++) {
-      sheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0)).value = headers[i];
+      sheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0)).value = TextCellValue(headers[i]);
     }
     for (var r = 0; r < expenses.length; r++) {
       final e = expenses[r];
       final row = r + 1;
-      sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row)).value = e.date.toIso8601String();
-      sheet.cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row)).value = e.categoryName;
-      sheet.cell(CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: row)).value = e.amount;
-      sheet.cell(CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: row)).value = e.paymentMethod.label;
-      sheet.cell(CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: row)).value = e.description;
+      sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row)).value = TextCellValue(e.date.toIso8601String());
+      sheet.cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row)).value = TextCellValue(e.categoryName);
+      sheet.cell(CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: row)).value = DoubleCellValue(e.amount);
+      sheet.cell(CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: row)).value = TextCellValue(e.paymentMethod.label);
+      sheet.cell(CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: row)).value = TextCellValue(e.description);
     }
     final bytes = excel.encode();
     if (bytes != null) await _shareBytes(bytes, 'expenses_export.xlsx');
@@ -42,7 +42,7 @@ class ExportService {
       build: (ctx) => [
         pw.Header(text: 'Expenses Report', textStyle: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold)),
         pw.SizedBox(height: 16),
-        pw.Table.fromTextArray(
+        pw.TableHelper.fromTextArray(
           headers: ['Date', 'Category', 'Amount', 'Payment'],
           data: expenses.map((e) => [e.date.toIso8601String().substring(0, 10), e.categoryName, e.amount.toStringAsFixed(2), e.paymentMethod.label]).toList(),
         ),

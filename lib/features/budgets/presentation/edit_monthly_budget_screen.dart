@@ -62,7 +62,7 @@ class _EditMonthlyBudgetScreenState extends State<EditMonthlyBudgetScreen> {
                       Container(
                         width: double.infinity,
                         height: 56,
-                        decoration: BoxDecoration(gradient: AppGradients.primaryAction, borderRadius: AppRadii.pill),
+                        decoration: const BoxDecoration(gradient: AppGradients.primaryAction, borderRadius: AppRadii.pill),
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(

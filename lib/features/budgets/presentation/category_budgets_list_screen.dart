@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:expenses_tracker/core/theme/app_colors.dart';
 import 'package:expenses_tracker/core/theme/app_spacing.dart';
@@ -26,12 +26,12 @@ class CategoryBudgetsListScreen extends StatelessWidget {
                     children: [
                       Text('Monthly Allocations', style: AppTextStyles.labelCaps.copyWith(color: AppColors.onSurfaceVariant)),
                       const SizedBox(height: AppSpacing.md),
-                      _BudgetRow(label: 'Food & Dining', allocated: 400, spent: 245.5, color: const Color(0xFFFF7043)),
-                      _BudgetRow(label: 'Transport', allocated: 150, spent: 85, color: const Color(0xFF42A5F5)),
-                      _BudgetRow(label: 'Shopping', allocated: 200, spent: 100, color: const Color(0xFFAB47BC)),
-                      _BudgetRow(label: 'Entertainment', allocated: 150, spent: 60, color: const Color(0xFFFFCA28)),
-                      _BudgetRow(label: 'Healthcare', allocated: 100, spent: 45, color: const Color(0xFFEF5350)),
-                      _BudgetRow(label: 'Utilities', allocated: 200, spent: 52, color: const Color(0xFF8D6E63)),
+                      const _BudgetRow(label: 'Food & Dining', allocated: 400, spent: 245.5, color: Color(0xFFFF7043)),
+                      const _BudgetRow(label: 'Transport', allocated: 150, spent: 85, color: Color(0xFF42A5F5)),
+                      const _BudgetRow(label: 'Shopping', allocated: 200, spent: 100, color: Color(0xFFAB47BC)),
+                      const _BudgetRow(label: 'Entertainment', allocated: 150, spent: 60, color: Color(0xFFFFCA28)),
+                      const _BudgetRow(label: 'Healthcare', allocated: 100, spent: 45, color: Color(0xFFEF5350)),
+                      const _BudgetRow(label: 'Utilities', allocated: 200, spent: 52, color: Color(0xFF8D6E63)),
                       const SizedBox(height: 80),
                     ],
                   ),

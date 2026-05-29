@@ -51,7 +51,7 @@ class ProgressRing extends StatelessWidget {
               strokeCap: StrokeCap.round,
             ),
           ),
-          if (centerWidget != null) centerWidget!,
+          ?centerWidget,
           if (centerWidget == null)
             Text(
               '${(clampedProgress * 100).round()}%',

@@ -12,15 +12,15 @@ class AccountIdentity {
     if (localName != null && localName.isNotEmpty) return localName;
     final authName = user.displayName?.trim();
     if (authName != null && authName.isNotEmpty) return authName;
-    final email = user.email?.trim();
-    if (email != null && email.isNotEmpty) return email;
+    final email = user.email.trim();
+    if (email.isNotEmpty) return email;
     return fallbackUserLabel;
   }
 
   static String? secondaryIdentity({required AppUser user, String? localDisplayName}) {
     final primary = displayName(user: user, localDisplayName: localDisplayName, fallbackUserLabel: '').trim();
-    final email = user.email?.trim();
-    if (email == null || email.isEmpty || email == primary) return null;
+    final email = user.email.trim();
+    if (email.isEmpty || email == primary) return null;
     return email;
   }
 

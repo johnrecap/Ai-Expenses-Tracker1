@@ -19,13 +19,6 @@ class FirebaseSavingGoalRepository implements SavingGoalRepository {
     createdAt: g.createdAt, updatedAt: g.updatedAt,
   ).toDocument();
 
-  SavingGoal _toModel(SavingGoalEntity e) => SavingGoal(
-    goalId: e.goalId, userId: e.userId, name: e.name,
-    targetAmount: e.targetAmount, currentAmount: e.currentAmount,
-    currency: e.currency, deadline: e.deadline, color: e.color,
-    createdAt: e.createdAt, updatedAt: e.updatedAt,
-  );
-
   @override
   Future<void> createSavingGoal(SavingGoal goal) async {
     final toSave = goal.copyWith(userId: userId, updatedAt: DateTime.now());

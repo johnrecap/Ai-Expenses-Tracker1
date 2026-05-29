@@ -150,7 +150,7 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                         child: Container(
                           width: 40,
                           height: 40,
-                          decoration: BoxDecoration(color: AppColors.surfaceContainerHigh, shape: BoxShape.circle),
+                          decoration: const BoxDecoration(color: AppColors.surfaceContainerHigh, shape: BoxShape.circle),
                           child: const Icon(Icons.arrow_back, size: 20, color: AppColors.onSurfaceVariant),
                         ),
                       ),

@@ -11,7 +11,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   final String _userId;
   bool _seeded = false;
 
-  CategoryBloc(this._repo, this._userId) : super(CategoryInitial()) {
+  CategoryBloc(this._repo, this._userId) : super(const CategoryInitial()) {
     on<CategoriesWatched>(_onWatch);
     on<CreateCategory>(_onCreate);
     on<UpdateCategory>(_onUpdate);
@@ -19,12 +19,14 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
   }
 
   Future<void> _onWatch(CategoriesWatched event, Emitter<CategoryState> emit) async {
-    emit(CategoryLoading());
+    emit(const CategoryLoading());
     try {
       await for (final categories in _repo.watchCategories()) {
         if (categories.isEmpty && !_seeded) {
           _seeded = true;
           await _seedDefaults();
+          final all = await _repo.getCategories();
+          emit(CategoryLoaded(all));
         } else {
           emit(CategoryLoaded(categories));
         }
@@ -96,13 +98,6 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       } catch (e) {
         debugPrint('CategoryBloc: failed to seed category ${c.categoryId}: $e');
       }
-    }
-
-    try {
-      final all = await _repo.getCategories();
-      emit(CategoryLoaded(all));
-    } catch (_) {
-      emit(const CategoryError('Failed to load categories.'));
     }
   }
 

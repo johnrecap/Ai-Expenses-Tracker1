@@ -1,5 +1,4 @@
 import 'package:expense_repository/src/models/expense_filter.dart';
-import 'package:expense_repository/src/models/language_preference.dart';
 import 'package:expense_repository/src/models/money_snapshot.dart';
 import 'package:expense_repository/src/models/payment_method.dart';
 import '../entities/expense_entity.dart';

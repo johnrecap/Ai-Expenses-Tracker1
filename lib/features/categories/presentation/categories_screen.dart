@@ -127,7 +127,7 @@ class CategoriesScreen extends StatelessWidget {
   }
 
   void _confirmArchive(BuildContext context, Category category) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Archive Category'),
@@ -177,7 +177,7 @@ class _CategoryCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
+                color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -199,7 +199,7 @@ class _CategoryCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        Icon(Icons.archive, size: 14, color: AppColors.outline),
+                        const Icon(Icons.archive, size: 14, color: AppColors.outline),
                         const SizedBox(width: 4),
                         Text(
                           'Archived',
@@ -337,7 +337,7 @@ class _CategoryFormDialogState extends State<_CategoryFormDialog> {
           const SizedBox(height: AppSpacing.lg),
           Text(widget.existingCategory != null ? 'Edit Category' : 'New Category', style: AppTextStyles.titleMedium.copyWith(color: AppColors.onSurface)),
           const SizedBox(height: AppSpacing.md),
-          TextField(controller: _nameCtrl, decoration: InputDecoration(labelText: 'Name', filled: true, fillColor: AppColors.surfaceContainerLow, border: const OutlineInputBorder(borderSide: BorderSide.none))),
+          TextField(controller: _nameCtrl, decoration: const InputDecoration(labelText: 'Name', filled: true, fillColor: AppColors.surfaceContainerLow, border: OutlineInputBorder(borderSide: BorderSide.none))),
           const SizedBox(height: AppSpacing.md),
           Text('Icon', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
           const SizedBox(height: AppSpacing.sm),

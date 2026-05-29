@@ -52,7 +52,7 @@ class _AddExpenseReceiptScreenState extends State<AddExpenseReceiptScreen> {
       });
 
       final bytes = await file.readAsBytes();
-      final maxBytes = 5 * 1024 * 1024; // 5MB
+      const maxBytes = 5 * 1024 * 1024; // 5MB
       var processedBytes = bytes;
 
       if (bytes.length > maxBytes) {
@@ -164,7 +164,7 @@ class _AddExpenseReceiptScreenState extends State<AddExpenseReceiptScreen> {
                         child: Container(
                           width: 40,
                           height: 40,
-                          decoration: BoxDecoration(color: AppColors.surfaceContainerHigh, shape: BoxShape.circle),
+                          decoration: const BoxDecoration(color: AppColors.surfaceContainerHigh, shape: BoxShape.circle),
                           child: const Icon(Icons.close, size: 20, color: AppColors.onSurfaceVariant),
                         ),
                       ),
@@ -188,7 +188,7 @@ class _AddExpenseReceiptScreenState extends State<AddExpenseReceiptScreen> {
                         border: Border.all(color: AppColors.glassCardBorder),
                       ),
                       child: _imagePath != null
-                          ? ClipRRect(borderRadius: BorderRadius.circular(15), child: Image.file(File(_imagePath!), fit: BoxFit.cover, errorBuilder: (_, __, ___) => _uploadPlaceholder()))
+                          ? ClipRRect(borderRadius: BorderRadius.circular(15), child: Image.file(File(_imagePath!), fit: BoxFit.cover, errorBuilder: (_, _, _) => _uploadPlaceholder()))
                           : _parsing
                               ? const Center(child: CircularProgressIndicator())
                               : _uploadPlaceholder(),

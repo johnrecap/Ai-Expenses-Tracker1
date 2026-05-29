@@ -4,9 +4,8 @@ import 'package:expenses_tracker/monetization/services/ad_service.dart';
 class MonetizationCubit extends Cubit<MonetizationState> {
   final AdService? _adService;
 
-  MonetizationCubit({AdService? adService})
-      : _adService = adService,
-        super(const MonetizationState());
+  MonetizationCubit({this._adService})
+      : super(const MonetizationState());
 
   Future<void> load() async {
     emit(state.copyWith(loading: true));

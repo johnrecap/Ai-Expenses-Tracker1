@@ -4,7 +4,7 @@ import 'package:expense_repository/expense_repository.dart';
 class SavingGoalBloc extends Bloc<SavingGoalEvent, SavingGoalState> {
   final SavingGoalRepository _repo;
 
-  SavingGoalBloc(this._repo) : super(SavingGoalInitial()) {
+  SavingGoalBloc(this._repo) : super(const SavingGoalInitial()) {
     on<SavingGoalsWatch>(_onWatch);
     on<SavingGoalCreate>(_onCreate);
     on<SavingGoalUpdate>(_onUpdate);
@@ -12,7 +12,7 @@ class SavingGoalBloc extends Bloc<SavingGoalEvent, SavingGoalState> {
   }
 
   Future<void> _onWatch(SavingGoalsWatch event, Emitter<SavingGoalState> emit) async {
-    emit(SavingGoalLoading());
+    emit(const SavingGoalLoading());
     try {
       await for (final goals in _repo.watchSavingGoals()) {
         emit(SavingGoalSuccess(goals));
@@ -25,7 +25,7 @@ class SavingGoalBloc extends Bloc<SavingGoalEvent, SavingGoalState> {
   Future<void> _onCreate(SavingGoalCreate event, Emitter<SavingGoalState> emit) async {
     if (event.goal.name.trim().isEmpty) { emit(const SavingGoalFailure('Enter a goal name.')); return; }
     if (event.goal.targetAmount <= 0) { emit(const SavingGoalFailure('Enter a positive target.')); return; }
-    emit(SavingGoalSaving());
+    emit(const SavingGoalSaving());
     try {
       await _repo.createSavingGoal(event.goal);
       emit(const SavingGoalActionSuccess('Goal created.'));
@@ -33,7 +33,7 @@ class SavingGoalBloc extends Bloc<SavingGoalEvent, SavingGoalState> {
   }
 
   Future<void> _onUpdate(SavingGoalUpdate event, Emitter<SavingGoalState> emit) async {
-    emit(SavingGoalSaving());
+    emit(const SavingGoalSaving());
     try {
       await _repo.updateSavingGoal(event.goal);
       emit(const SavingGoalActionSuccess('Goal updated.'));
@@ -41,7 +41,7 @@ class SavingGoalBloc extends Bloc<SavingGoalEvent, SavingGoalState> {
   }
 
   Future<void> _onDelete(SavingGoalDelete event, Emitter<SavingGoalState> emit) async {
-    emit(SavingGoalSaving());
+    emit(const SavingGoalSaving());
     try {
       await _repo.deleteSavingGoal(event.goalId);
       emit(const SavingGoalActionSuccess('Goal deleted.'));

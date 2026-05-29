@@ -1,13 +1,10 @@
-﻿import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/material.dart';
 import 'package:expenses_tracker/core/theme/app_colors.dart';
 import 'package:expenses_tracker/core/theme/app_gradients.dart';
 import 'package:expenses_tracker/core/theme/app_radii.dart';
 import 'package:expenses_tracker/core/theme/app_spacing.dart';
 import 'package:expenses_tracker/core/theme/app_text_styles.dart';
 import 'package:expenses_tracker/core/widgets/glass_bottom_sheet.dart';
-import 'package:expenses_tracker/features/categories/category_bloc/category_bloc.dart';
-import 'package:expense_repository/expense_repository.dart';
 
 class ExpenseFiltersSheet extends StatefulWidget {
   const ExpenseFiltersSheet({super.key});
@@ -28,17 +25,6 @@ class _ExpenseFiltersSheetState extends State<ExpenseFiltersSheet> {
     ('Housing', Icons.home),
     ('Entertainment', Icons.movie),
   ];
-
-  List<Category> _categories = [];
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final catState = context.read<CategoryBloc>().state;
-    if (catState is CategoryLoaded) {
-      _categories = catState.categories;
-    }
-  }
 
   @override
   void dispose() {
@@ -75,7 +61,7 @@ class _ExpenseFiltersSheetState extends State<ExpenseFiltersSheet> {
                     child: Container(
                       width: 32,
                       height: 32,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: AppColors.surfaceContainerHigh,
                         shape: BoxShape.circle,
                       ),
@@ -95,7 +81,7 @@ class _ExpenseFiltersSheetState extends State<ExpenseFiltersSheet> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: AppSpacing.lg),
-                    _SectionLabel(label: 'Search'),
+                    const _SectionLabel(label: 'Search'),
                     const SizedBox(height: AppSpacing.sm),
                     TextField(
                       controller: _searchController,
@@ -107,24 +93,24 @@ class _ExpenseFiltersSheetState extends State<ExpenseFiltersSheet> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.lg),
-                    _SectionLabel(label: 'Date Range'),
+                    const _SectionLabel(label: 'Date Range'),
                     const SizedBox(height: AppSpacing.sm),
                     Row(
                       children: [
-                        Expanded(
+                        const Expanded(
                           child: _DateField(value: 'Oct 1, 2023'),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                           child: Text('-', style: AppTextStyles.bodySmall.copyWith(color: AppColors.outline)),
                         ),
-                        Expanded(
+                        const Expanded(
                           child: _DateField(value: 'Oct 31, 2023'),
                         ),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.lg),
-                    _SectionLabel(label: 'Categories'),
+                    const _SectionLabel(label: 'Categories'),
                     const SizedBox(height: AppSpacing.sm),
                     Wrap(
                       spacing: AppSpacing.sm,
@@ -176,7 +162,7 @@ class _ExpenseFiltersSheetState extends State<ExpenseFiltersSheet> {
                     const SizedBox(height: AppSpacing.lg),
                     Row(
                       children: [
-                        _SectionLabel(label: 'Amount Range'),
+                        const _SectionLabel(label: 'Amount Range'),
                         const Spacer(),
                         Text(
                           '\$0 - \$${_amountRange.toInt().toString()}+',
@@ -239,7 +225,7 @@ class _ExpenseFiltersSheetState extends State<ExpenseFiltersSheet> {
                   Expanded(
                     flex: 2,
                     child: Container(
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         gradient: AppGradients.primaryAction,
                         borderRadius: AppRadii.pill,
                       ),

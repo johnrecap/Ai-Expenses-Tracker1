@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:expense_repository/expense_repository.dart';
-import '../sync/sync_change.dart';
 import 'local_store_interface.dart';
 
 class LocalRepositoryStore implements LocalStoreInterface {

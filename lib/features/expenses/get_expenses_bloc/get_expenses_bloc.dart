@@ -20,7 +20,7 @@ class GetExpensesBloc extends Bloc<GetExpensesEvent, GetExpensesState> {
         final expenses = await expenseRepository.getExpenses();
         emit(GetExpensesSuccess(List.unmodifiable(expenses)));
       } catch (_) {
-        emit(GetExpensesFailure('Failed to load expenses. Check your connection.'));
+        emit(const GetExpensesFailure('Failed to load expenses. Check your connection.'));
       }
     }
   }
@@ -30,7 +30,7 @@ class GetExpensesBloc extends Bloc<GetExpensesEvent, GetExpensesState> {
       final expenses = await expenseRepository.getExpenses();
       emit(GetExpensesSuccess(List.unmodifiable(expenses)));
     } catch (_) {
-      emit(GetExpensesFailure('Failed to refresh expenses.'));
+      emit(const GetExpensesFailure('Failed to refresh expenses.'));
     }
   }
 }

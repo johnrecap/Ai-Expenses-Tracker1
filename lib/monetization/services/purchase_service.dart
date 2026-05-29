@@ -8,7 +8,7 @@ class PurchaseService {
   const PurchaseService(this.context);
 
   Future<bool> purchasePremium() async {
-    await Future.delayed(const Duration(seconds: 1));
+    await Future<void>.delayed(const Duration(seconds: 1));
     if (context.mounted) {
       context.read<MonetizationCubit>().setPremium(true);
     }
@@ -16,7 +16,7 @@ class PurchaseService {
   }
 
   Future<bool> restorePurchases() async {
-    await Future.delayed(const Duration(seconds: 1));
+    await Future<void>.delayed(const Duration(seconds: 1));
     return true;
   }
 }

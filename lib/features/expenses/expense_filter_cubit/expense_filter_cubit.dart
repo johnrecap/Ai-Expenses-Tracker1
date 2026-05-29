@@ -18,7 +18,7 @@ class ExpenseFilterCubit extends Cubit<ExpenseFilterState> {
   }
 
   void reset() {
-    final f = ExpenseFilter.empty;
+    const f = ExpenseFilter.empty;
     emit(ExpenseFilterState(allExpenses: state.allExpenses, filteredExpenses: _apply(state.allExpenses, f), filter: f));
   }
 

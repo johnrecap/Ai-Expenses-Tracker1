@@ -8,10 +8,9 @@ part 'recurring_expense_state.dart';
 
 class RecurringExpenseBloc extends Bloc<RecurringExpenseEvent, RecurringExpenseState> {
   final RecurringExpenseRepository _repo;
-  final String _userId;
   StreamSubscription<List<RecurringExpense>>? _sub;
 
-  RecurringExpenseBloc(this._repo, this._userId) : super(RecurringExpenseInitial()) {
+  RecurringExpenseBloc(this._repo, String userId) : super(const RecurringExpenseInitial()) {
     on<RecurringExpensesWatched>(_onWatch);
     on<RecurringExpensesUpdated>(_onUpdated);
     on<CreateRecurringExpense>(_onCreate);
@@ -21,7 +20,7 @@ class RecurringExpenseBloc extends Bloc<RecurringExpenseEvent, RecurringExpenseS
   }
 
   Future<void> _onWatch(RecurringExpensesWatched event, Emitter<RecurringExpenseState> emit) async {
-    emit(RecurringExpenseLoading());
+    emit(const RecurringExpenseLoading());
     await _sub?.cancel();
     try {
       _sub = _repo.watchAll().listen(

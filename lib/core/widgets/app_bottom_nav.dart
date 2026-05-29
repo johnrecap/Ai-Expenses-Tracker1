@@ -26,7 +26,7 @@ class AppBottomNav extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppColors.glassCardFill,
             border: Border(top: BorderSide(color: AppColors.glassCardBorder, width: 1)),
           ),

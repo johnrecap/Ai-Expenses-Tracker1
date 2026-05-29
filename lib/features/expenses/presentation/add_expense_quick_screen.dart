@@ -124,7 +124,7 @@ class _AddExpenseQuickScreenState extends State<AddExpenseQuickScreen> {
                         child: Container(
                           width: 40,
                           height: 40,
-                          decoration: BoxDecoration(color: AppColors.surfaceContainerHigh, shape: BoxShape.circle),
+                          decoration: const BoxDecoration(color: AppColors.surfaceContainerHigh, shape: BoxShape.circle),
                           child: const Icon(Icons.close, size: 20, color: AppColors.onSurfaceVariant),
                         ),
                       ),

@@ -56,7 +56,7 @@ class _AiExpenseParsePanelState extends State<AiExpenseParsePanel> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppColors.inputFill,
             borderRadius: AppRadii.card,
           ),

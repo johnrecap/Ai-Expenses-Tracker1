@@ -39,7 +39,7 @@ class FirebaseAiActionLogRepository implements AiActionLogRepository {
   };
 
   AiActionLog _fromDoc(Map<String, dynamic> d) {
-    DateTime ts(v) => v is Timestamp ? v.toDate() : DateTime.now();
+    DateTime ts(dynamic v) => v is Timestamp ? v.toDate() : DateTime.now();
     return AiActionLog(
       actionId: d['actionId'] as String? ?? '',
       userId: d['userId'] as String? ?? '',

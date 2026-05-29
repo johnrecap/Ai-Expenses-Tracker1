@@ -38,7 +38,7 @@ class WalletState extends Equatable {
 
 class WalletLoaded extends WalletState {
   const WalletLoaded({
-    required List<WalletAccount> wallets,
-    required List<Transfer> transfers,
-  }) : super(status: WalletStatus.loaded, wallets: wallets, transfers: transfers);
+    required super.wallets,
+    required super.transfers,
+  }) : super(status: WalletStatus.loaded);
 }

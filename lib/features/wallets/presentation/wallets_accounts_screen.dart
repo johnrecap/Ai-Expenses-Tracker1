@@ -59,9 +59,9 @@ class WalletsAccountsScreen extends StatelessWidget {
                           child: Column(children: [
                             ...state.transfers.take(5).map((t) => _TransferRow(
                               label: '${t.fromWalletId} → ${t.toWalletId}',
-                              amount: '${t.amount.toStringAsFixed(3)}',
+                              amount: t.amount.toStringAsFixed(3),
                               date: '${t.date.day}/${t.date.month}',
-                            )).toList(),
+                            )),
                           ]),
                         ),
                       ],
@@ -90,7 +90,7 @@ class WalletsAccountsScreen extends StatelessWidget {
   }
 
   void _showWalletForm(BuildContext context, {WalletAccount? existing}) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -151,7 +151,7 @@ class _TransferRow extends StatelessWidget {
       child: Row(children: [
         Container(
           width: 32, height: 32,
-          decoration: BoxDecoration(color: AppColors.surfaceContainerHigh, shape: BoxShape.circle),
+          decoration: const BoxDecoration(color: AppColors.surfaceContainerHigh, shape: BoxShape.circle),
           child: const Icon(Icons.swap_horiz, size: 16, color: AppColors.onSurfaceVariant),
         ),
         const SizedBox(width: AppSpacing.sm),
@@ -214,20 +214,20 @@ class _WalletFormState extends State<_WalletForm> {
           const SizedBox(height: AppSpacing.lg),
           Text(widget.existing != null ? 'Edit Wallet' : 'New Wallet', style: AppTextStyles.titleMedium.copyWith(color: AppColors.onSurface)),
           const SizedBox(height: AppSpacing.md),
-          TextField(controller: _nameCtrl, decoration: InputDecoration(labelText: 'Name', filled: true, fillColor: AppColors.surfaceContainerLow, border: const OutlineInputBorder(borderSide: BorderSide.none))),
+          TextField(controller: _nameCtrl, decoration: const InputDecoration(labelText: 'Name', filled: true, fillColor: AppColors.surfaceContainerLow, border: OutlineInputBorder(borderSide: BorderSide.none))),
           const SizedBox(height: AppSpacing.sm),
           DropdownButtonFormField<String>(
-            value: _type,
-            decoration: InputDecoration(labelText: 'Type', filled: true, fillColor: AppColors.surfaceContainerLow, border: const OutlineInputBorder(borderSide: BorderSide.none)),
+            initialValue: _type,
+            decoration: const InputDecoration(labelText: 'Type', filled: true, fillColor: AppColors.surfaceContainerLow, border: OutlineInputBorder(borderSide: BorderSide.none)),
             items: ['cash', 'current', 'savings', 'credit'].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
             onChanged: (v) => setState(() => _type = v!),
           ),
           const SizedBox(height: AppSpacing.sm),
           Row(children: [
-            Expanded(child: TextField(controller: _balanceCtrl, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: 'Balance', filled: true, fillColor: AppColors.surfaceContainerLow, border: const OutlineInputBorder(borderSide: BorderSide.none)))),
+            Expanded(child: TextField(controller: _balanceCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Balance', filled: true, fillColor: AppColors.surfaceContainerLow, border: OutlineInputBorder(borderSide: BorderSide.none)))),
             const SizedBox(width: AppSpacing.sm),
             DropdownButtonFormField<String>(
-              value: _currency,
+              initialValue: _currency,
               items: ['KWD', 'EGP', 'USD', 'SAR', 'AED'].map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
               onChanged: (v) => setState(() => _currency = v!),
             ),

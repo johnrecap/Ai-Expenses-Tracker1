@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:expenses_tracker/core/theme/app_colors.dart';
 import 'package:expenses_tracker/core/theme/app_radii.dart';
 import 'package:expenses_tracker/core/theme/app_spacing.dart';
@@ -80,9 +80,9 @@ class _ReceiptUploadPanelState extends State<ReceiptUploadPanel> {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                _ParsedRow(label: 'Merchant', value: 'Carrefour Market'),
-                _ParsedRow(label: 'Amount', value: '28.750 KWD'),
-                _ParsedRow(label: 'Date', value: 'May 28, 2026'),
+                const _ParsedRow(label: 'Merchant', value: 'Carrefour Market'),
+                const _ParsedRow(label: 'Amount', value: '28.750 KWD'),
+                const _ParsedRow(label: 'Date', value: 'May 28, 2026'),
               ],
             ),
           ),

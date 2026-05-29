@@ -25,9 +25,9 @@ class AiInsightCard extends StatelessWidget {
       onTap: onTap,
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           borderRadius: AppRadii.card,
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             colors: [
               AppColors.aiGradientStart,
               AppColors.aiGradientEnd,

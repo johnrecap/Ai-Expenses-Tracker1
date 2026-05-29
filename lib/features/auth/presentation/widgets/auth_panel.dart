@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:expenses_tracker/core/theme/app_colors.dart';
 import 'package:expenses_tracker/core/theme/app_gradients.dart';
 import 'package:expenses_tracker/core/theme/app_radii.dart';
@@ -92,7 +92,7 @@ class AuthPanel extends StatelessWidget {
             Container(
               width: double.infinity,
               height: 56,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: AppGradients.primaryAction,
                 borderRadius: AppRadii.pill,
               ),
