@@ -78,8 +78,9 @@ class _AddExpenseAiTextScreenState extends State<AddExpenseAiTextScreen> {
       amount: amount,
       date: _parsedExpense?.date ?? DateTime.now(),
       description: merchant.isNotEmpty ? merchant : 'AI Text expense',
-      source: ExpenseSource.manual,
-      paymentMethod: PaymentMethod.cash,
+      source: ExpenseSource.aiText,
+      currency: _parsedExpense?.currency ?? 'EGP',
+      paymentMethod: _parsedExpense?.paymentMethod ?? PaymentMethod.cash,
     );
 
     context.read<CreateExpenseBloc>().add(CreateExpense(expense));

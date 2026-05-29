@@ -95,7 +95,16 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                 const SizedBox(height: AppSpacing.md),
                 Text('Expense not found', style: AppTextStyles.titleMedium.copyWith(color: AppColors.onSurfaceVariant)),
                 const SizedBox(height: AppSpacing.md),
-                TextButton(onPressed: () => context.pop(), child: const Text('Go back')),
+                TextButton(
+                  onPressed: () {
+                    if (Navigator.canPop(context)) {
+                      context.pop();
+                    } else {
+                      context.go('/expenses');
+                    }
+                  },
+                  child: const Text('Go back'),
+                ),
               ],
             ),
           ),
@@ -109,7 +118,11 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Expense updated')),
           );
-          context.pop();
+          if (Navigator.canPop(context)) {
+            context.pop();
+          } else {
+            context.go('/expenses');
+          }
         } else if (state is CreateExpenseFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message)),
@@ -127,7 +140,13 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                   Row(
                     children: [
                       GestureDetector(
-                        onTap: () => context.pop(),
+                        onTap: () {
+                          if (Navigator.canPop(context)) {
+                            context.pop();
+                          } else {
+                            context.go('/expenses');
+                          }
+                        },
                         child: Container(
                           width: 40,
                           height: 40,

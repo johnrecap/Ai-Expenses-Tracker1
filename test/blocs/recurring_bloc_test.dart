@@ -10,8 +10,8 @@ void main() {
 
   group('RecurringExpenseBloc', () {
     test('initial state is empty', () {
-      final bloc = RecurringExpenseBloc(repo);
-      expect(bloc.state.items, isEmpty);
+      final bloc = RecurringExpenseBloc(repo, 'u1');
+      expect((bloc.state as RecurringExpenseLoaded).items, isEmpty);
     });
 
     test('load populates items', () async {
@@ -22,9 +22,10 @@ void main() {
           startDate: DateTime.now(), createdAt: DateTime.now(), updatedAt: DateTime.now(),
         ),
       ];
-      final bloc = RecurringExpenseBloc(repo);
+      final bloc = RecurringExpenseBloc(repo, 'u1');
+      bloc.add(RecurringExpensesWatched());
       await Future.delayed(const Duration(milliseconds: 50));
-      expect(bloc.state.items.length, 1);
+      expect((bloc.state as RecurringExpenseLoaded).items.length, 1);
       bloc.close();
     });
   });

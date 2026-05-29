@@ -63,6 +63,7 @@ class _AddExpenseReceiptScreenState extends State<AddExpenseReceiptScreen> {
           final resized = img.copyResize(image, width: 2048); // maintains aspect ratio
           processedBytes = img.encodeJpg(resized, quality: 85);
         }
+        // If decode fails, keep original bytes (image format not supported by the package)
       }
 
       final base64 = base64Encode(processedBytes);
@@ -73,7 +74,7 @@ class _AddExpenseReceiptScreenState extends State<AddExpenseReceiptScreen> {
         setState(() {
           _parsedExpense = draft;
           if (draft != null) {
-            _amount.text = draft.amount.toString();
+            _amount.text = draft.amount.toStringAsFixed(draft.currency.toUpperCase() == 'KWD' ? 3 : 2);
             _merchant.text = draft.description;
           }
         });
@@ -121,7 +122,8 @@ class _AddExpenseReceiptScreenState extends State<AddExpenseReceiptScreen> {
       date: _parsedExpense?.date ?? DateTime.now(),
       description: merchant.isNotEmpty ? merchant : 'Receipt expense',
       source: ExpenseSource.receipt,
-      paymentMethod: PaymentMethod.cash,
+      currency: _parsedExpense?.currency ?? 'EGP',
+      paymentMethod: _parsedExpense?.paymentMethod ?? PaymentMethod.cash,
     );
 
     context.read<CreateExpenseBloc>().add(CreateExpense(expense));
@@ -153,7 +155,13 @@ class _AddExpenseReceiptScreenState extends State<AddExpenseReceiptScreen> {
                   Row(
                     children: [
                       GestureDetector(
-                        onTap: () => context.pop(),
+                        onTap: () {
+                          if (Navigator.canPop(context)) {
+                            context.pop();
+                          } else {
+                            context.go('/expenses');
+                          }
+                        },
                         child: Container(
                           width: 40,
                           height: 40,
@@ -196,7 +204,7 @@ class _AddExpenseReceiptScreenState extends State<AddExpenseReceiptScreen> {
                         children: [
                           const Icon(Icons.receipt_long, color: AppColors.primary, size: 18),
                           const SizedBox(width: AppSpacing.sm),
-                          Expanded(child: Text('Receipt parsed: ${_parsedExpense!.amount.toStringAsFixed(3)} � ${_parsedExpense!.description}', style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary))),
+                          Expanded(child: Text('Receipt parsed: ${_parsedExpense!.amount.toStringAsFixed(_parsedExpense!.currency.toUpperCase() == 'KWD' ? 3 : 2)} ${_parsedExpense!.currency} ${_parsedExpense!.description}', style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary))),
                         ],
                       ),
                     ),

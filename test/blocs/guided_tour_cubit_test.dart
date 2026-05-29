@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:expenses_tracker/guided_tour/cubit/guided_tour_cubit.dart';
+import 'package:expenses_tracker/features/onboarding/onboarding_cubit/onboarding_cubit.dart';
 import 'package:expense_repository/expense_repository.dart';
 import 'dart:async';
 
@@ -8,28 +8,28 @@ void main() {
 
   setUp(() => repo = _MockSettingsRepo());
 
-  group('GuidedTourCubit', () {
+  group('OnboardingCubit', () {
     test('initial state is inactive', () {
-      final cubit = GuidedTourCubit(repo);
+      final cubit = OnboardingCubit(repo);
       expect(cubit.state.active, false);
     });
 
     test('maybeStart activates tour for new user', () async {
-      final cubit = GuidedTourCubit(repo);
+      final cubit = OnboardingCubit(repo);
       await cubit.maybeStart();
       expect(cubit.state.active, true);
       expect(cubit.state.steps.length, 4);
     });
 
     test('next advances step', () async {
-      final cubit = GuidedTourCubit(repo);
+      final cubit = OnboardingCubit(repo);
       await cubit.maybeStart();
       cubit.nextStep();
       expect(cubit.state.currentStep, 1);
     });
 
     test('previous goes back', () async {
-      final cubit = GuidedTourCubit(repo);
+      final cubit = OnboardingCubit(repo);
       await cubit.maybeStart();
       cubit.nextStep();
       cubit.nextStep();
@@ -38,14 +38,14 @@ void main() {
     });
 
     test('complete deactivates tour', () async {
-      final cubit = GuidedTourCubit(repo);
+      final cubit = OnboardingCubit(repo);
       await cubit.maybeStart();
       await cubit.complete();
       expect(cubit.state.active, false);
     });
 
     test('skip deactivates tour', () async {
-      final cubit = GuidedTourCubit(repo);
+      final cubit = OnboardingCubit(repo);
       await cubit.maybeStart();
       await cubit.skip();
       expect(cubit.state.active, false);

@@ -7,6 +7,7 @@ import 'package:expenses_tracker/features/expenses/presentation/widgets/transact
 Category _testCategory() => Category(
   categoryId: 'cat-1',
   name: 'Food',
+  totalExpenses: 0,
   icon: 'restaurant',
   color: 0xFFFF7043,
   userId: 'test-user',

@@ -87,19 +87,6 @@ class AiService {
   }
 
   Expense? parseExpenseToDraft(AiResponse response) {
-    return null;
-  }
-}
-
-class MockAiService extends AiService {
-  const MockAiService() : super();
-
-  Future<AiResponse> extractReceipt(String base64Image) async {
-    return AiResponse(description: 'Receipt scanned', amount: 0, confidence: 0.5);
-  }
-
-  @override
-  Expense? parseExpenseToDraft(AiResponse response) {
     if (response.amount == null || response.description == null) return null;
 
     final cat = Category.empty.copyWith(
@@ -122,6 +109,15 @@ class MockAiService extends AiService {
       date: response.date ?? DateTime.now(),
       source: ExpenseSource.aiText,
       userId: '',
+      paymentMethod: PaymentMethod.cash,
     );
+  }
+}
+
+class MockAiService extends AiService {
+  const MockAiService() : super();
+
+  Future<AiResponse> extractReceipt(String base64Image) async {
+    return AiResponse(description: 'Receipt scanned', amount: 0, confidence: 0.5);
   }
 }
