@@ -1,5 +1,5 @@
 import 'package:expense_repository/expense_repository.dart';
-import '../local/local_repository_store.dart';
+import 'local_store_interface.dart';
 
 class LocalCategoryAliasRepository implements CategoryAliasRepository {
   final List<CategoryAlias> _aliases = [];
@@ -39,7 +39,7 @@ class LocalAiActionLogRepository implements AiActionLogRepository {
 }
 
 class LocalWalletAccountRepository implements WalletAccountRepository {
-  final LocalRepositoryStore store;
+  final LocalStoreInterface store;
   LocalWalletAccountRepository({required this.store});
   @override Future<void> createWallet(WalletAccount w) async => store.upsertWallet(w);
   @override Future<void> updateWallet(WalletAccount w) async => store.upsertWallet(w);

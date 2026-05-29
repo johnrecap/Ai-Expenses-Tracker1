@@ -1,8 +1,8 @@
-import 'package:expense_repository/src/local/local_repository_store.dart';
+import 'package:expense_repository/src/local/local_store_interface.dart';
 import 'package:expense_repository/expense_repository.dart';
 
 class LocalExpenseRepository implements ExpenseRepository {
-  final LocalRepositoryStore store;
+  final LocalStoreInterface store;
   LocalExpenseRepository({required this.store});
 
   @override Future<void> createExpense(Expense e) async => store.upsertExpense(e);
@@ -25,7 +25,7 @@ class LocalExpenseRepository implements ExpenseRepository {
 }
 
 class LocalCategoryRepository implements CategoryRepository {
-  final LocalRepositoryStore store;
+  final LocalStoreInterface store;
   LocalCategoryRepository({required this.store});
 
   @override Future<void> createCategory(Category c) async => store.upsertCategory(c);
@@ -38,7 +38,7 @@ class LocalCategoryRepository implements CategoryRepository {
 }
 
 class LocalBudgetRepository implements BudgetRepository {
-  final LocalRepositoryStore store;
+  final LocalStoreInterface store;
   LocalBudgetRepository({required this.store});
 
   @override Future<void> saveBudget(Budget b) async => store.upsertBudget(b);
@@ -47,7 +47,7 @@ class LocalBudgetRepository implements BudgetRepository {
 }
 
 class LocalSettingsRepository implements SettingsRepository {
-  final LocalRepositoryStore store;
+  final LocalStoreInterface store;
   LocalSettingsRepository({required this.store});
 
   @override Future<UserSettings> getSettings() async => store.settings ?? await ensureDefaultSettings();
@@ -67,7 +67,7 @@ class LocalSettingsRepository implements SettingsRepository {
 }
 
 class LocalSavingGoalRepository implements SavingGoalRepository {
-  final LocalRepositoryStore store;
+  final LocalStoreInterface store;
   LocalSavingGoalRepository({required this.store});
   @override Future<void> createSavingGoal(SavingGoal g) async => store.upsertGoal(g);
   @override Future<void> updateSavingGoal(SavingGoal g) async => store.upsertGoal(g);

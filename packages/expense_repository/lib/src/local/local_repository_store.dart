@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:expense_repository/expense_repository.dart';
 import '../sync/sync_change.dart';
+import 'local_store_interface.dart';
 
-class LocalRepositoryStore {
+class LocalRepositoryStore implements LocalStoreInterface {
   final String userId;
   final Map<String, Expense> _expenses = {};
   final Map<String, Category> _categories = {};

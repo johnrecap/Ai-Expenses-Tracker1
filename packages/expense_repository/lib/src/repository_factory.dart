@@ -18,6 +18,7 @@ import 'package:expense_repository/src/firebase/firebase_settings_repo.dart';
 import 'package:expense_repository/src/firebase/firebase_wallet_repo.dart';
 import 'package:expense_repository/src/local/local_repositories.dart';
 import 'package:expense_repository/src/local/local_repository_store.dart';
+import 'package:expense_repository/src/local/drift/drift_store.dart';
 import 'package:expense_repository/src/local/local_stubs.dart';
 import 'package:expense_repository/src/recurring_expense_repo.dart';
 import 'package:expense_repository/src/repository_runtime_mode.dart';
@@ -101,7 +102,7 @@ class AuthenticatedRepositoryFactory {
   }
 
   AuthenticatedRepositoryBundle _createVpsLocalFirstBundle({required String userId}) {
-    final store = LocalRepositoryStore(userId: userId);
+    final store = DriftLocalRepositoryStore(userId: userId);
     final apiConfig = VpsApiConfig.fromEnvironment();
     SyncCoordinator? coordinator;
     if (apiConfig.isConfigured) {
