@@ -237,6 +237,67 @@ class CategoryBudgets extends Table {
 }
 
 // ---------------------------------------------------------------------------
+// Category-alias table
+// ---------------------------------------------------------------------------
+
+@DataClassName('DriftCategoryAlias')
+class CategoryAliases extends Table {
+  TextColumn get aliasId => text()();
+  TextColumn get userId => text()();
+  TextColumn get name => text()();
+  TextColumn get categoryId => text()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {aliasId};
+}
+
+// ---------------------------------------------------------------------------
+// Recurring-expense table
+// ---------------------------------------------------------------------------
+
+@DataClassName('DriftRecurringExpense')
+class RecurringExpenses extends Table {
+  TextColumn get recurringExpenseId => text()();
+  TextColumn get userId => text()();
+  TextColumn get name => text()();
+  RealColumn get amount => real()();
+  TextColumn get currency => text()();
+  TextColumn get categoryId => text()();
+  TextColumn get frequency => text()();
+  DateTimeColumn get startDate => dateTime()();
+  DateTimeColumn get endDate => dateTime().nullable()();
+  DateTimeColumn get lastGeneratedDate => dateTime().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {recurringExpenseId};
+}
+
+// ---------------------------------------------------------------------------
+// AI action-log table
+// ---------------------------------------------------------------------------
+
+@DataClassName('DriftAiActionLog')
+class AiActionLogs extends Table {
+  TextColumn get actionId => text()();
+  TextColumn get userId => text()();
+  TextColumn get actionType => text()();
+  TextColumn get input => text()();
+  TextColumn get output => text().nullable()();
+  TextColumn get structuredJson =>
+      text().map(const JsonMapConverter()).nullable()();
+  BoolColumn get success => boolean()();
+  TextColumn get error => text().nullable()();
+  IntColumn get quotaUsed => integer()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {actionId};
+}
+
+// ---------------------------------------------------------------------------
 // Drift database annotation — lists every table
 // ---------------------------------------------------------------------------
 
@@ -250,6 +311,9 @@ class CategoryBudgets extends Table {
     Wallets,
     Transfers,
     CategoryBudgets,
+    CategoryAliases,
+    RecurringExpenses,
+    AiActionLogs,
   ],
 )
 class AppDatabase extends _$AppDatabase {

@@ -35,6 +35,9 @@ class DriftLocalRepositoryStore implements LocalStoreInterface {
   final Map<String, WalletAccount> _wallets = {};
   final Map<String, Transfer> _transfers = {};
   final Map<String, CategoryBudget> _categoryBudgets = {};
+  final Map<String, CategoryAlias> _categoryAliases = {};
+  final Map<String, RecurringExpense> _recurringExpenses = {};
+  final List<AiActionLog> _aiActionLogs = [];
 
   // ---- sync infrastructure ------------------------------------------------
   final List<SyncChange> pendingChanges = [];
@@ -50,6 +53,12 @@ class DriftLocalRepositoryStore implements LocalStoreInterface {
   final _transferController = StreamController<List<Transfer>>.broadcast();
   final _categoryBudgetController =
       StreamController<List<CategoryBudget>>.broadcast();
+  final _categoryAliasController =
+      StreamController<List<CategoryAlias>>.broadcast();
+  final _recurringExpenseController =
+      StreamController<List<RecurringExpense>>.broadcast();
+  final _aiActionLogController =
+      StreamController<List<AiActionLog>>.broadcast();
   final _pendingController =
       StreamController<List<SyncChange>>.broadcast();
 
@@ -75,6 +84,12 @@ class DriftLocalRepositoryStore implements LocalStoreInterface {
   Stream<List<Transfer>> watchTransfers() => _transferController.stream;
   Stream<List<CategoryBudget>> watchCategoryBudgets() =>
       _categoryBudgetController.stream;
+  Stream<List<CategoryAlias>> watchCategoryAliases() =>
+      _categoryAliasController.stream;
+  Stream<List<RecurringExpense>> watchRecurringExpenses() =>
+      _recurringExpenseController.stream;
+  Stream<List<AiActionLog>> watchAiActionLogs() =>
+      _aiActionLogController.stream;
   Stream<List<SyncChange>> watchPendingChanges() =>
       _pendingController.stream;
 
@@ -173,6 +188,53 @@ class DriftLocalRepositoryStore implements LocalStoreInterface {
 
   List<CategoryBudget> get categoryBudgets =>
       _categoryBudgets.values.toList();
+
+  // -- category aliases -----------------------------------------------------
+  void upsertCategoryAlias(CategoryAlias a) {
+    _categoryAliases[a.aliasId] = a;
+    _categoryAliasController.add(_categoryAliases.values.toList());
+    _enqueue('categoryAlias', a.aliasId, _categoryAliasToDoc(a));
+    _persistCategoryAlias(a);
+  }
+
+  void deleteCategoryAlias(String id) {
+    _categoryAliases.remove(id);
+    _categoryAliasController.add(_categoryAliases.values.toList());
+    _enqueueDelete('categoryAlias', id, {});
+    _deleteCategoryAliasFromDb(id);
+  }
+
+  List<CategoryAlias> get categoryAliases =>
+      _categoryAliases.values.toList();
+
+  // -- recurring expenses ---------------------------------------------------
+  void upsertRecurringExpense(RecurringExpense e) {
+    _recurringExpenses[e.recurringExpenseId] = e;
+    _recurringExpenseController.add(_recurringExpenses.values.toList());
+    _enqueue('recurringExpense', e.recurringExpenseId,
+        _recurringExpenseToDoc(e));
+    _persistRecurringExpense(e);
+  }
+
+  void deleteRecurringExpense(String id) {
+    _recurringExpenses.remove(id);
+    _recurringExpenseController.add(_recurringExpenses.values.toList());
+    _enqueueDelete('recurringExpense', id, {});
+    _deleteRecurringExpenseFromDb(id);
+  }
+
+  List<RecurringExpense> get recurringExpenses =>
+      _recurringExpenses.values.toList();
+
+  // -- AI action logs -------------------------------------------------------
+  void upsertAiActionLog(AiActionLog l) {
+    _aiActionLogs.add(l);
+    _aiActionLogController.add(List.unmodifiable(_aiActionLogs));
+    _enqueue('aiActionLog', l.actionId, _aiActionLogToDoc(l));
+    _persistAiActionLog(l);
+  }
+
+  List<AiActionLog> get aiActionLogs => List.unmodifiable(_aiActionLogs);
 
   // -- sync helpers --------------------------------------------------------
   void markUploadedChanges(List<String> ids) {
@@ -277,6 +339,43 @@ class DriftLocalRepositoryStore implements LocalStoreInterface {
         'updatedAt': b.updatedAt.toIso8601String(),
       };
 
+  Map<String, dynamic> _categoryAliasToDoc(CategoryAlias a) => {
+        'aliasId': a.aliasId,
+        'userId': a.userId,
+        'name': a.name,
+        'categoryId': a.categoryId,
+        'createdAt': a.createdAt.toIso8601String(),
+      };
+
+  Map<String, dynamic> _recurringExpenseToDoc(RecurringExpense e) => {
+        'recurringExpenseId': e.recurringExpenseId,
+        'userId': e.userId,
+        'name': e.name,
+        'amount': e.amount,
+        'currency': e.currency,
+        'categoryId': e.categoryId,
+        'frequency': e.frequency,
+        'startDate': e.startDate.toIso8601String(),
+        if (e.endDate != null) 'endDate': e.endDate!.toIso8601String(),
+        if (e.lastGeneratedDate != null)
+          'lastGeneratedDate': e.lastGeneratedDate!.toIso8601String(),
+        'createdAt': e.createdAt.toIso8601String(),
+        'updatedAt': e.updatedAt.toIso8601String(),
+      };
+
+  Map<String, dynamic> _aiActionLogToDoc(AiActionLog l) => {
+        'actionId': l.actionId,
+        'userId': l.userId,
+        'actionType': l.actionType,
+        'input': l.input,
+        if (l.output != null) 'output': l.output,
+        if (l.structuredJson != null) 'structuredJson': l.structuredJson,
+        'success': l.success,
+        if (l.error != null) 'error': l.error,
+        'quotaUsed': l.quotaUsed,
+        'createdAt': l.createdAt.toIso8601String(),
+      };
+
   // -----------------------------------------------------------------------
   // Private: Drift persistence (fire-and-forget — cache updated first)
   // -----------------------------------------------------------------------
@@ -346,6 +445,40 @@ class DriftLocalRepositoryStore implements LocalStoreInterface {
     _db
         .into(_db.categoryBudgets)
         .insertOnConflictUpdate(_modelToDriftCategoryBudget(b))
+        .catchError((_) {});
+  }
+
+  void _persistCategoryAlias(CategoryAlias a) {
+    _db
+        .into(_db.categoryAliases)
+        .insertOnConflictUpdate(_modelToDriftCategoryAlias(a))
+        .catchError((_) {});
+  }
+
+  void _deleteCategoryAliasFromDb(String id) {
+    (_db.delete(_db.categoryAliases)..where((t) => t.aliasId.equals(id)))
+        .go()
+        .catchError((_) {});
+  }
+
+  void _persistRecurringExpense(RecurringExpense e) {
+    _db
+        .into(_db.recurringExpenses)
+        .insertOnConflictUpdate(_modelToDriftRecurringExpense(e))
+        .catchError((_) {});
+  }
+
+  void _deleteRecurringExpenseFromDb(String id) {
+    (_db.delete(_db.recurringExpenses)
+          ..where((t) => t.recurringExpenseId.equals(id)))
+        .go()
+        .catchError((_) {});
+  }
+
+  void _persistAiActionLog(AiActionLog l) {
+    _db
+        .into(_db.aiActionLogs)
+        .insertOnConflictUpdate(_modelToDriftAiActionLog(l))
         .catchError((_) {});
   }
 
@@ -602,6 +735,86 @@ class DriftLocalRepositoryStore implements LocalStoreInterface {
         updatedAt: d.updatedAt,
       );
 
+  // -- CategoryAlias --------------------------------------------------------
+  DriftCategoryAlias _modelToDriftCategoryAlias(CategoryAlias a) =>
+      DriftCategoryAlias(
+        aliasId: a.aliasId,
+        userId: a.userId,
+        name: a.name,
+        categoryId: a.categoryId,
+        createdAt: a.createdAt,
+      );
+
+  CategoryAlias _driftCategoryAliasToModel(DriftCategoryAlias d) =>
+      CategoryAlias(
+        aliasId: d.aliasId,
+        userId: d.userId,
+        name: d.name,
+        categoryId: d.categoryId,
+        createdAt: d.createdAt,
+      );
+
+  // -- RecurringExpense -----------------------------------------------------
+  DriftRecurringExpense _modelToDriftRecurringExpense(RecurringExpense e) =>
+      DriftRecurringExpense(
+        recurringExpenseId: e.recurringExpenseId,
+        userId: e.userId,
+        name: e.name,
+        amount: e.amount,
+        currency: e.currency,
+        categoryId: e.categoryId,
+        frequency: e.frequency,
+        startDate: e.startDate,
+        endDate: e.endDate,
+        lastGeneratedDate: e.lastGeneratedDate,
+        createdAt: e.createdAt,
+        updatedAt: e.updatedAt,
+      );
+
+  RecurringExpense _driftRecurringExpenseToModel(DriftRecurringExpense d) =>
+      RecurringExpense(
+        recurringExpenseId: d.recurringExpenseId,
+        userId: d.userId,
+        name: d.name,
+        amount: d.amount,
+        currency: d.currency,
+        categoryId: d.categoryId,
+        frequency: d.frequency,
+        startDate: d.startDate,
+        endDate: d.endDate,
+        lastGeneratedDate: d.lastGeneratedDate,
+        createdAt: d.createdAt,
+        updatedAt: d.updatedAt,
+      );
+
+  // -- AiActionLog ----------------------------------------------------------
+  DriftAiActionLog _modelToDriftAiActionLog(AiActionLog l) =>
+      DriftAiActionLog(
+        actionId: l.actionId,
+        userId: l.userId,
+        actionType: l.actionType,
+        input: l.input,
+        output: l.output,
+        structuredJson: l.structuredJson,
+        success: l.success,
+        error: l.error,
+        quotaUsed: l.quotaUsed,
+        createdAt: l.createdAt,
+      );
+
+  AiActionLog _driftAiActionLogToModel(DriftAiActionLog d) => AiActionLog(
+        actionId: d.actionId,
+        userId: d.userId,
+        actionType: d.actionType,
+        input: d.input,
+        output: d.output,
+        structuredJson: d.structuredJson,
+        success: d.success,
+        error: d.error,
+        quotaUsed: d.quotaUsed,
+        createdAt: d.createdAt,
+      );
+
   // -----------------------------------------------------------------------
   // Private: initial load from Drift into in-memory caches
   // -----------------------------------------------------------------------
@@ -650,6 +863,26 @@ class DriftLocalRepositoryStore implements LocalStoreInterface {
             _driftCategoryBudgetToModel(row);
       }
 
+      final categoryAliasRows =
+          await _db.select(_db.categoryAliases).get();
+      for (final row in categoryAliasRows) {
+        _categoryAliases[row.aliasId] =
+            _driftCategoryAliasToModel(row);
+      }
+
+      final recurringExpenseRows =
+          await _db.select(_db.recurringExpenses).get();
+      for (final row in recurringExpenseRows) {
+        _recurringExpenses[row.recurringExpenseId] =
+            _driftRecurringExpenseToModel(row);
+      }
+
+      final aiActionLogRows =
+          await _db.select(_db.aiActionLogs).get();
+      for (final row in aiActionLogRows) {
+        _aiActionLogs.add(_driftAiActionLogToModel(row));
+      }
+
       // Emit initial state
       _emitExpenses();
       _categoryController.add(_categories.values.toList());
@@ -660,6 +893,9 @@ class DriftLocalRepositoryStore implements LocalStoreInterface {
       _walletController.add(_wallets.values.toList());
       _transferController.add(_transfers.values.toList());
       _categoryBudgetController.add(_categoryBudgets.values.toList());
+      _categoryAliasController.add(_categoryAliases.values.toList());
+      _recurringExpenseController.add(_recurringExpenses.values.toList());
+      _aiActionLogController.add(List.unmodifiable(_aiActionLogs));
 
       final b = budget;
       if (b != null) _budgetController.add(b);
@@ -679,6 +915,9 @@ class DriftLocalRepositoryStore implements LocalStoreInterface {
     await _walletController.close();
     await _transferController.close();
     await _categoryBudgetController.close();
+    await _categoryAliasController.close();
+    await _recurringExpenseController.close();
+    await _aiActionLogController.close();
     await _pendingController.close();
     await _db.close();
   }

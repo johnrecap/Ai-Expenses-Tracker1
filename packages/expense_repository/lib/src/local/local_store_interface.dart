@@ -17,6 +17,11 @@ abstract class LocalStoreInterface {
   UserSettings? get settings;
   List<SavingGoal> get goals;
   List<WalletAccount> get wallets;
+  List<Transfer> get transfers;
+  List<CategoryBudget> get categoryBudgets;
+  List<CategoryAlias> get categoryAliases;
+  List<RecurringExpense> get recurringExpenses;
+  List<AiActionLog> get aiActionLogs;
   List<SyncChange> get pendingChanges;
 
   // -- streams
@@ -26,6 +31,11 @@ abstract class LocalStoreInterface {
   Stream<UserSettings> watchSettings();
   Stream<List<SavingGoal>> watchGoals();
   Stream<List<WalletAccount>> watchWallets();
+  Stream<List<Transfer>> watchTransfers();
+  Stream<List<CategoryBudget>> watchCategoryBudgets();
+  Stream<List<CategoryAlias>> watchCategoryAliases();
+  Stream<List<RecurringExpense>> watchRecurringExpenses();
+  Stream<List<AiActionLog>> watchAiActionLogs();
   Stream<List<SyncChange>> watchPendingChanges();
 
   // -- mutations
@@ -37,6 +47,13 @@ abstract class LocalStoreInterface {
   void upsertGoal(SavingGoal g);
   void deleteGoal(String id);
   void upsertWallet(WalletAccount w);
+  void upsertTransfer(Transfer t);
+  void upsertCategoryBudget(CategoryBudget b);
+  void upsertCategoryAlias(CategoryAlias a);
+  void deleteCategoryAlias(String id);
+  void upsertRecurringExpense(RecurringExpense e);
+  void deleteRecurringExpense(String id);
+  void upsertAiActionLog(AiActionLog l);
   void markUploadedChanges(List<String> ids);
   void markSyncChangesUpdated();
 }

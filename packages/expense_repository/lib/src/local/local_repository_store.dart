@@ -11,6 +11,11 @@ class LocalRepositoryStore implements LocalStoreInterface {
   final Map<String, UserSettings> _settings = {};
   final Map<String, SavingGoal> _goals = {};
   final Map<String, WalletAccount> _wallets = {};
+  final Map<String, Transfer> _transfers = {};
+  final Map<String, CategoryBudget> _categoryBudgets = {};
+  final Map<String, CategoryAlias> _categoryAliases = {};
+  final Map<String, RecurringExpense> _recurringExpenses = {};
+  final List<AiActionLog> _aiActionLogs = [];
 
   final List<SyncChange> pendingChanges = [];
   int _changeCounter = 0;
@@ -21,6 +26,15 @@ class LocalRepositoryStore implements LocalStoreInterface {
   final _settingsController = StreamController<UserSettings>.broadcast();
   final _goalController = StreamController<List<SavingGoal>>.broadcast();
   final _walletController = StreamController<List<WalletAccount>>.broadcast();
+  final _transferController = StreamController<List<Transfer>>.broadcast();
+  final _categoryBudgetController =
+      StreamController<List<CategoryBudget>>.broadcast();
+  final _categoryAliasController =
+      StreamController<List<CategoryAlias>>.broadcast();
+  final _recurringExpenseController =
+      StreamController<List<RecurringExpense>>.broadcast();
+  final _aiActionLogController =
+      StreamController<List<AiActionLog>>.broadcast();
   final _pendingController = StreamController<List<SyncChange>>.broadcast();
 
   LocalRepositoryStore({required this.userId});
@@ -65,6 +79,15 @@ class LocalRepositoryStore implements LocalStoreInterface {
   Stream<UserSettings> watchSettings() => _settingsController.stream;
   Stream<List<SavingGoal>> watchGoals() => _goalController.stream;
   Stream<List<WalletAccount>> watchWallets() => _walletController.stream;
+  Stream<List<Transfer>> watchTransfers() => _transferController.stream;
+  Stream<List<CategoryBudget>> watchCategoryBudgets() =>
+      _categoryBudgetController.stream;
+  Stream<List<CategoryAlias>> watchCategoryAliases() =>
+      _categoryAliasController.stream;
+  Stream<List<RecurringExpense>> watchRecurringExpenses() =>
+      _recurringExpenseController.stream;
+  Stream<List<AiActionLog>> watchAiActionLogs() =>
+      _aiActionLogController.stream;
   Stream<List<SyncChange>> watchPendingChanges() => _pendingController.stream;
 
   void upsertExpense(Expense e) { _expenses[e.expenseId] = e; _emitExpenses(); _enqueue('expense', e.expenseId, e.toEntity().toDocument()); }
@@ -86,6 +109,23 @@ class LocalRepositoryStore implements LocalStoreInterface {
 
   void upsertWallet(WalletAccount w) { _wallets[w.walletId] = w; _walletController.add(_wallets.values.toList()); _enqueue('wallet', w.walletId, _walletToDoc(w)); }
   List<WalletAccount> get wallets => _wallets.values.toList();
+
+  void upsertTransfer(Transfer t) { _transfers[t.transferId] = t; _transferController.add(_transfers.values.toList()); _enqueue('transfer', t.transferId, _transferToDoc(t)); }
+  List<Transfer> get transfers => _transfers.values.toList();
+
+  void upsertCategoryBudget(CategoryBudget b) { _categoryBudgets[b.budgetId] = b; _categoryBudgetController.add(_categoryBudgets.values.toList()); _enqueue('categoryBudget', b.budgetId, _categoryBudgetToDoc(b)); }
+  List<CategoryBudget> get categoryBudgets => _categoryBudgets.values.toList();
+
+  void upsertCategoryAlias(CategoryAlias a) { _categoryAliases[a.aliasId] = a; _categoryAliasController.add(_categoryAliases.values.toList()); _enqueue('categoryAlias', a.aliasId, _categoryAliasToDoc(a)); }
+  void deleteCategoryAlias(String id) { _categoryAliases.remove(id); _categoryAliasController.add(_categoryAliases.values.toList()); _enqueueDelete('categoryAlias', id, {}); }
+  List<CategoryAlias> get categoryAliases => _categoryAliases.values.toList();
+
+  void upsertRecurringExpense(RecurringExpense e) { _recurringExpenses[e.recurringExpenseId] = e; _recurringExpenseController.add(_recurringExpenses.values.toList()); _enqueue('recurringExpense', e.recurringExpenseId, _recurringExpenseToDoc(e)); }
+  void deleteRecurringExpense(String id) { _recurringExpenses.remove(id); _recurringExpenseController.add(_recurringExpenses.values.toList()); _enqueueDelete('recurringExpense', id, {}); }
+  List<RecurringExpense> get recurringExpenses => _recurringExpenses.values.toList();
+
+  void upsertAiActionLog(AiActionLog l) { _aiActionLogs.add(l); _aiActionLogController.add(List.unmodifiable(_aiActionLogs)); _enqueue('aiActionLog', l.actionId, _aiActionLogToDoc(l)); }
+  List<AiActionLog> get aiActionLogs => List.unmodifiable(_aiActionLogs);
 
   Map<String, dynamic> _goalToDoc(SavingGoal g) => {
     'goalId': g.goalId, 'userId': g.userId, 'name': g.name,

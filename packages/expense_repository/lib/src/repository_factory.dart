@@ -121,15 +121,15 @@ class AuthenticatedRepositoryFactory {
     return AuthenticatedRepositoryBundle(
       expenseRepository: LocalExpenseRepository(store: store),
       categoryRepository: LocalCategoryRepository(store: store),
-      categoryAliasRepository: LocalCategoryAliasRepository(),
-      categoryBudgetRepository: LocalCategoryBudgetRepository(),
+      categoryAliasRepository: LocalCategoryAliasRepository(store: store),
+      categoryBudgetRepository: LocalCategoryBudgetRepository(store: store),
       budgetRepository: LocalBudgetRepository(store: store),
       settingsRepository: LocalSettingsRepository(store: store),
-      recurringExpenseRepository: LocalRecurringExpenseRepository(),
+      recurringExpenseRepository: LocalRecurringExpenseRepository(store: store),
       savingGoalRepository: LocalSavingGoalRepository(store: store),
-      aiActionLogRepository: LocalAiActionLogRepository(),
+      aiActionLogRepository: LocalAiActionLogRepository(store: store),
       walletAccountRepository: LocalWalletAccountRepository(store: store),
-      transferRepository: LocalTransferRepository(),
+      transferRepository: LocalTransferRepository(store: store),
     );
   }
 
