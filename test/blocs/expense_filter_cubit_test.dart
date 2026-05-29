@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:expenses_tracker/screens/expenses/blocs/expense_filter_cubit/expense_filter_cubit.dart';
+import 'package:expenses_tracker/features/expenses/expense_filter_cubit/expense_filter_cubit.dart';
 import 'package:expense_repository/expense_repository.dart';
 
 void main() {

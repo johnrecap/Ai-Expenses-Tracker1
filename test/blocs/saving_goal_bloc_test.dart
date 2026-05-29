@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:expenses_tracker/screens/saving_goals/blocs/saving_goal_bloc/saving_goal_bloc.dart';
+import 'package:expenses_tracker/features/goals/saving_goal_bloc/saving_goal_bloc.dart';
 import 'package:expense_repository/expense_repository.dart';
 import 'dart:async';
 

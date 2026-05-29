@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:expenses_tracker/screens/reports/cubit/report_cubit.dart';
+import 'package:expenses_tracker/features/reports/report_cubit/report_cubit.dart';
 import 'package:expense_repository/expense_repository.dart';
 
 void main() {

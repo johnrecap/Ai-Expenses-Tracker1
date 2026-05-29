@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:expenses_tracker/screens/add_expense/blocs/create_expense_bloc/create_expense_bloc.dart';
+import 'package:expenses_tracker/features/expenses/create_expense_bloc/create_expense_bloc.dart';
 import 'package:expense_repository/expense_repository.dart';
 
 void main() {
