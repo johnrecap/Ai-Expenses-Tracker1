@@ -1,11 +1,15 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:expenses_tracker/core/theme/app_colors.dart';
 import 'package:expenses_tracker/core/theme/app_radii.dart';
 import 'package:expenses_tracker/core/theme/app_spacing.dart';
 import 'package:expenses_tracker/core/theme/app_text_styles.dart';
+import 'package:expense_repository/expense_repository.dart';
+import 'package:expenses_tracker/features/ai/services/ai_service.dart';
 
 class AiExpenseParsePanel extends StatefulWidget {
-  const AiExpenseParsePanel({super.key});
+  final void Function(Expense? expense)? onParsed;
+
+  const AiExpenseParsePanel({super.key, this.onParsed});
 
   @override
   State<AiExpenseParsePanel> createState() => _AiExpenseParsePanelState();
@@ -13,12 +17,37 @@ class AiExpenseParsePanel extends StatefulWidget {
 
 class _AiExpenseParsePanelState extends State<AiExpenseParsePanel> {
   final _controller = TextEditingController();
-  bool _showSuggestion = false;
+  bool _loading = false;
+  Expense? _parsedExpense;
+
+  final _aiService = const MockAiService();
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _onParse() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+
+    setState(() => _loading = true);
+
+    try {
+      final result = await _aiService.parseExpense(text, AiContext(now: DateTime.now()));
+      final draft = _aiService.parseExpenseToDraft(result);
+      setState(() => _parsedExpense = draft);
+      widget.onParsed?.call(draft);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('AI parsing failed. Enter details manually.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override
@@ -53,14 +82,16 @@ class _AiExpenseParsePanelState extends State<AiExpenseParsePanel> {
                   SizedBox(
                     height: 40,
                     child: ElevatedButton.icon(
-                      onPressed: () => setState(() => _showSuggestion = true),
+                      onPressed: _loading ? null : _onParse,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: AppColors.onPrimary,
                         shape: const StadiumBorder(),
                         padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.md),
                       ),
-                      icon: const Icon(Icons.auto_awesome, size: 16),
+                      icon: _loading
+                          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onPrimary))
+                          : const Icon(Icons.auto_awesome, size: 16),
                       label: Text('Parse', style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600)),
                     ),
                   ),
@@ -69,7 +100,7 @@ class _AiExpenseParsePanelState extends State<AiExpenseParsePanel> {
             ],
           ),
         ),
-        if (_showSuggestion) ...[
+        if (_parsedExpense != null) ...[
           const SizedBox(height: AppSpacing.md),
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
@@ -89,9 +120,18 @@ class _AiExpenseParsePanelState extends State<AiExpenseParsePanel> {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                _SuggestionRow(label: 'Merchant', value: 'The Avenues Mall'),
-                _SuggestionRow(label: 'Amount', value: '25.000 KWD'),
-                _SuggestionRow(label: 'Category', value: 'Shopping'),
+                _SuggestionRow(
+                  label: 'Description',
+                  value: _parsedExpense!.description,
+                ),
+                _SuggestionRow(
+                  label: 'Amount',
+                  value: '${_parsedExpense!.amount.toStringAsFixed(_parsedExpense!.currency.toUpperCase() == 'KWD' ? 3 : 2)} ${_parsedExpense!.currency}',
+                ),
+                _SuggestionRow(
+                  label: 'Category',
+                  value: _parsedExpense!.categoryName,
+                ),
               ],
             ),
           ),
@@ -113,10 +153,12 @@ class _SuggestionRow extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(
-            width: 72,
+            width: 80,
             child: Text(label, style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
           ),
-          Text(value, style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurface, fontWeight: FontWeight.w600)),
+          Expanded(
+            child: Text(value, style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurface, fontWeight: FontWeight.w600)),
+          ),
         ],
       ),
     );
