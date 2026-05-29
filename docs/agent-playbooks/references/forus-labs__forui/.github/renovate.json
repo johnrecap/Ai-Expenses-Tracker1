@@ -1,0 +1,127 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "dependencyDashboard": true,
+  "addLabels": [
+    "dependencies"
+  ],
+  "schedule": [
+    "on wednesday"
+  ],
+  "packageRules": [
+    {
+      "groupName": "GitHub Actions - Major Revisions",
+      "matchFileNames": [
+        ".github/**"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    },
+    {
+      "groupName": "GitHub Actions - Minor Revisions",
+      "matchFileNames": [
+        ".github/**"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": false
+    },
+    {
+      "groupName": "Docs - Major Revisions",
+      "matchFileNames": [
+        "docs/**"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    },
+    {
+      "groupName": "Docs - Minor Revisions",
+      "matchFileNames": [
+        "docs/**"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": false
+    },
+    {
+      "groupName": "Forui - Major Revisions",
+      "matchFileNames": [
+        "forui/**"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    },
+    {
+      "groupName": "Forui - Minor Revisions",
+      "matchFileNames": [
+        "forui/**"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": false
+    },
+    {
+      "groupName": "Forui Gradle - Major Revisions",
+      "matchFileNames": [
+        "forui/example/android/**"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    },
+    {
+      "groupName": "Forui Gradle - Minor Revisions",
+      "matchFileNames": [
+        "forui/example/android/**"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": false
+    },
+    {
+      "groupName": "Forui Assets - Major Revisions",
+      "matchFileNames": [
+        "forui_assets/**"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    },
+    {
+      "groupName": "Forui Assets- Minor Revisions",
+      "matchFileNames": [
+        "forui_assets/**"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": false
+    }
+  ]
+}

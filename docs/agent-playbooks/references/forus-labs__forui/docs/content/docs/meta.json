@@ -1,0 +1,20 @@
+{
+  "pages": [
+    "index",
+    "getting-started",
+    "concepts",
+    "guides",
+    "reference",
+    "!widgets",
+    "...",
+    "---Widgets---",
+    "widgets/layout",
+    "widgets/form",
+    "widgets/data",
+    "widgets/tile",
+    "widgets/navigation",
+    "widgets/feedback",
+    "widgets/overlay",
+    "widgets/foundation"
+  ]
+}

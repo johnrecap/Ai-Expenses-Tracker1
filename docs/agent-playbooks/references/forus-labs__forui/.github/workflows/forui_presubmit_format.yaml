@@ -1,0 +1,65 @@
+name: Forui Presubmit Format
+
+on:
+  workflow_dispatch: {}
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/forui_presubmit*.yaml'
+      - 'forui/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  format:
+    if: github.actor != 'auto-maid[bot]' && github.event.pull_request.draft == false && !contains(github.event.head_commit.message, 'Prepare Forui for review')
+    name: Format & Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: forui
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2.23.0
+      - run: flutter pub get
+      - run: dart run build_runner build
+      - run: dart run ./tool/cli_generator/main.dart
+      - run: dart run ../tool/sort.dart forui
+      - run: dart fix --apply
+        # We format the code again since the required trailing comma lint fixes causes code to be formatted differently.
+      - run: dart format .
+
+      - id: changes
+        working-directory: .
+        run: |
+          git diff --exit-code -- forui && echo "changes=false" >> $GITHUB_OUTPUT || {
+            git diff -- forui > changes.patch
+            echo "changes=true" >> $GITHUB_OUTPUT
+          }
+
+      - if: steps.changes.outputs.changes == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: format-changes
+          path: changes.patch
+          retention-days: 1
+
+      - if: steps.changes.outputs.changes == 'true'
+        working-directory: .
+        run: |
+          echo "${{ github.event.number }}" > pr-number.txt
+          echo "${{ github.event.pull_request.head.ref }}" > pr-head-ref.txt
+          echo "${{ github.event.pull_request.head.sha }}" > pr-head-sha.txt
+          echo "${{ github.event.pull_request.head.repo.full_name }}" > pr-head-repo.txt
+
+      - if: steps.changes.outputs.changes == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: pr-metadata
+          path: |
+            pr-number.txt
+            pr-head-ref.txt
+            pr-head-sha.txt
+            pr-head-repo.txt
+          retention-days: 1

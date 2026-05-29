@@ -1,0 +1,168 @@
+import 'package:flutter/widgets.dart';
+
+import 'package:auto_route/auto_route.dart';
+import 'package:forui/forui.dart';
+
+import 'package:docs_snippets/example.dart';
+
+@RoutePage()
+class TooltipPage extends StatelessWidget {
+  final FThemeData theme;
+
+  TooltipPage({@queryParam String theme = 'neutral-light'}) : theme = themes[theme]!;
+
+  @override
+  Widget build(BuildContext context) => FTheme(
+    data: theme,
+    child: FScaffold(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 200, maxHeight: 200),
+          child: Builder(
+            builder: (context) => Column(
+              mainAxisAlignment: .center,
+              children: [
+                const SizedBox(height: 30),
+                FTooltip(
+                  tipBuilder: (context, _) => const Text('Add to library'),
+                  child: FButton(
+                    variant: .outline,
+                    size: .sm,
+                    mainAxisSize: .min,
+                    onPress: () {},
+                    child: const Text('Long press/Hover'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+@RoutePage()
+class GroupTooltipPage extends Example {
+  GroupTooltipPage({@queryParam super.theme});
+
+  @override
+  Widget example(BuildContext context) =>
+      // {@highlight}
+      FTooltipGroup(
+        // {@endhighlight}
+        child: Row(
+          mainAxisSize: .min,
+          spacing: 2,
+          children: [
+            FTooltip(
+              tipBuilder: (context, _) => const Text('Bold'),
+              child: FButton.icon(variant: .ghost, size: .sm, onPress: () {}, child: const Icon(FLucideIcons.bold)),
+            ),
+            FTooltip(
+              tipBuilder: (context, _) => const Text('Italic'),
+              child: FButton.icon(variant: .ghost, size: .sm, onPress: () {}, child: const Icon(FLucideIcons.italic)),
+            ),
+            FTooltip(
+              tipBuilder: (context, _) => const Text('Underline'),
+              child: FButton.icon(
+                variant: .ghost,
+                size: .sm,
+                onPress: () {},
+                child: const Icon(FLucideIcons.underline),
+              ),
+            ),
+            FTooltip(
+              tipBuilder: (context, _) => const Text('Strikethrough'),
+              child: FButton.icon(
+                variant: .ghost,
+                size: .sm,
+                onPress: () {},
+                child: const Icon(FLucideIcons.strikethrough),
+              ),
+            ),
+          ],
+        ),
+      );
+}
+
+@RoutePage()
+class HorizontalTooltipPage extends StatelessWidget {
+  final FThemeData theme;
+
+  HorizontalTooltipPage({@queryParam String theme = 'neutral-light'}) : theme = themes[theme]!;
+
+  @override
+  Widget build(BuildContext context) => FTheme(
+    data: theme,
+    child: FScaffold(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 200, maxHeight: 200),
+          child: Builder(
+            builder: (context) => Column(
+              mainAxisAlignment: .center,
+              children: [
+                const SizedBox(height: 30),
+                FTooltip(
+                  // {@highlight}
+                  tipAnchor: .topLeft,
+                  childAnchor: .topRight,
+                  // {@endhighlight}
+                  tipBuilder: (context, _) => const Text('Add to library'),
+                  child: FButton(
+                    variant: .outline,
+                    size: .sm,
+                    mainAxisSize: .min,
+                    onPress: () {},
+                    child: const Text('Long press/Hover'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+@RoutePage()
+class LongPressOnlyTooltipPage extends StatelessWidget {
+  final FThemeData theme;
+
+  LongPressOnlyTooltipPage({@queryParam String theme = 'neutral-light'}) : theme = themes[theme]!;
+
+  @override
+  Widget build(BuildContext context) => FTheme(
+    data: theme,
+    child: FScaffold(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 200, maxHeight: 200),
+          child: Builder(
+            builder: (context) => Column(
+              mainAxisAlignment: .center,
+              children: [
+                const SizedBox(height: 30),
+                FTooltip(
+                  // {@highlight}
+                  hover: false,
+                  // {@endhighlight}
+                  tipBuilder: (context, _) => const Text('Add to library'),
+                  child: FButton(
+                    variant: .outline,
+                    size: .sm,
+                    mainAxisSize: .min,
+                    onPress: () {},
+                    child: const Text('Long press'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}

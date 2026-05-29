@@ -1,0 +1,228 @@
+---
+title: Select
+description: A select displays a list of drop-down options for the user to pick from. It is a form-field and can therefore be used in a form.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.select/
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import selectUsage from '@/snippets/usages/form/select/select.json';
+import selectRichUsage from '@/snippets/usages/form/select/selectRich.json';
+import selectSearchUsage from '@/snippets/usages/form/select/selectSearch.json';
+import selectSearchBuilderUsage from '@/snippets/usages/form/select/selectSearchBuilder.json';
+import defaultSnippet from '@/snippets/examples/form/select/default.json';
+import detailedSnippet from '@/snippets/examples/form/select/detailed.json';
+import sectionSnippet from '@/snippets/examples/form/select/section.json';
+import dividerSnippet from '@/snippets/examples/form/select/divider.json';
+import syncSnippet from '@/snippets/examples/form/select/sync.json';
+import asyncSnippet from '@/snippets/examples/form/select/async.json';
+import asyncLoadingSnippet from '@/snippets/examples/form/select/async-loading.json';
+import asyncErrorSnippet from '@/snippets/examples/form/select/async-error.json';
+import toggleableSnippet from '@/snippets/examples/form/select/toggleable.json';
+import clearableSnippet from '@/snippets/examples/form/select/clearable.json';
+import formatSnippet from '@/snippets/examples/form/select/format.json';
+import popoverBuilderSnippet from '@/snippets/examples/form/select/popover-builder.json';
+import formSnippet from '@/snippets/examples/form/select/form.json';
+
+<Callout type="info">
+    For multi selections, consider using a [multi select](/docs/widgets/form/multi-select).
+
+    For touch devices, a [select tile group](/docs/widgets/tile/select-tile-group) or
+    [select menu tile](/docs/widgets/tile/select-menu-tile) is generally recommended over this.
+</Callout>
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/select' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={defaultSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Select', 'Select Search', 'Select Content', 'Select Section', 'Select Scroll Handle']}>
+    <Tab value="Select">
+        ```shell copy
+        dart run forui style create select
+        ````
+    </Tab>
+    <Tab value="Select Search">
+        ```shell copy
+        dart run forui style create select-search
+        ````
+    </Tab>
+    <Tab value="Select Content">
+        ```shell copy
+        dart run forui style create select-content
+        ````
+    </Tab>
+    <Tab value="Select Section">
+        ```shell copy
+        dart run forui style create select-section
+        ````
+    </Tab>
+    <Tab value="Select Scroll Handle">
+        ```shell copy
+        dart run forui style create select-scroll-handle
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `FSelect(...)`
+<UsageSnippet usage={selectUsage} />
+
+### `FSelect.rich(...)`
+<UsageSnippet usage={selectRichUsage} />
+
+### `FSelect.search(...)`
+<UsageSnippet usage={selectSearchUsage} />
+
+### `FSelect.searchBuilder(...)`
+<UsageSnippet usage={selectSearchBuilderUsage} />
+
+## Examples
+
+### Detailed
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/select' variant='detailed' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={detailedSnippet} />
+  </Tab>
+</Tabs>
+
+### Sections
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/select' variant='section' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={sectionSnippet} />
+  </Tab>
+</Tabs>
+
+### Dividers
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/select' variant='divider' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={dividerSnippet} />
+  </Tab>
+</Tabs>
+
+### Searchable
+
+#### Sync
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/select' variant='sync' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={syncSnippet} />
+  </Tab>
+</Tabs>
+
+#### Async
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/select' variant='async' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={asyncSnippet} />
+  </Tab>
+</Tabs>
+
+#### Async with Custom Loading
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/select' variant='async-loading' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={asyncLoadingSnippet} />
+  </Tab>
+</Tabs>
+
+#### Async with Custom Error Handling
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/select' variant='async-error' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={asyncErrorSnippet} />
+  </Tab>
+</Tabs>
+
+### Behavior
+
+#### Toggleable Items
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/select' variant='toggleable' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={toggleableSnippet} />
+  </Tab>
+</Tabs>
+
+#### Clearable
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/select' variant='clearable' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={clearableSnippet} />
+  </Tab>
+</Tabs>
+
+#### Popover Builder
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/select' variant='popover-builder' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={popoverBuilderSnippet} />
+  </Tab>
+</Tabs>
+
+#### Custom Formatting
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/select' variant='format' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={formatSnippet} />
+  </Tab>
+</Tabs>
+
+### Form
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/select' variant='form' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={formSnippet} />
+  </Tab>
+</Tabs>

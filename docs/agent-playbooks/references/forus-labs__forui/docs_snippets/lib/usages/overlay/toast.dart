@@ -1,0 +1,74 @@
+// ignore_for_file: avoid_redundant_argument_values
+
+import 'package:flutter/widgets.dart';
+
+import 'package:forui/forui.dart';
+
+const toast = FToast(
+  // {@category "Variant"}
+  variant: .primary,
+  // {@endcategory}
+  // {@category "Core"}
+  style: .delta(titleSpacing: 5),
+  clipBehavior: .none,
+  icon: Icon(FLucideIcons.info),
+  title: Text('Title'),
+  description: Text('Description'),
+  suffix: Icon(FLucideIcons.x),
+  // {@endcategory}
+);
+
+const toaster = FToaster(
+  // {@category "Core"}
+  style: .delta(padding: .value(.all(16))),
+  child: Placeholder(),
+  // {@endcategory}
+);
+
+final showToast = showFToast(
+  // {@category "Variant"}
+  variant: .primary,
+  // {@endcategory}
+  // {@category "Core"}
+  context: context,
+  style: const .delta(padding: .value(.all(16))),
+  icon: const Icon(FLucideIcons.info),
+  title: const Text('Title'),
+  description: const Text('Description'),
+  suffixBuilder: (context, entry) => GestureDetector(onTap: entry.dismiss, child: const Icon(FLucideIcons.x)),
+  // {@category "Behavior"}
+  alignment: .bottomEnd,
+  swipeToDismiss: const [.right],
+  dismissThreshold: 0.5,
+  duration: const Duration(seconds: 5),
+  onDismiss: () {},
+  // {@endcategory}
+);
+
+final showRawToast = showRawFToast(
+  // {@category "Variant"}
+  variant: .primary,
+  // {@endcategory}
+  // {@category "Behavior"}
+  alignment: .bottomEnd,
+  swipeToDismiss: const [.right],
+  dismissThreshold: 0.5,
+  duration: const Duration(seconds: 5),
+  onDismiss: () {},
+  // {@endcategory}
+  // {@category "Core"}
+  context: context,
+  style: const .delta(padding: .value(.all(16))),
+  builder: (context, entry) => const Text('Custom toast content'),
+  // {@endcategory}
+);
+
+// {@category "Variant" "`Primary`"}
+/// The toast's primary variant.
+const FToastVariant primary = .primary;
+
+// {@category "Variant" "`Destructive`"}
+/// The toast's destructive variant.
+const FToastVariant destructive = .destructive;
+
+BuildContext get context => throw UnimplementedError();

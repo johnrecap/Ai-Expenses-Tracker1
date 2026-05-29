@@ -1,0 +1,134 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:forui/forui.dart';
+import '../../../test_scaffold.dart';
+
+const letters = {
+  'A': 'A',
+  'B': 'B',
+  'C': 'C',
+  'D': 'D',
+  'E': 'E',
+  'F': 'F',
+  'G': 'G',
+  'H': 'H',
+  'I': 'I',
+  'J': 'J',
+  'K': 'K',
+  'L': 'L',
+  'M': 'M',
+  'N': 'N',
+  'O': 'O',
+};
+
+void main() {
+  const key = ValueKey('select');
+  late ScrollController scrollController;
+
+  setUp(() {
+    scrollController = ScrollController();
+  });
+
+  tearDown(() {
+    scrollController.dispose();
+  });
+
+  testWidgets('focus changes when pressed on mobile', (tester) async {
+    debugDefaultTargetPlatformOverride = .iOS;
+
+    await tester.pumpWidget(
+      TestScaffold.app(
+        alignment: .topCenter,
+        child: FSelect<String>(key: key, items: letters),
+      ),
+    );
+
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    expect(Focus.of(tester.element(find.text('A'))).hasFocus, false);
+
+    await tester.press(find.text('C'));
+    await tester.pumpAndSettle();
+
+    expect(Focus.of(tester.element(find.text('A'))).hasFocus, false);
+    expect(Focus.of(tester.element(find.text('C'))).hasFocus, true);
+
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('opening does not scroll outer scrollable', (tester) async {
+    final outer = ScrollController();
+    addTearDown(outer.dispose);
+
+    await tester.pumpWidget(
+      TestScaffold.app(
+        child: ListView.builder(
+          controller: outer,
+          itemCount: 20,
+          itemBuilder: (context, index) {
+            if (index == 5) {
+              return SingleChildScrollView(
+                scrollDirection: .horizontal,
+                child: Row(
+                  children: [
+                    const SizedBox(width: 100),
+                    SizedBox(
+                      width: 200,
+                      child: FSelect<String>(
+                        key: key,
+                        control: const .managed(initial: 'O'),
+                        items: letters,
+                      ),
+                    ),
+                    const SizedBox(width: 200),
+                  ],
+                ),
+              );
+            }
+            return const SizedBox(height: 200);
+          },
+        ),
+      ),
+    );
+
+    outer.jumpTo(800);
+    await tester.pumpAndSettle();
+
+    final before = outer.offset;
+
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    expect(outer.offset, before);
+  });
+
+  testWidgets('scrolls to item at the end of very long list', (tester) async {
+    await tester.pumpWidget(
+      TestScaffold.app(
+        child: FSelect<int>(
+          items: {for (var i = 0; i < 20; i++) i.toString(): i},
+          key: key,
+          contentScrollController: scrollController,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    scrollController.jumpTo(scrollController.position.maxScrollExtent);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('19'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    expect(find.text('19'), findsNWidgets(2));
+  });
+}

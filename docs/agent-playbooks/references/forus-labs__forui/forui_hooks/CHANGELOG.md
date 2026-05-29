@@ -1,0 +1,145 @@
+## 0.22.1
+
+Relax SDK constraints to allow Flutter and Dart beta/pre-release versions.
+
+
+## 0.22.0
+
+### `FLineCalendar`
+* Add `useFLineCalendarScrollController(...)`.
+
+
+## 0.21.0
+* **Breaking** Remove `useFPopoverController(motion: ...)`. Configure motion via `FPopoverStyle` instead.
+* **Breaking** Remove `useFTooltipController(motion: ...)`. Configure motion via `FTooltipStyle` instead.
+
+
+## 0.20.0
+Add support for Forui `0.20.0`.
+
+
+## 0.19.0
+Add support for Forui `0.19.0`.
+
+
+## 0.18.0
+Add support for Forui `0.18.0`.
+
+
+## 0.17.0
+To simplify updating to the latest version, we've included [Data Driven Fixes](https://github.com/flutter/flutter/blob/master/docs/contributing/Data-driven-Fixes.md).
+This allows you to run automated fixes on your codebase to update it to be compatible with the latest version of `forui_hooks`.
+
+After updating to the latest version, run:
+```dart
+dart fix --apply
+```
+
+* Add `useFPopoverController(shown: ...)`.
+* Add `useFTooltipController(shown: ...)`.
+
+* **Breaking** Rename `useFContinuousRangeSliderController(selection: ...)` to `useFContinuousRangeSliderController(value: ...)`.
+* **Breaking** Rename `useFContinuousSliderController(allowedInteraction: ...)` to `useFContinuousSliderController(interaction: ...)`.
+* **Breaking** Rename `useFContinuousSliderController(selection: ...)` to `useFContinuousSliderController(value: ...)`.
+* **Breaking** Rename `useFDateCalendarController(initialSelection: ...)` to `useFDateCalendarController(initial: ...)`.
+* **Breaking** Rename `useFDateFieldController(initialDate: ...)` to `useFDateFieldController(date: ...)`.
+* **Breaking** Rename `useFDatesCalendarController(initialSelections: ...)` to `useFDatesCalendarController(initial: ...)`.
+* **Breaking** Rename `useFDiscreteRangeSliderController(selection: ...)` to `useFDiscreteRangeSliderController(value: ...)`.
+* **Breaking** Rename `useFDiscreteSliderController(allowedInteraction: ...)` to `useFDiscreteSliderController(interaction: ...)`.
+* **Breaking** Rename `useFDiscreteSliderController(selection: ...)` to `useFDiscreteSliderController(value: ...)`.
+* **Breaking** Rename `useFPaginationController(initialPage: ...)` to `useFPaginationController(page: ...)`.
+* **Breaking** Rename `useFPickerController(initialIndexes: ...)` to `useFPickerController(indexes: ...)`.
+* **Breaking** Rename `useFRangeCalendarController(initialSelection: ...)` to `useFRangeCalendarController(initial: ...)`.
+* **Breaking** Rename `useFTabController(initialIndex: ...)` to `useFTabController(index: ...)`.
+* **Breaking** Rename `useFTimeFieldController(initialTime: ...)` to `useFTimeFieldController(time: ...)`.
+* **Breaking** Rename `useFTimePickerController(initial: ...)` to `useFTimePickerController(time: ...)`.
+* **Breaking** Remove `useFAutocompleteController(vsync: ..., popoverMotion: ...)`. Use `FSelect(popoverControl: ...)` instead.
+* **Breaking** Remove `useFDateFieldController(vsync: ..., popoverMotion: ..., truncateAndStripTimezone: ...)`. Use `FDateField(popoverControl: ...)` instead.
+* **Breaking** Remove `useFMultiSelectController`. Use `useFMultiValueNotifier` instead.
+* **Breaking** Remove `useFRadioAccordionController`. Use `useFAccordionController` instead.
+* **Breaking** Remove `useFRadioSelectGroupController`. Use `useFRadioMultiValueNotifier` instead.
+* **Breaking** Remove `useFRadioSelectMenuTileController`. Use `useFRadioMultiValueNotifier` instead.
+* **Breaking** Remove `useFSelectController(vsync: ..., popoverMotion: ...)`. Use `FSelect(popoverControl: ...)` instead.
+* **Breaking** Remove `useFSelectGroupController`. Use `useFMultiValueNotifier` instead.
+* **Breaking** Remove `useFSelectMenuTileController`. Use `useFMultiValueNotifier` instead.
+* **Breaking** Remove `useFSelectTileGroupController`. Use `useFMultiValueNotifier` instead.
+* **Breaking** Remove `useFTimeFieldController(vsync: ..., popoverMotion: ...)`. Use `FTimeField(popoverControl: ...)` instead.
+
+* Fix `useFDateCalendarController(togglable: ...)` defaulting to false instead of true.
+
+
+## 0.16.0
+
+* **Breaking** Replace `useFDateFieldController(animationDuration: ...)` with `useFDateFieldController(popoverMotion: ...)`.
+* **Breaking** Replace `useFPopoverController(animationDuration: ...)` with `useFPopoverController(motion: ...)`.
+* **Breaking** Replace `useFSelectController(animationDuration: ...)` with `useFSelectController(popoverMotion: ...)`.
+* **Breaking** Replace `useFSMultiSelectController(animationDuration: ...)` with `useFSMultiSelectController(popoverMotion: ...)`.
+* **Breaking** Replace `useFTabController(animationDuration: ...)` with `useFTabController(motion: ...)`.
+* **Breaking** Replace `useFTimeFieldController(animationDuration: ...)` with `useFTimeFieldController(popoverMotion: ...)`.
+* **Breaking** Replace `useFTooltipController(animationDuration: ...)` with `useFTooltipController(motion: ...)`.
+
+
+## 0.15.0
+* Add `useFAutocompleteController`.
+* Add `useFMultiSelectController`.
+
+* **Breaking** Change `useFMultiValueNotifier({Set<T> values})` to `useFMultiValueNotifier({Set<T> value})`.
+* **Breaking** Change `useFSelectGroupController({Set<T> values})` to `useFSelectGroupController({Set<T> value})`.
+* **Breaking** Change `useFSelectTileGroupController({Set<T> values})` to `useFSelectTileGroupController({Set<T> value})`.
+* **Breaking** Change `useFSelectMenuTileController({Set<T> values})` to `useFSelectMenuTileController({Set<T> value})`.
+
+
+## 0.14.0
+Bump Forui dependency from `0.13.0` to `0.14.0`.
+
+
+## 0.13.0
+Bump Forui dependency from `0.12.0` to `0.13.0`.
+
+
+## 0.12.0
+Bumps minimum Flutter SDK version to 3.32.0.
+
+* Add `toggleable` parameter to `useFDateCalendarController`.
+
+
+## 0.11.0
+* Add `FSelectController`.
+* Add `useFSelectGroupController`.
+* Add `useFRadioSelectGroupController`.
+* Add `useFSelectTileGroupController`.
+* Add `useFRadioSelectTileGroupController`.
+* Add `useFSelectMenuTileController`.
+* Add `useFRadioSelectMenuTileController`.
+
+* **Breaking** Change `FPaginationController` to require `pages` parameter.
+
+* Rename `useFMultiSelectGroupController` to `useFMultiValueNotifier`.
+* Rename `useFRadioSelectGroupController` to `useFRadioMultiValueNotifier`.
+
+
+## 0.10.0
+Bump `flutter_hooks` version to `0.21.0`.
+
+* Add `useFPaginationController`.
+* Add `useFTimeFieldController`.
+* Add `useFTimePickerController`.
+
+* **Breaking** Change `useFDatePickerController` to `useFDateFieldController`.
+
+
+## 0.9.0
+* Add `useFDatePickerController`.
+* Add `useFPickerController`.
+
+
+## 0.8.0
+Add support for Forui `0.8.0`.
+
+
+## 0.7.0+1
+Updated the README file.
+
+
+## 0.7.0
+Initial release!

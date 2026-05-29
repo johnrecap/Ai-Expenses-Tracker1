@@ -1,0 +1,279 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:forui/forui.dart';
+import '../../../test_scaffold.dart';
+
+void main() {
+  const key = Key('field');
+
+  group('managed', () {
+    testWidgets('onChange callback called', (tester) async {
+      FTime? changedValue;
+
+      await tester.pumpWidget(
+        TestScaffold.app(
+          locale: const Locale('en', 'SG'),
+          child: FTimeField(
+            key: key,
+            control: .managed(initial: const FTime(), onChange: (value) => changedValue = value),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await tester.sendKeyEvent(.arrowLeft);
+      await tester.sendKeyEvent(.arrowUp);
+      await tester.pumpAndSettle();
+
+      expect(changedValue, const FTime(0, 1));
+    });
+
+    testWidgets('onChange called when clearing via clear button', (tester) async {
+      final values = <FTime?>[];
+
+      await tester.pumpWidget(
+        TestScaffold.app(
+          locale: const Locale('en', 'SG'),
+          child: FTimeField(
+            key: key,
+            clearable: true,
+            control: .managed(onChange: values.add),
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byKey(key), '12:30 pm');
+      await tester.pumpAndSettle();
+
+      expect(values, [const FTime(12, 30)]);
+
+      await tester.tap(find.bySemanticsLabel('Clear'));
+      await tester.pumpAndSettle();
+
+      expect(values, [const FTime(12, 30), null]);
+    });
+  });
+
+  group('lifted', () {
+    testWidgets('arrow adjustment does not change', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          locale: const Locale('en', 'SG'),
+          child: StatefulBuilder(
+            builder: (context, setState) => FTimeField(
+              key: key,
+              control: .lifted(time: const FTime(10, 30), onChange: (v) => setState(() {})),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tapAt(tester.getTopLeft(find.byKey(key)));
+      await tester.pumpAndSettle();
+
+      await tester.sendKeyEvent(.arrowUp);
+      await tester.pumpAndSettle();
+
+      expect(find.text('10:30 am'), findsOneWidget);
+    });
+  });
+
+  for (final (index, (locale, placeholder)) in const [
+    (null, 'HH:MM --'),
+    (Locale('en', 'SG'), 'HH:MM --'),
+    (Locale('bg'), 'HH:MM ч.'),
+    (Locale('fr', 'CA'), 'HH h MM'),
+    (Locale('zh', 'HK'), '--HH:MM'),
+  ].indexed) {
+    testWidgets('placeholder - $index', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          locale: locale,
+          child: const FTimeField(key: key),
+        ),
+      );
+
+      expect(find.text(placeholder), findsOneWidget);
+    });
+  }
+
+  testWidgets('arrow key adjustment', (tester) async {
+    await tester.pumpWidget(
+      TestScaffold.app(
+        locale: const Locale('en', 'SG'),
+        child: const FTimeField(key: key),
+      ),
+    );
+
+    await tester.tapAt(tester.getTopLeft(find.byKey(key)));
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(.arrowUp);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(.arrowRight);
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(.arrowDown);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(.arrowRight);
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(.arrowUp);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(.arrowRight);
+    await tester.pumpAndSettle();
+
+    expect(find.text('1:00 am'), findsOneWidget);
+  });
+
+  testWidgets('clearable', (tester) async {
+    await tester.pumpWidget(
+      TestScaffold.app(
+        locale: const Locale('en', 'SG'),
+        child: const FTimeField(key: key, clearable: true),
+      ),
+    );
+
+    expect(find.bySemanticsLabel('Clear'), findsNothing);
+
+    await tester.enterText(find.byKey(key), '12:30 pm');
+    await tester.pumpAndSettle();
+
+    expect(find.bySemanticsLabel('Clear'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Clear'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('HH:MM --'), findsOneWidget);
+    expect(find.bySemanticsLabel('Clear'), findsNothing);
+  });
+
+  group('validator', () {
+    testWidgets('placeholder', (tester) async {
+      debugDefaultTargetPlatformOverride = .macOS;
+
+      await tester.pumpWidget(
+        TestScaffold.app(
+          locale: const Locale('en', 'SG'),
+          child: const FTimeField(key: key),
+        ),
+      );
+
+      await tester.tapAt(tester.getTopLeft(find.byKey(key)));
+      await tester.pumpAndSettle();
+
+      await tester.sendKeyEvent(.backspace);
+      await tester.pumpAndSettle();
+
+      await tester.tapAt(tester.getBottomRight(find.byType(TestScaffold)));
+
+      expect(find.text('Invalid time.'), findsNothing);
+
+      debugDefaultTargetPlatformOverride = null;
+    });
+
+    testWidgets('partial time', (tester) async {
+      debugDefaultTargetPlatformOverride = .macOS;
+
+      await tester.pumpWidget(
+        TestScaffold.app(
+          locale: const Locale('en', 'SG'),
+          child: const FTimeField(key: key),
+        ),
+      );
+
+      await tester.enterText(find.byKey(key), '12:MM --');
+      await tester.pumpAndSettle();
+
+      await tester.tapAt(.zero);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Invalid time.'), findsOneWidget);
+
+      debugDefaultTargetPlatformOverride = null;
+    });
+
+    testWidgets('partial time - zh HK', (tester) async {
+      debugDefaultTargetPlatformOverride = .macOS;
+
+      await tester.pumpWidget(
+        TestScaffold.app(
+          locale: const Locale('zh', 'HK'),
+          child: const FTimeField(key: key),
+        ),
+      );
+
+      await tester.enterText(find.byKey(key), '--HH:12');
+      await tester.pumpAndSettle();
+
+      await tester.tapAt(.zero);
+      await tester.pumpAndSettle();
+
+      expect(find.text('無效的時間。'), findsOneWidget);
+
+      debugDefaultTargetPlatformOverride = null;
+    });
+
+    testWidgets('full time', (tester) async {
+      debugDefaultTargetPlatformOverride = .macOS;
+
+      await tester.pumpWidget(
+        TestScaffold.app(
+          locale: const Locale('en', 'SG'),
+          child: const FTimeField(key: key),
+        ),
+      );
+
+      await tester.enterText(find.byKey(key), '12:30 pm');
+      await tester.pumpAndSettle();
+
+      await tester.tapAt(.zero);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Invalid time.'), findsNothing);
+
+      debugDefaultTargetPlatformOverride = null;
+    });
+
+    testWidgets('custom invalid time', (tester) async {
+      debugDefaultTargetPlatformOverride = .macOS;
+
+      final controller = autoDispose(
+        FTimeFieldController(
+          validator: (time) {
+            if (time == const FTime(12, 30)) {
+              return 'Custom error.';
+            }
+
+            return null;
+          },
+        ),
+      );
+
+      await tester.pumpWidget(
+        TestScaffold.app(
+          locale: const Locale('en', 'SG'),
+          child: FTimeField(
+            control: .managed(controller: controller),
+            key: key,
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byKey(key), '12:30 pm');
+      await tester.pumpAndSettle();
+
+      await tester.tapAt(.zero);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Custom error.'), findsOneWidget);
+
+      debugDefaultTargetPlatformOverride = null;
+    });
+  });
+}

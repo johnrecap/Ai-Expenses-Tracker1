@@ -1,0 +1,68 @@
+---
+title: Tappable
+description: An area that responds to touch.
+apiReference: https://pub.dev/documentation/forui/latest/forui.foundation/FTappable-class.html
+---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import tappableDefault from '@/snippets/examples/foundation/tappable/default.json';
+import tappableGroupDefault from '@/snippets/examples/foundation/tappable-group/default.json';
+import tappableBounce from '@/snippets/examples/foundation/tappable/bounce.json';
+import tappableUsage from '@/snippets/usages/foundation/tappable/tappable.json';
+import tappableStaticUsage from '@/snippets/usages/foundation/tappable/tappableStatic.json';
+
+<Callout type="info">
+  This widget is typically used to create other high-level widgets, e.g., [button](../form/button). You should prefer
+  those high-level widgets unless you're creating a custom widget.
+</Callout>
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='foundation/tappable' height={300}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={tappableDefault} />
+  </Tab>
+</Tabs>
+
+## Usage
+
+### `FTappable(...)`
+<UsageSnippet usage={tappableUsage} />
+
+### `FTappable.static(...)`
+
+A variant of `FTappable` without any animation. This is similar to using `FTappableMotion.none`.
+
+<UsageSnippet usage={tappableStaticUsage} />
+
+## Custom Bounce Animation
+
+You can customize a tappable's bounce animation by passing a `FTappableMotion`.
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='foundation/tappable' variant='bounce' height={300}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={tappableBounce} />
+  </Tab>
+</Tabs>
+
+## Slide-across Interaction
+
+Several tappables can be placed in a `FTappableGroup` to enable slide-across interaction. When you press one tappable
+and slide across to another, the pressed state transfers to the new tappable.
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='foundation/tappable-group' height={300}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={tappableGroupDefault} />
+  </Tab>
+</Tabs>

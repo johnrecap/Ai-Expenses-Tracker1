@@ -1,0 +1,57 @@
+version: 2
+goal:
+  slug: valid-parallel-workers
+  status: active
+  objective: "Validate parallel worker scopes."
+completion_contract:
+  outcome: "Validate parallel worker scopes."
+  verification_surface:
+    - "Goal board validator output."
+  constraints:
+    - "Preserve disjoint Worker allowed_files."
+  boundaries:
+    - "Use only the declared worker allowed_files for this fixture scenario."
+  iteration_policy: "Fix the next validator-reported blocker and rerun the board check."
+  blocked_stop_condition: "Stop with the validator error when the fixture cannot be repaired safely."
+rules:
+  one_active_task: false
+  require_fresh_verification: true
+  require_final_audit: true
+artifacts:
+  implementation_notes:
+    path: ".harness/implementation-notes/2026-05-25-valid-parallel-workers-notes.mdx"
+    format: mdx
+    status: present
+    browser_preview:
+      surface: localhost
+      status: blocked
+      blocker: "Fixture board does not start a localhost preview server."
+      live_update:
+        status: blocked
+        blocker: "Fixture board does not start a localhost preview server."
+tasks:
+  - id: T001
+    type: worker
+    assignee: Worker
+    status: active
+    objective: "Update docs."
+    allowed_files:
+      - "Docs/goal.md"
+      - ".harness/implementation-notes/2026-05-25-valid-parallel-workers-notes.mdx"
+    verify:
+      - "bash scripts/verify-work.sh --fast"
+    stop_if:
+      - "Docs scope changes."
+    receipt_id: null
+  - id: T002
+    type: worker
+    assignee: Worker
+    status: active
+    objective: "Update tests."
+    allowed_files:
+      - "Skills/agent-ops/goal-governor/tests/fixtures/valid/state.yaml"
+    verify:
+      - "python3 scripts/check_goal_board.py tests/fixtures/valid"
+    stop_if:
+      - "Fixture scope changes."
+    receipt_id: null

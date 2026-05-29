@@ -1,0 +1,92 @@
+name: widgetbook
+description: >-
+  Widgetbook is a sandbox for building widgets and screens in isolation.
+  It helps you develop hard-to-reach states and edge cases without needing to run your app.
+version: 3.23.0
+homepage: https://www.widgetbook.io?utm_source=pub.dev&utm_medium=link&utm_campaign=widgetbook
+repository: https://github.com/widgetbook/widgetbook/tree/main/packages/widgetbook
+issue_tracker: https://github.com/widgetbook/widgetbook/issues
+documentation: https://docs.widgetbook.io
+topics: [widgetbook, storybook, ui, tool, test]
+
+screenshots:
+  - description: Widgetbook Logo
+    path: assets/logo.webp
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+  flutter: ">=3.38.0"
+
+dependencies:
+  accessibility_tools: ^2.6.0
+  collection: ^1.15.0
+  device_frame_plus: ^1.5.0
+  flutter:
+    sdk: flutter
+  inspector: ">=2.1.0 <5.0.0"
+  meta: ^1.8.0
+  nested: ^1.0.0
+  resizable_widget: ^1.0.5
+  url_launcher: ^6.3.0
+  # To create custom AddonConfig(s) that use types from
+  # the widgetbook package, we need to depend on the
+  # annotation package.
+  widgetbook_annotation: ^3.11.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.0
+
+flutter:
+  assets:
+    - assets/
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins/Poppins-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/Poppins/Poppins-ThinItalic.ttf
+          weight: 100
+          style: italic
+        - asset: assets/fonts/Poppins/Poppins-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/Poppins/Poppins-ExtraLightItalic.ttf
+          weight: 200
+          style: italic
+        - asset: assets/fonts/Poppins/Poppins-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Poppins/Poppins-LightItalic.ttf
+          weight: 300
+          style: italic
+        - asset: assets/fonts/Poppins/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins/Poppins-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/Poppins/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins/Poppins-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/Poppins/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins/Poppins-SemiBoldItalic.ttf
+          weight: 600
+          style: italic
+        - asset: assets/fonts/Poppins/Poppins-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Poppins/Poppins-BoldItalic.ttf
+          weight: 700
+          style: italic
+        - asset: assets/fonts/Poppins/Poppins-ExtraBold.ttf
+          weight: 800
+          style: italic
+        - asset: assets/fonts/Poppins/Poppins-ExtraBoldItalic.ttf
+          weight: 800
+          style: italic
+        - asset: assets/fonts/Poppins/Poppins-Black.ttf
+          weight: 900
+        - asset: assets/fonts/Poppins/Poppins-BlackItalic.ttf
+          weight: 900
+          style: italic

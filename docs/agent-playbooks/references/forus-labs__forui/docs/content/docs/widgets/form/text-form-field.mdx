@@ -1,0 +1,61 @@
+---
+title: Text Form Field
+description: A text field that can be used in forms, allowing the user to enter text, either with a hardware keyboard or with an onscreen keyboard.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.text_field/
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import defaultSnippet from '@/snippets/examples/form/text-form-field/default.json';
+import textFormFieldUsage from '@/snippets/usages/form/text_form_field/textFormField.json';
+import textFormFieldEmailUsage from '@/snippets/usages/form/text_form_field/textFormFieldEmail.json';
+import textFormFieldMultilineUsage from '@/snippets/usages/form/text_form_field/textFormFieldMultiline.json';
+import textFormFieldPasswordUsage from '@/snippets/usages/form/text_form_field/textFormFieldPassword.json';
+
+<Callout type="info">
+  `FTextFormField` wraps [`FTextField`](/docs/widgets/form/text-field) and provides a
+  [`FormField`](https://api.flutter.dev/flutter/widgets/FormField-class.html).
+</Callout>
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/text-form-field' height={550}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={defaultSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Text Field Sizes', 'Text Field']}>
+    <Tab value="Text Field Sizes">
+        ```shell copy
+        dart run forui style create text-field-sizes
+        ````
+    </Tab>
+    <Tab value="Text Field">
+        ```shell copy
+        dart run forui style create text-field
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `FTextFormField(...)`
+<UsageSnippet usage={textFormFieldUsage} />
+
+### `FTextFormField.email(...)`
+<UsageSnippet usage={textFormFieldEmailUsage} />
+
+### `FTextFormField.password(...)`
+<UsageSnippet usage={textFormFieldPasswordUsage} />
+
+### `FTextFormField.multiline(...)`
+<UsageSnippet usage={textFormFieldMultilineUsage} />

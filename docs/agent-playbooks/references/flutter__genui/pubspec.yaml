@@ -1,0 +1,30 @@
+# Copyright 2025 The Flutter Authors.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: genui_monorepo
+publish_to: none
+license: BSD-3-Clause
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+  flutter: ">=3.35.7 <4.0.0"
+
+workspace:
+  - dev_tools/catalog_gallery
+  - dev_tools/composer
+
+  - examples/simple_chat
+  - examples/verdure/client
+
+  - packages/a2ui_core
+  - packages/genui
+  - packages/genui_a2a
+  - packages/json_schema_builder
+
+  - tool/e2e
+  - tool/fix_copyright
+  - tool/test_and_fix
+
+flutter:
+  uses-material-design: true

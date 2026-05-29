@@ -1,0 +1,416 @@
+@Tags(['golden'])
+library;
+
+import 'package:flutter/widgets.dart';
+
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:forui/forui.dart';
+import '../../../test_scaffold.dart';
+
+const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'];
+
+class ItemWrapper extends StatelessWidget with FItemMixin {
+  const ItemWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const .all(5.0),
+    child: Center(
+      child: FSelect<String>.rich(
+        format: (s) => s,
+        children: [
+          .richSection(
+            label: const Text('Section 1'),
+            children: [const .item(title: Text('Item 1'), value: 'item 1')],
+          ),
+          .richSection(
+            label: const Text('Section 2'),
+            children: [const .item(title: Text('Item 2'), value: 'item 2')],
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+void main() {
+  const key = ValueKey('select');
+  late ScrollController scrollController;
+
+  setUp(() {
+    scrollController = ScrollController();
+  });
+
+  tearDown(() {
+    scrollController.dispose();
+  });
+
+  for (final theme in TestScaffold.themes) {
+    group('scroll handles', () {
+      testWidgets('show both', (tester) async {
+        await tester.pumpWidget(
+          TestScaffold.app(
+            theme: theme.data,
+            alignment: .topCenter,
+            child: FSelect<String>.rich(
+              key: key,
+              format: (string) => string,
+              contentScrollController: scrollController,
+              contentScrollHandles: true,
+              children: [
+                .richSection(
+                  label: const Text('Lorem'),
+                  children: [for (final letter in letters) .item(title: Text(letter), value: letter)],
+                ),
+              ],
+            ),
+          ),
+        );
+
+        await tester.tap(find.byKey(key));
+        await tester.pumpAndSettle();
+
+        scrollController.jumpTo(scrollController.position.maxScrollExtent / 2);
+        await tester.pumpAndSettle();
+
+        await expectLater(
+          find.byType(TestScaffold),
+          matchesGoldenFile('select/${theme.name}/content/both-scroll-handles.png'),
+        );
+      });
+
+      testWidgets('hide starting scroll handle', (tester) async {
+        await tester.pumpWidget(
+          TestScaffold.app(
+            theme: theme.data,
+            alignment: .topCenter,
+            child: FSelect<String>.rich(
+              key: key,
+              format: (string) => string,
+              contentScrollHandles: true,
+              children: [
+                .richSection(
+                  label: const Text('Lorem'),
+                  children: [for (final letter in letters) .item(title: Text(letter), value: letter)],
+                ),
+              ],
+            ),
+          ),
+        );
+
+        await tester.tap(find.byKey(key));
+        await tester.pumpAndSettle();
+
+        await expectLater(
+          find.byType(TestScaffold),
+          matchesGoldenFile('select/${theme.name}/content/hide-start-scroll-handle.png'),
+        );
+      });
+
+      testWidgets('hide ending scroll handle', (tester) async {
+        await tester.pumpWidget(
+          TestScaffold.app(
+            theme: theme.data,
+            alignment: .topCenter,
+            child: FSelect<String>.rich(
+              key: key,
+              format: (string) => string,
+              contentScrollController: scrollController,
+              contentScrollHandles: true,
+              children: [
+                .richSection(
+                  label: const Text('Lorem'),
+                  children: [for (final letter in letters) .item(title: Text(letter), value: letter)],
+                ),
+              ],
+            ),
+          ),
+        );
+
+        await tester.tap(find.byKey(key));
+        await tester.pumpAndSettle();
+
+        scrollController.jumpTo(scrollController.position.maxScrollExtent);
+        await tester.pumpAndSettle();
+
+        await expectLater(
+          find.byType(TestScaffold),
+          matchesGoldenFile('select/${theme.name}/content/hide-end-scroll-handle.png'),
+        );
+      });
+
+      testWidgets('hide scroll handles when handles disabled', (tester) async {
+        await tester.pumpWidget(
+          TestScaffold.app(
+            theme: theme.data,
+            alignment: .topCenter,
+            child: FSelect<String>.rich(
+              key: key,
+              format: (string) => string,
+              contentScrollController: scrollController,
+              children: [
+                .richSection(
+                  label: const Text('Lorem'),
+                  children: [for (final letter in letters) .item(title: Text(letter), value: letter)],
+                ),
+              ],
+            ),
+          ),
+        );
+
+        await tester.tap(find.byKey(key));
+        await tester.pumpAndSettle();
+
+        scrollController.jumpTo(scrollController.position.maxScrollExtent / 2);
+        await tester.pumpAndSettle();
+
+        await expectLater(
+          find.byType(TestScaffold),
+          matchesGoldenFile('select/${theme.name}/content/no-scroll-handles.png'),
+        );
+      });
+
+      testWidgets('hide scroll handles when all items visible', (tester) async {
+        await tester.pumpWidget(
+          TestScaffold.app(
+            theme: theme.data,
+            alignment: .topCenter,
+            child: FSelect<String>.rich(
+              key: key,
+              format: (string) => string,
+              contentScrollController: scrollController,
+              contentScrollHandles: true,
+              children: [
+                .richSection(
+                  label: const Text('Lorem'),
+                  children: [const .item(title: Text('1'), value: '1')],
+                ),
+              ],
+            ),
+          ),
+        );
+
+        await tester.tap(find.byKey(key));
+        await tester.pumpAndSettle();
+
+        scrollController.jumpTo(scrollController.position.maxScrollExtent / 2);
+        await tester.pumpAndSettle();
+
+        await expectLater(
+          find.byType(TestScaffold),
+          matchesGoldenFile('select/${theme.name}/content/all-items-visible.png'),
+        );
+      });
+    });
+
+    testWidgets('dividers', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          alignment: .topCenter,
+          child: FSelect<String>.rich(
+            key: key,
+            contentDivider: .full,
+            format: (s) => s,
+            children: [
+              .section(
+                label: const Text('Group 1'),
+                divider: .indented,
+                items: {
+                  for (final item in ['1A', '1B']) item: item,
+                },
+              ),
+              .section(
+                label: const Text('Group 2'),
+                items: {
+                  for (final item in ['2A', '2B']) item: item,
+                },
+              ),
+              .item(title: const Text('Item 3'), value: 'Item 3'),
+              .item(title: const Text('Item 4'), value: 'Item 4'),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('select/${theme.name}/content/dividers.png'));
+    });
+
+    testWidgets('dividers with single item', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          alignment: .topCenter,
+          child: FSelect<String>.rich(
+            key: key,
+            contentDivider: .full,
+            format: (s) => s,
+            children: [.item(title: const Text('Item 1'), value: 'Item 1')],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectLater(
+        find.byType(TestScaffold),
+        matchesGoldenFile('select/${theme.name}/content/dividers-single-item.png'),
+      );
+    });
+
+    testWidgets('hover with dividers', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          alignment: .topCenter,
+          child: FSelect<String>.rich(
+            key: key,
+            contentDivider: .full,
+            format: (s) => s,
+            children: [
+              .section(
+                label: const Text('Group 1'),
+                divider: .indented,
+                items: {
+                  for (final item in ['1A', '1B']) item: item,
+                },
+              ),
+              .section(
+                label: const Text('Group 2'),
+                items: {
+                  for (final item in ['2A', '2B']) item: item,
+                },
+              ),
+              .item(title: const Text('Item 3'), value: 'Item 3'),
+              .item(title: const Text('Item 4'), value: 'Item 4'),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      final gesture = await tester.createPointerGesture();
+      await gesture.moveTo(tester.getCenter(find.text('1B')));
+      await tester.pumpAndSettle();
+
+      await expectLater(
+        find.byType(TestScaffold),
+        matchesGoldenFile('select/${theme.name}/content/dividers-hover.png'),
+      );
+    });
+
+    group('focus', () {
+      testWidgets('autofocus first item on desktop', (tester) async {
+        await tester.pumpWidget(
+          TestScaffold.app(
+            theme: theme.data,
+            platform: .macOS,
+            alignment: .topCenter,
+            child: FSelect<String>.rich(
+              key: key,
+              format: (string) => string,
+              children: [
+                .richSection(
+                  label: const Text('Lorem'),
+                  children: [for (final letter in letters) .item(title: Text(letter), value: letter)],
+                ),
+              ],
+            ),
+          ),
+        );
+
+        await tester.tap(find.byKey(key));
+        await tester.pumpAndSettle();
+
+        await expectLater(
+          find.byType(TestScaffold),
+          matchesGoldenFile('select/${theme.name}/content/autofocus-first-desktop.png'),
+        );
+      });
+
+      testWidgets('no autofocus first item on touch', (tester) async {
+        await tester.pumpWidget(
+          TestScaffold.app(
+            theme: theme.data,
+            platform: .iOS,
+            alignment: .topCenter,
+            child: FSelect<String>.rich(
+              key: key,
+              format: (string) => string,
+              children: [
+                .richSection(
+                  label: const Text('Lorem'),
+                  children: [for (final letter in letters) .item(title: Text(letter), value: letter)],
+                ),
+              ],
+            ),
+          ),
+        );
+
+        await tester.tap(find.byKey(key));
+        await tester.pumpAndSettle();
+
+        await expectLater(
+          find.byType(TestScaffold),
+          matchesGoldenFile('select/${theme.name}/content/autofocus-first-touch.png'),
+        );
+      });
+
+      testWidgets('selected item', (tester) async {
+        final controller = autoDispose(FSelectController<String>())..value = 'O';
+
+        await tester.pumpWidget(
+          TestScaffold.app(
+            theme: theme.data,
+            alignment: .topCenter,
+            child: FSelect<String>.rich(
+              key: key,
+              format: (string) => string,
+              control: .managed(controller: controller),
+              children: [
+                .richSection(
+                  label: const Text('Lorem'),
+                  children: [for (final letter in letters) .item(title: Text(letter), value: letter)],
+                ),
+              ],
+            ),
+          ),
+        );
+
+        await tester.tap(find.byKey(key));
+        await tester.pumpAndSettle();
+
+        await expectLater(
+          find.byType(TestScaffold),
+          matchesGoldenFile('select/${theme.name}/content/focused-selected-item.png'),
+        );
+      });
+    });
+  }
+
+  testWidgets('leaky inherited FItemData does not affect FSelect', (tester) async {
+    await tester.pumpWidget(
+      TestScaffold.app(
+        child: FItemGroup(
+          divider: .indented,
+          children: [
+            .item(title: const Text('2nd')),
+            const ItemWrapper(key: key),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TestScaffold), matchesGoldenFile('select/content/leaky-inherited-fitemdata.png'));
+  });
+}

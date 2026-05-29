@@ -1,0 +1,493 @@
+#!/usr/bin/env python3
+"""Fast shared scanner for repository skill metadata and quality checks."""
+
+from __future__ import annotations
+
+import argparse
+import re
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Iterable
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+# Canonical skill authoring lives in Skills/ and the plugin source trees.
+# `skills-system/` is a generated projection store for hidden/system runtime
+# skills and should not be treated as authored source by quality lints.
+ROOTS = ("Skills", "Plugins/harness-engineering", "Plugins/plugin-factory", "Plugins/skill-factory")
+ORDERED_TYPES = (
+    "library_api_reference",
+    "product_verification",
+    "data_fetch_analysis",
+    "team_automation",
+    "scaffolding_templates",
+    "code_quality_review",
+    "ci_cd_deployment",
+    "runbook",
+    "infrastructure_ops",
+)
+REQUIRED_HEADINGS = (
+    "When to use",
+    "Required inputs",
+    "Deliverables",
+    "Failure mode",
+    "Gotchas",
+)
+HEADING_ALIASES = {
+    "When to use": {"when to use", "when to use?", "use"},
+    "Required inputs": {"required inputs", "inputs", "preconditions", "full context"},
+    "Deliverables": {
+        "deliverables",
+        "outputs",
+        "output format",
+        "required output contract",
+        "full context",
+    },
+    "Failure mode": {
+        "failure mode",
+        "failure modes",
+        "failure handling",
+        "failure handling and repair",
+        "repair loop",
+        "repair workflow",
+        "stopping conditions",
+        "when not to use",
+        "anti-triggers",
+        "anti triggers",
+        "anti-patterns",
+        "anti-patterns to avoid",
+        "do not use",
+        "notes",
+    },
+    "Gotchas": {
+        "gotchas",
+        "operational traps",
+        "known traps",
+        "known failure modes",
+        "false confidence risks",
+        "constraints",
+        "notes",
+        "anti-patterns",
+        "anti-patterns to avoid",
+    },
+}
+AGENT_NATIVE_CONTRACTS = (
+    (
+        "execution boundaries",
+        {
+            "execution boundaries",
+            "safety boundaries",
+            "codex harness placement",
+            "boundary map",
+            "command boundaries",
+            "human approval gates",
+            "constraints",
+            "constraints and safety",
+            "safety",
+            "safety rules",
+            "rules",
+            "anti patterns",
+            "anti patterns to avoid",
+            "avoid",
+            "do not use",
+        },
+    ),
+    (
+        "expected artifacts",
+        {
+            "expected artifacts",
+            "deliverables",
+            "outputs",
+            "output format",
+            "evidence requirements",
+            "output contract",
+            "required output contract",
+            "acceptance criteria",
+        },
+    ),
+    (
+        "repair or failure loop",
+        {
+            "repair loop",
+            "repair workflow",
+            "failure handling",
+            "failure handling and repair",
+            "failure mode",
+            "stopping conditions",
+            "rollback path",
+            "rollback paths",
+            "handoff rules",
+            "validation",
+            "gotchas",
+            "safety",
+            "anti patterns",
+            "anti patterns to avoid",
+        },
+    ),
+    (
+        "validation or acceptance criteria",
+        {
+            "validation",
+            "validation gates",
+            "evidence requirements",
+            "confidence reporting",
+            "acceptance criteria",
+            "deliverables",
+            "outputs",
+            "output contract",
+            "required output contract",
+        },
+    ),
+)
+RELOCATION_GUARD_SKILL_FILES = {
+    "skills-system/skill-creator",
+    "skills-system/skill-installer",
+    "plugins/skill-factory/skills/code_quality_review/skill-builder",
+    "plugins/plugin-factory/skills/plugin-factory-router",
+    "plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
+    "plugins/plugin-factory/skills/code_quality_review/plugin-builder",
+    "plugins/plugin-factory/skills/infrastructure_ops/plugin-installer",
+    "plugins/plugin-factory/skills/team_automation/plugin-router",
+}
+CONTEXT_POLICY_PATTERNS = (
+    re.compile(r"never drop required context", re.IGNORECASE),
+    re.compile(r"required operational context is never removed", re.IGNORECASE),
+    re.compile(r"preserve .*context.*relocat", re.IGNORECASE),
+    re.compile(r"apply the context-disposition policy", re.IGNORECASE),
+    re.compile(r"important,? still-valid context", re.IGNORECASE),
+    re.compile(r"stale, duplicated, unsafe, superseded, or low-signal", re.IGNORECASE),
+)
+READ_WHEN_PATTERN = re.compile(r"read when\s*:", re.IGNORECASE)
+REFERENCE_LINK_PATTERN = re.compile(r"\]\([^)]*references/[^)]*\)", re.IGNORECASE)
+SKILL_PATH_EXCLUDED_SEGMENTS = {"fixtures", "__pycache__"}
+
+
+@dataclass
+class SkillFile:
+    path: Path
+    relative_path: str
+    skill_dir: Path
+    skill_type: str
+    line_count: int
+    code_fence_count: int
+    headings: set[str]
+
+
+def iter_skill_files() -> Iterable[Path]:
+    for root_name in ROOTS:
+        root = REPO_ROOT / root_name
+        if not root.is_dir():
+            continue
+        for path in sorted(root.rglob("SKILL.md")):
+            if any(segment in SKILL_PATH_EXCLUDED_SEGMENTS for segment in path.parts):
+                continue
+            yield path
+
+
+def frontmatter_block(text: str) -> list[str]:
+    lines = text.splitlines()
+    if len(lines) < 3 or lines[0].strip() != "---":
+        return []
+    block: list[str] = []
+    for line in lines[1:]:
+        if line.strip() == "---":
+            return block
+        block.append(line)
+    return []
+
+
+def parse_frontmatter(text: str) -> dict[str, str]:
+    lines = frontmatter_block(text)
+    parsed: dict[str, str] = {}
+    current_key: str | None = None
+    current_indent = 0
+    metadata_key: str | None = None
+
+    for raw_line in lines:
+        if not raw_line.strip():
+            continue
+
+        indent = len(raw_line) - len(raw_line.lstrip(" "))
+        line = raw_line.strip()
+
+        if indent == 0 and ":" in line:
+            key, value = line.split(":", 1)
+            current_key = key.strip()
+            current_indent = indent
+            metadata_key = None
+            parsed[current_key] = value.strip().strip("\"'")
+            continue
+
+        if current_key == "metadata" and indent > current_indent and ":" in line:
+            key, value = line.split(":", 1)
+            metadata_key = key.strip()
+            parsed[f"metadata.{metadata_key}"] = value.strip().strip("\"'")
+            continue
+
+        if metadata_key and current_key == "metadata" and indent > current_indent:
+            existing = parsed.get(f"metadata.{metadata_key}", "")
+            parsed[f"metadata.{metadata_key}"] = " ".join(
+                part for part in (existing, line.strip("\"'")) if part
+            ).strip()
+            continue
+
+        if current_key and indent > current_indent:
+            existing = parsed.get(current_key, "")
+            parsed[current_key] = " ".join(
+                part for part in (existing, line.strip("\"'")) if part
+            ).strip()
+
+    return parsed
+
+
+def extract_headings(text: str) -> set[str]:
+    headings: set[str] = set()
+    for line in text.splitlines():
+        match = re.match(r"^##\s+(.+?)\s*$", line)
+        if not match:
+            continue
+        heading = re.sub(r"\s+\(.+\)\s*$", "", match.group(1).strip())
+        headings.add(heading)
+    return headings
+
+
+def normalize_heading(value: str) -> str:
+    normalized = value.strip().lower().replace("-", " ")
+    normalized = re.sub(r"[^\w\s]", "", normalized)
+    normalized = re.sub(r"\s+", " ", normalized)
+    return normalized.strip()
+
+
+def load_skill(path: Path) -> SkillFile:
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    parsed = parse_frontmatter(text)
+    skill_type = parsed.get("metadata.skill-type") or parsed.get("metadata.skill_type") or ""
+    return SkillFile(
+        path=path,
+        relative_path=path.relative_to(REPO_ROOT).as_posix(),
+        skill_dir=path.parent,
+        skill_type=skill_type,
+        line_count=text.count("\n") + (0 if not text or text.endswith("\n") else 1),
+        code_fence_count=sum(1 for line in text.splitlines() if line.startswith("```")),
+        headings=extract_headings(text),
+    )
+
+
+def all_skills() -> list[SkillFile]:
+    return [load_skill(path) for path in iter_skill_files()]
+
+
+def title_case(value: str) -> str:
+    return " ".join(word.capitalize() for word in value.replace("_", " ").split())
+
+
+def cmd_lint_progressive_disclosure(mode: str) -> int:
+    """
+    Validate progressive-disclosure and structural rules across discovered SKILL.md files.
+    
+    Per-skill checks include:
+    - Line-count limits (hard cap and target) and requirement for an Infrastructure/references/ directory when length exceeds target.
+    - Presence of an Infrastructure/scripts/ directory when many code fences are present.
+    - Presence of recommended level-2 headings from REQUIRED_HEADINGS (missing headings are errors in "strict" mode, warnings otherwise).
+    - Presence of the agent-native execution contract across all skills: execution boundaries, expected artifacts, repair/failure behavior, and validation or acceptance criteria (missing contract dimensions are errors in "strict" mode, warnings otherwise).
+    - For relocation-guard skills (a predefined set of relative paths), additional checks for context-disposition policy language, a `Read when:` progressive-disclosure signpost, a markdown link into `references/`, and at least one relocation target document in the `references/` directory (severity follows mode).
+    
+    The function prints per-file error/warning messages and a final summary to stdout.
+    
+    Parameters:
+        mode (str): Severity mode; "strict" treats missing recommended items as errors, otherwise as warnings.
+    
+    Returns:
+        int: Exit code — `1` if `mode` is "strict" and any errors were found, otherwise `0`.
+    """
+    skills = all_skills()
+    errors = 0
+    warnings = 0
+
+    def emit(severity: str, rel_path: str, message: str) -> None:
+        nonlocal errors, warnings
+        if severity == "error":
+            print(f"ERROR {rel_path}: {message}")
+            errors += 1
+        else:
+            print(f"WARN  {rel_path}: {message}")
+            warnings += 1
+
+    for skill in skills:
+        normalized_headings = {normalize_heading(heading) for heading in skill.headings}
+        if skill.line_count > 360:
+            emit("error", skill.relative_path, f"SKILL.md exceeds hard cap (lines={skill.line_count}, cap=360)")
+        elif skill.line_count > 320:
+            emit("warn", skill.relative_path, f"SKILL.md exceeds target length (lines={skill.line_count}, target=320)")
+            if not (skill.skill_dir / "references").is_dir():
+                emit("error", skill.relative_path, "length > 320 without Infrastructure/references/ for progressive disclosure")
+
+        if skill.code_fence_count >= 6 and not (skill.skill_dir / "scripts").is_dir():
+            emit("error", skill.relative_path, f"many code fences ({skill.code_fence_count}) but Infrastructure/scripts/ directory is missing")
+        elif skill.code_fence_count >= 4 and not (skill.skill_dir / "scripts").is_dir():
+            emit("warn", skill.relative_path, f"consider moving embedded mechanics to Infrastructure/scripts/ (code fences={skill.code_fence_count})")
+
+        for heading in REQUIRED_HEADINGS:
+            accepted_headings = {normalize_heading(heading)}
+            accepted_headings.update(
+                normalize_heading(alias) for alias in HEADING_ALIASES.get(heading, set())
+            )
+            if normalized_headings.isdisjoint(accepted_headings):
+                severity = "error" if mode == "strict" else "warn"
+                emit(severity, skill.relative_path, f"missing recommended section heading: ## {heading}")
+
+        for contract_name, accepted_headings in AGENT_NATIVE_CONTRACTS:
+            normalized_contract_headings = {normalize_heading(heading) for heading in accepted_headings}
+            if normalized_headings.isdisjoint(normalized_contract_headings):
+                severity = "error" if mode == "strict" else "warn"
+                emit(
+                    severity,
+                    skill.relative_path,
+                    f"missing agent-native contract surface: {contract_name}",
+                )
+
+        skill_directory = str(Path(skill.relative_path).parent).replace("\\", "/")
+        if skill_directory.lower() in RELOCATION_GUARD_SKILL_FILES:
+            severity = "error" if mode == "strict" else "warn"
+            body = skill.path.read_text(encoding="utf-8", errors="ignore")
+
+            if not any(pattern.search(body) for pattern in CONTEXT_POLICY_PATTERNS):
+                emit(
+                    severity,
+                    skill.relative_path,
+                    "missing context-disposition policy; important still-valid context must be relocated to references while stale, duplicated, unsafe, superseded, or low-signal text may be intentionally discarded",
+                )
+            if READ_WHEN_PATTERN.search(body) is None:
+                emit(severity, skill.relative_path, "missing `Read when:` progressive-disclosure signpost")
+            if REFERENCE_LINK_PATTERN.search(body) is None:
+                emit(severity, skill.relative_path, "missing markdown link into references/ for relocated context")
+
+            refs_dir = skill.skill_dir / "references"
+            has_ref_docs = refs_dir.is_dir() and any(
+                path.suffix in {".md", ".yaml", ".yml", ".json"} for path in refs_dir.iterdir()
+            )
+            if not has_ref_docs:
+                emit(severity, skill.relative_path, "references/ directory must contain relocation target documents")
+
+    print(f"Checked files: {len(skills)}")
+    print(f"Errors: {errors}")
+    print(f"Warnings: {warnings}")
+    print(f"Mode: {mode}")
+    if mode == "strict" and errors > 0:
+        return 1
+    print("Progressive disclosure lint passed")
+    return 0
+
+
+def cmd_lint_skill_types() -> int:
+    skills = all_skills()
+    missing = 0
+    invalid = 0
+    allowed = set(ORDERED_TYPES)
+
+    for skill in skills:
+        if not skill.skill_type:
+            print(f"MISSING skill type: {skill.relative_path}")
+            missing += 1
+            continue
+        if skill.skill_type not in allowed:
+            print(f"INVALID skill type: {skill.relative_path} -> {skill.skill_type}")
+            invalid += 1
+
+    print(f"Checked files: {len(skills)}")
+    print(f"Missing: {missing}")
+    print(f"Invalid: {invalid}")
+    if missing > 0 or invalid > 0:
+        return 1
+    print("skill-type lint passed")
+    return 0
+
+
+def cmd_write_skill_type_index(output: Path) -> int:
+    skills = all_skills()
+    counts = {skill_type: 0 for skill_type in ORDERED_TYPES}
+    grouped: dict[str, list[tuple[str, str]]] = {skill_type: [] for skill_type in ORDERED_TYPES}
+    invalid: list[tuple[str, str, str]] = []
+    total_tagged = 0
+
+    for skill in skills:
+        if not skill.skill_type:
+            continue
+        rel_dir = skill.skill_dir.relative_to(REPO_ROOT).as_posix()
+        category = str(Path(rel_dir).parent).replace("\\", "/")
+        name = skill.skill_dir.name
+        if skill.skill_type in counts:
+            counts[skill.skill_type] += 1
+            total_tagged += 1
+            grouped[skill.skill_type].append((name, category))
+        else:
+            invalid.append((name, category, skill.skill_type))
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("w", encoding="utf-8") as fh:
+        fh.write("# Skill Type Index\n\n")
+        fh.write("Generated from `metadata.skill-type` tags in skill frontmatter.\n\n")
+        fh.write("## Table of Contents\n")
+        fh.write("- [Summary](#summary)\n")
+        fh.write("- [Validation Notes](#validation-notes)\n")
+        fh.write("- [Canonical Values](#canonical-values)\n")
+        fh.write("- [Semantic Types](#semantic-types)\n\n")
+        fh.write("## Summary\n\n")
+        for skill_type in ORDERED_TYPES:
+            fh.write(f"- `{skill_type}`: {counts[skill_type]}\n")
+        fh.write(f"- `invalid`: {len(invalid)}\n")
+        fh.write(f"- `total_tagged`: {total_tagged}\n\n")
+        fh.write("## Validation Notes\n\n")
+        fh.write(f"- Source scope: `{' '.join(ROOTS)}`.\n")
+        fh.write("- Companion mode: sandbox-safe (no protected runtime path mutations).\n")
+        fh.write("- Validation command:\n")
+        fh.write("  - `bash Infrastructure/scripts/validation-and-linting/lint_skill_types.sh`\n\n")
+        fh.write("## Canonical Values\n\n")
+        for skill_type in ORDERED_TYPES:
+            fh.write(f"- `{skill_type}`\n")
+        fh.write("\n## Semantic Types\n\n")
+        for index, skill_type in enumerate(ORDERED_TYPES):
+            fh.write(f"### {title_case(skill_type)}\n\n")
+            items = sorted(grouped[skill_type])
+            if items:
+                for name, category in items:
+                    fh.write(f"- {name} ({category})\n")
+            else:
+                fh.write("- _No tagged skills yet._\n")
+            if index < len(ORDERED_TYPES) - 1 or invalid:
+                fh.write("\n")
+        if invalid:
+            fh.write("## Invalid Tags\n\n")
+            for name, category, skill_type in sorted(invalid):
+                fh.write(f"- {name} ({category}) [{skill_type}]\n")
+            fh.write("\n")
+    return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Fast repository skill scanner")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    progressive = subparsers.add_parser("lint-progressive-disclosure")
+    progressive.add_argument("--mode", choices=("strict", "warn"), default="warn")
+
+    subparsers.add_parser("lint-skill-types")
+
+    index = subparsers.add_parser("write-skill-type-index")
+    index.add_argument("--output", type=Path, required=True)
+
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    if args.command == "lint-progressive-disclosure":
+        return cmd_lint_progressive_disclosure(args.mode)
+    if args.command == "lint-skill-types":
+        return cmd_lint_skill_types()
+    if args.command == "write-skill-type-index":
+        return cmd_write_skill_type_index(args.output)
+    raise AssertionError(f"Unhandled command: {args.command}")
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

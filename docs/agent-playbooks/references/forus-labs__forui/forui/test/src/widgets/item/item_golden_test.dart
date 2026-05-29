@@ -1,0 +1,429 @@
+@Tags(['golden'])
+library;
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:forui/forui.dart';
+import '../../test_scaffold.dart';
+
+void main() {
+  group('blue screen', () {
+    testWidgets('enabled', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.blue(
+          child: FItem(
+            style: TestScaffold.blueScreen.itemStyles.base,
+            prefix: const Icon(FLucideIcons.bluetooth),
+            title: const Text('Bluetooth'),
+            subtitle: const Text('Fee, Fo, Fum'),
+            details: const Text('Duobase (5G)'),
+            suffix: const Icon(FLucideIcons.chevronRight),
+            onPress: () {},
+          ),
+        ),
+      );
+
+      await expectBlueScreen();
+    });
+
+    testWidgets('hovered', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.blue(
+          child: FItem(
+            style: TestScaffold.blueScreen.itemStyles.base,
+            prefix: const Icon(FLucideIcons.bluetooth),
+            title: const Text('Bluetooth'),
+            subtitle: const Text('Fee, Fo, Fum'),
+            details: const Text('Duobase (5G)'),
+            suffix: const Icon(FLucideIcons.chevronRight),
+            onPress: () {},
+          ),
+        ),
+      );
+
+      final gesture = await tester.createPointerGesture();
+      await tester.pump();
+
+      await gesture.moveTo(tester.getCenter(find.byType(FItem)));
+      await tester.pumpAndSettle();
+
+      await expectBlueScreen();
+    });
+
+    testWidgets('disabled', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.blue(
+          child: FItem(
+            style: TestScaffold.blueScreen.itemStyles.base,
+            enabled: false,
+            prefix: const Icon(FLucideIcons.bluetooth),
+            title: const Text('Bluetooth'),
+            subtitle: const Text('Fee, Fo, Fum'),
+            details: const Text('Duobase (5G)'),
+            suffix: const Icon(FLucideIcons.chevronRight),
+            onPress: () {},
+          ),
+        ),
+      );
+
+      await expectBlueScreen();
+    });
+  });
+
+  for (final theme in TestScaffold.themes) {
+    for (final (name, FItemVariant variant, bool enabled, bool selected) in [
+      ('enabled', .primary, true, false),
+      ('disabled', .primary, false, false),
+      ('selected', .primary, true, true),
+      ('disabled-selected', .primary, false, true),
+      ('destructive', .destructive, true, false),
+      ('destructive-disabled', .destructive, false, false),
+      ('destructive-selected', .destructive, true, true),
+    ]) {
+      testWidgets('$name - ${theme.name}', (tester) async {
+        await tester.pumpWidget(
+          TestScaffold(
+            theme: theme.data,
+            child: FItem(
+              variant: variant,
+              enabled: enabled,
+              selected: selected,
+              prefix: const Icon(FLucideIcons.bluetooth),
+              title: const Text('Lorem'),
+              subtitle: const Text('Fee, Fo'),
+              details: const Text('FL (5G)'),
+              suffix: const Icon(FLucideIcons.chevronRight),
+              onPress: () {},
+            ),
+          ),
+        );
+
+        await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/item/$name-${theme.name}.png'));
+      });
+    }
+
+    testWidgets('hovered', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          theme: theme.data,
+          child: FItem(
+            prefix: const Icon(FLucideIcons.bluetooth),
+            title: const Text('Lorem'),
+            subtitle: const Text('Fee, Fo'),
+            details: const Text('FL (5G)'),
+            suffix: const Icon(FLucideIcons.chevronRight),
+            onPress: () {},
+          ),
+        ),
+      );
+
+      final gesture = await tester.createPointerGesture();
+      await tester.pump();
+
+      await gesture.moveTo(tester.getCenter(find.byType(FItem)));
+      await tester.pumpAndSettle();
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/item/hovered-${theme.name}.png'));
+    });
+
+    testWidgets('pressed', (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+      await tester.pumpWidget(
+        TestScaffold(
+          theme: theme.data,
+          child: FItem(
+            prefix: const Icon(FLucideIcons.bluetooth),
+            title: const Text('Lorem'),
+            subtitle: const Text('Fee, Fo'),
+            details: const Text('FL (5G)'),
+            suffix: const Icon(FLucideIcons.chevronRight),
+            onPress: () {},
+          ),
+        ),
+      );
+
+      await tester.longPress(find.byType(FItem));
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/item/pressed-${theme.name}.png'));
+
+      await tester.pumpAndSettle();
+
+      debugDefaultTargetPlatformOverride = null;
+    });
+
+    testWidgets('RTL', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          theme: theme.data,
+          textDirection: TextDirection.rtl,
+          child: FItem(
+            autofocus: true,
+            prefix: const Icon(FLucideIcons.bluetooth),
+            title: const Text('Lorem'),
+            subtitle: const Text('Fee, Fo'),
+            details: const Text('FL (5G)'),
+            suffix: const Icon(FLucideIcons.chevronRight),
+            onPress: () {},
+          ),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/item/rtl-${theme.name}.png'));
+    });
+
+    testWidgets('focused', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          theme: theme.data,
+          child: FItem(
+            autofocus: true,
+            prefix: const Icon(FLucideIcons.bluetooth),
+            title: const Text('Lorem'),
+            subtitle: const Text('Fee, Fo'),
+            details: const Text('FL (5G)'),
+            suffix: const Icon(FLucideIcons.chevronRight),
+            onPress: () {},
+          ),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/item/focused-${theme.name}.png'));
+    });
+  }
+
+  testWidgets('does not hover', (tester) async {
+    await tester.pumpWidget(
+      TestScaffold(
+        child: FItem(
+          prefix: const Icon(FLucideIcons.bluetooth),
+          title: const Text('Bluetooth'),
+          details: const Text('FL (5G)'),
+          suffix: const Icon(FLucideIcons.chevronRight),
+        ),
+      ),
+    );
+
+    final gesture = await tester.createPointerGesture();
+    await tester.pump();
+
+    await gesture.moveTo(tester.getCenter(find.byType(FItem)));
+    await tester.pumpAndSettle();
+
+    await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/item/unhoverable.png'));
+  });
+
+  group('FItem', () {
+    testWidgets('utilize all space', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 225),
+            child: FItem(
+              prefix: const Icon(FLucideIcons.bluetooth),
+              title: const Text('Bluetooth'),
+              details: const Text('FL (5G)'),
+              suffix: const Icon(FLucideIcons.chevronRight),
+              onPress: () {},
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/item/utilize-all-space.png'));
+    });
+
+    testWidgets('minimal', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          child: FItem(title: const Text('Bluetooth'), onPress: () {}),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/item/minimal.png'));
+    });
+
+    testWidgets('no subtitle', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          child: FItem(
+            prefix: const Icon(FLucideIcons.bluetooth),
+            title: const Text('Bluetooth'),
+            details: const Text('FL (5G)'),
+            suffix: const Icon(FLucideIcons.chevronRight),
+            onPress: () {},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/item/no-subtitle.png'));
+    });
+
+    testWidgets('no suffix icon', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          child: FItem(
+            prefix: const Icon(FLucideIcons.bluetooth),
+            title: const Text('Bluetooth'),
+            details: const Text('FL (5G)'),
+            onPress: () {},
+          ),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/item/no-suffix.png'));
+    });
+
+    testWidgets('prioritize title', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          child: SizedBox(
+            width: 300,
+            child: Padding(
+              padding: const .all(8.0),
+              child: FItem(
+                prefix: const Icon(FLucideIcons.bluetooth),
+                title: const Text('L                               ong'),
+                details: const Text('FL (5G)'),
+                suffix: const Icon(FLucideIcons.chevronRight),
+                onPress: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/item/prioritize-title.png'));
+    });
+
+    testWidgets('prioritize subtitle', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          child: SizedBox(
+            width: 300,
+            child: Padding(
+              padding: const .all(8.0),
+              child: FItem(
+                prefix: const Icon(FLucideIcons.bluetooth),
+                title: const Text('Title'),
+                subtitle: const Text('L                                     ong'),
+                details: const Text('FL (5G)'),
+                suffix: const Icon(FLucideIcons.chevronRight),
+                onPress: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/item/prioritize-subtitle.png'));
+    });
+
+    testWidgets('prioritize details', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          child: SizedBox(
+            width: 300,
+            child: Padding(
+              padding: const .all(8.0),
+              child: FItem(
+                prefix: const Icon(FLucideIcons.bluetooth),
+                title: const Text('Title'),
+                subtitle: const Text('L                                     ong'),
+                details: const FSwitch(),
+                suffix: const Icon(FLucideIcons.chevronRight),
+                onPress: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/item/prioritize-details.png'));
+    });
+
+    group('intrinsic width', () {
+      setUp(() => debugCheckIntrinsicSizes = true);
+      tearDown(() => debugCheckIntrinsicSizes = false);
+
+      testWidgets('all children', (tester) async {
+        await tester.pumpWidget(
+          TestScaffold(
+            child: IntrinsicWidth(
+              child: FItem(
+                prefix: const Icon(FLucideIcons.bluetooth),
+                title: const Text('Bluetooth'),
+                subtitle: const Text('Fee, Fo, Fum'),
+                details: const Text('FL (5G)'),
+                suffix: const Icon(FLucideIcons.chevronRight),
+                onPress: () {},
+              ),
+            ),
+          ),
+        );
+
+        await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/item/intrinsic-width-all.png'));
+      });
+
+      testWidgets('prefixed', (tester) async {
+        await tester.pumpWidget(
+          TestScaffold(
+            child: IntrinsicWidth(
+              child: FItem(prefix: const Icon(FLucideIcons.bluetooth), title: const Text('Bluetooth'), onPress: () {}),
+            ),
+          ),
+        );
+
+        await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/item/intrinsic-width-prefixed.png'));
+      });
+
+      testWidgets('minimal', (tester) async {
+        await tester.pumpWidget(
+          TestScaffold(
+            child: IntrinsicWidth(
+              child: FItem(title: const Text('Bluetooth'), onPress: () {}),
+            ),
+          ),
+        );
+
+        await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/item/intrinsic-width-minimal.png'));
+      });
+    });
+  });
+
+  group('FItem.raw', () {
+    testWidgets('minimal', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          child: FItem.raw(child: const Text('Bluetooth'), onPress: () {}),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/raw/minimal.png'));
+    });
+
+    testWidgets('all', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          child: FItem.raw(prefix: const Icon(FLucideIcons.bluetooth), child: const Text('Bluetooth'), onPress: () {}),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/raw/all.png'));
+    });
+
+    testWidgets('expanded child', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          child: FItem.raw(prefix: const Icon(FLucideIcons.bluetooth), child: const FTextField()),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('item/raw/expanded.png'));
+    });
+  });
+}

@@ -1,0 +1,436 @@
+{
+  "actor_type": "agent",
+  "artifacts": [
+    {
+      "actor_type": "agent",
+      "artifact_id": "runtime-card-autofix-codex",
+      "artifact_type": "runtime_card",
+      "consumer_contract": "RuntimeCard v1 consumed by validate_runtime_cards.py and governed closeout.",
+      "generated_by": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+      "mutation_scope": "evidence_write",
+      "path": ".harness/evidence/runtime-proof/autofix/codex/runtime-card.json",
+      "source_identity": {
+        "source_paths": [
+          "Skills/agent-ops/autofix/SKILL.md",
+          "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+          "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+        ]
+      },
+      "validation_status": "pass",
+      "visibility_status": "user_observable",
+      "workspace_root": "${WORKSPACE_ROOT}"
+    },
+    {
+      "actor_type": "agent",
+      "artifact_id": "runtime-probe-autofix-codex",
+      "artifact_type": "verifier_output",
+      "consumer_contract": "Probe JSON records the raw command-handle proof used by the RuntimeCard.",
+      "generated_by": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+      "mutation_scope": "evidence_write",
+      "path": ".harness/evidence/runtime-proof/autofix/codex/probe.json",
+      "source_identity": {
+        "source_paths": [
+          "Skills/agent-ops/autofix/SKILL.md",
+          "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+          "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+        ]
+      },
+      "validation_status": "pass",
+      "visibility_status": "user_observable",
+      "workspace_root": "${WORKSPACE_ROOT}"
+    }
+  ],
+  "card_id": "runtime-card-autofix-codex",
+  "command_handle": "$autofix",
+  "created_at": "2026-05-25T20:13:17Z",
+  "evidence_receipts": [
+    {
+      "artifact_path": ".harness/evidence/runtime-proof/autofix/codex/runtime-card.json",
+      "blocker_class": "none",
+      "claim": "$autofix is reachable in the Codex runtime.",
+      "claim_status": "pass",
+      "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+      "evidence_type": "command",
+      "exit_code": 0,
+      "observed_at": "2026-05-25T20:13:17Z",
+      "probe_artifact_path": ".harness/evidence/runtime-proof/autofix/codex/probe.json",
+      "probe_command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+      "probe_exit_code": 0,
+      "receipt_id": "runtime-proof-autofix-codex",
+      "runtime_status": "implemented_enforced",
+      "runtime_target": "codex",
+      "source_paths": [
+        "Skills/agent-ops/autofix/SKILL.md",
+        "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+        "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      ],
+      "verifier": "ask.skills.proof"
+    }
+  ],
+  "limitations": [
+    {
+      "class": "skill_invocation_not_asserted",
+      "message": "Codex session metadata was observed for this workspace; this proof still verifies command-handle reachability rather than a dedicated skill tool invocation event. Agents observability counters are attached when available but are not treated as per-skill invocation proof."
+    }
+  ],
+  "mutation_scope": "evidence_write",
+  "permission_profile": {
+    "filesystem": "workspace evidence write",
+    "network": "not required"
+  },
+  "recovery_plan": {
+    "expected_outcome": "Operator can rerun the proof command and inspect schema-valid runtime evidence.",
+    "next_commands": [
+      {
+        "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
+        "expected_outcome": "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation.",
+        "permission_profile": {
+          "filesystem": "read workspace and user runtime links",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Workspace rooted projection validates cleanly."
+        ]
+      },
+      {
+        "command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+        "expected_outcome": "Refreshes .agents/skills command handles from canonical sources.",
+        "permission_profile": {
+          "filesystem": "write workspace runtime projection",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Canonical skill sources are ready to project."
+        ]
+      },
+      {
+        "command": "./bin/ask skills sync --scope user --projection rooted --json --robot",
+        "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
+        "permission_profile": {
+          "filesystem": "write home-directory runtime links",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Dry-run output is acceptable to the operator."
+        ]
+      },
+      {
+        "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+        "expected_outcome": "Updates runtime evidence with pass or a narrower blocked_runtime reason.",
+        "permission_profile": {
+          "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
+          "network": "not required"
+        },
+        "preconditions": [
+          "User runtime link or handle bridge now points at the workspace projection."
+        ]
+      }
+    ],
+    "permission_profile": {
+      "filesystem": "workspace evidence write and user runtime link read",
+      "network": "not required"
+    },
+    "preconditions": [
+      "Run workspace and user skill sync if the runtime link or command handle is absent."
+    ],
+    "reason": "$autofix is reachable in the Codex runtime.",
+    "recovery_status": "implemented_enforced"
+  },
+  "runtime_diagnostics": {
+    "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+    "failed_gate": null,
+    "missing_command_handles": [],
+    "recovery_commands": [
+      {
+        "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
+        "expected_outcome": "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation.",
+        "kind": "preview_user_runtime_sync",
+        "permission_profile": {
+          "filesystem": "read workspace and user runtime links",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Workspace rooted projection validates cleanly."
+        ]
+      },
+      {
+        "command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+        "expected_outcome": "Refreshes .agents/skills command handles from canonical sources.",
+        "kind": "refresh_workspace_projection",
+        "permission_profile": {
+          "filesystem": "write workspace runtime projection",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Canonical skill sources are ready to project."
+        ]
+      },
+      {
+        "command": "./bin/ask skills sync --scope user --projection rooted --json --robot",
+        "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
+        "kind": "apply_user_runtime_sync",
+        "permission_profile": {
+          "filesystem": "write home-directory runtime links",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Dry-run output is acceptable to the operator."
+        ]
+      },
+      {
+        "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+        "expected_outcome": "Updates runtime evidence with pass or a narrower blocked_runtime reason.",
+        "kind": "rerun_runtime_proof",
+        "permission_profile": {
+          "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
+          "network": "not required"
+        },
+        "preconditions": [
+          "User runtime link or handle bridge now points at the workspace projection."
+        ]
+      }
+    ],
+    "recovery_risk": "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying.",
+    "runtime_modes": {
+      "agents_user_runtime": "root_symlink",
+      "codex_user_runtime": "root_symlink"
+    },
+    "schema_version": "command-handle-runtime-diagnostics.v1",
+    "selected_runtime_target": "codex"
+  },
+  "runtime_session": {
+    "actor_type": "agent",
+    "created_at": "2026-05-25T20:13:17Z",
+    "latest_turn_id": "019e60b5-aa7f-7793-9b41-29e821bfd54f",
+    "observability": {
+      "codex_log_presence": true,
+      "last_ingest_at": "2026-05-25T20:13:16.563757Z",
+      "last_logs_ingest_at": "2026-05-25T20:13:16.563757Z",
+      "last_traces_ingest_at": "2026-05-25T20:12:33.806577Z",
+      "logs_freshness": "fresh",
+      "overall_status": "degraded",
+      "plugin_backed_skill_invocation_count": 0,
+      "reasons": [
+        "auth ingest errors recorded",
+        "claude exists historically but is absent from live signal presence"
+      ],
+      "skill_invocation_event_count": 0,
+      "source": "agents_otel_stats",
+      "stale_signals": [
+        {
+          "freshness": "stale",
+          "last_ingest_at": "2026-05-16T12:22:20.991212Z",
+          "signal": "metrics"
+        }
+      ],
+      "stats_path": "${HOME}/.agents/otel-collector/data/processed/stats.json",
+      "traces_freshness": "fresh"
+    },
+    "observability_sources": [
+      "agents_otel_stats"
+    ],
+    "rollout_path": "${HOME}/.codex/sessions/2026/05/24/rollout-2026-05-24T18-11-11-019e5af8-214a-70e2-824d-40574af940e8.jsonl",
+    "runtime_status": "implemented_enforced",
+    "runtime_target": "codex",
+    "session_id": "019e5af8-214a-70e2-824d-40574af940e8",
+    "source": "codex_rollout_jsonl",
+    "visibility_status": "user_observable",
+    "workspace_root": "${WORKSPACE_ROOT}"
+  },
+  "runtime_status": "implemented_enforced",
+  "runtime_target": "codex",
+  "schema_version": 1,
+  "skill_handle": "autofix",
+  "thread_runs": [
+    {
+      "cwd": "${WORKSPACE_ROOT}",
+      "latest_turn_id": "019e60b5-aa7f-7793-9b41-29e821bfd54f",
+      "observed_at": "2026-05-25T20:13:17Z",
+      "originator": "Codex Desktop",
+      "rollout_path": "${HOME}/.codex/sessions/2026/05/24/rollout-2026-05-24T18-11-11-019e5af8-214a-70e2-824d-40574af940e8.jsonl",
+      "runtime_status": "implemented_enforced",
+      "runtime_target": "codex",
+      "session_id": "019e5af8-214a-70e2-824d-40574af940e8",
+      "source": "codex_rollout_jsonl",
+      "thread_id": "019e5af8-214a-70e2-824d-40574af940e8",
+      "thread_source": "user"
+    },
+    {
+      "codex_log_presence": true,
+      "last_logs_ingest_at": "2026-05-25T20:13:16.563757Z",
+      "last_traces_ingest_at": "2026-05-25T20:12:33.806577Z",
+      "observed_at": "2026-05-25T20:13:17Z",
+      "overall_status": "degraded",
+      "runtime_status": "implemented_enforced",
+      "runtime_target": "codex",
+      "source": "agents_otel_stats",
+      "stats_path": "${HOME}/.agents/otel-collector/data/processed/stats.json",
+      "thread_id": "agents-otel-observability"
+    }
+  ],
+  "turn_events": [
+    {
+      "cwd": "${WORKSPACE_ROOT}",
+      "event_type": "turn_context_observed",
+      "observed_at": "2026-05-24T17:11:15.349Z",
+      "runtime_target": "codex",
+      "source_line": 5,
+      "turn_id": "019e5af8-2ab7-7963-88c3-3477c24b4111"
+    },
+    {
+      "event_type": "task_complete",
+      "observed_at": "2026-05-24T17:15:20.099Z",
+      "runtime_target": "codex",
+      "source_line": 98,
+      "turn_id": "019e5af8-2ab7-7963-88c3-3477c24b4111"
+    },
+    {
+      "cwd": "${WORKSPACE_ROOT}",
+      "event_type": "turn_context_observed",
+      "observed_at": "2026-05-24T17:15:40.989Z",
+      "runtime_target": "codex",
+      "source_line": 101,
+      "turn_id": "019e5afc-3d1f-72b2-9b27-631796e00260"
+    },
+    {
+      "event_type": "patch_apply_end",
+      "observed_at": "2026-05-24T17:25:46.694Z",
+      "runtime_target": "codex",
+      "source_line": 141,
+      "turn_id": "019e5afc-3d1f-72b2-9b27-631796e00260"
+    },
+    {
+      "event_type": "task_complete",
+      "observed_at": "2026-05-24T17:26:10.684Z",
+      "runtime_target": "codex",
+      "source_line": 154,
+      "turn_id": "019e5afc-3d1f-72b2-9b27-631796e00260"
+    },
+    {
+      "cwd": "${WORKSPACE_ROOT}",
+      "event_type": "turn_context_observed",
+      "observed_at": "2026-05-24T17:31:36.776Z",
+      "runtime_target": "codex",
+      "source_line": 157,
+      "turn_id": "019e5b0a-d245-7da3-9e6f-5544ae9288de"
+    },
+    {
+      "cwd": "${WORKSPACE_ROOT}",
+      "event_type": "turn_context_observed",
+      "observed_at": "2026-05-24T17:34:43.070Z",
+      "runtime_target": "codex",
+      "source_line": 203,
+      "turn_id": "019e5b0a-d245-7da3-9e6f-5544ae9288de"
+    },
+    {
+      "event_type": "patch_apply_end",
+      "observed_at": "2026-05-24T17:40:36.865Z",
+      "runtime_target": "codex",
+      "source_line": 296,
+      "turn_id": "019e5b0a-d245-7da3-9e6f-5544ae9288de"
+    },
+    {
+      "codex_log_presence": true,
+      "event_type": "agents_observability_stats_observed",
+      "observed_at": "2026-05-25T20:13:17Z",
+      "overall_status": "degraded",
+      "plugin_backed_skill_invocation_count": 0,
+      "runtime_target": "codex",
+      "skill_invocation_event_count": 0,
+      "source": "agents_otel_stats",
+      "stats_path": "${HOME}/.agents/otel-collector/data/processed/stats.json"
+    }
+  ],
+  "verifier_results": [
+    {
+      "failed_check_id": null,
+      "gates": {
+        "agents_user_command_handle_exists": true,
+        "agents_user_command_handle_points_to_workspace": true,
+        "agents_user_link": true,
+        "agents_user_runtime_ready": true,
+        "codex_user_command_handle_exists": true,
+        "codex_user_command_handle_points_to_workspace": true,
+        "codex_user_link": true,
+        "codex_user_runtime_ready": true,
+        "generated_command_handle_check": true,
+        "resolver": true,
+        "user_runtime_ready": true,
+        "workspace_command_handle_exists": true
+      },
+      "required_gates": [
+        "resolver",
+        "generated_command_handle_check",
+        "workspace_command_handle_exists",
+        "codex_user_runtime_ready"
+      ],
+      "runtime_diagnostics": {
+        "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+        "failed_gate": null,
+        "missing_command_handles": [],
+        "recovery_commands": [
+          {
+            "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
+            "expected_outcome": "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation.",
+            "kind": "preview_user_runtime_sync",
+            "permission_profile": {
+              "filesystem": "read workspace and user runtime links",
+              "network": "not required"
+            },
+            "preconditions": [
+              "Workspace rooted projection validates cleanly."
+            ]
+          },
+          {
+            "command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+            "expected_outcome": "Refreshes .agents/skills command handles from canonical sources.",
+            "kind": "refresh_workspace_projection",
+            "permission_profile": {
+              "filesystem": "write workspace runtime projection",
+              "network": "not required"
+            },
+            "preconditions": [
+              "Canonical skill sources are ready to project."
+            ]
+          },
+          {
+            "command": "./bin/ask skills sync --scope user --projection rooted --json --robot",
+            "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
+            "kind": "apply_user_runtime_sync",
+            "permission_profile": {
+              "filesystem": "write home-directory runtime links",
+              "network": "not required"
+            },
+            "preconditions": [
+              "Dry-run output is acceptable to the operator."
+            ]
+          },
+          {
+            "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+            "expected_outcome": "Updates runtime evidence with pass or a narrower blocked_runtime reason.",
+            "kind": "rerun_runtime_proof",
+            "permission_profile": {
+              "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
+              "network": "not required"
+            },
+            "preconditions": [
+              "User runtime link or handle bridge now points at the workspace projection."
+            ]
+          }
+        ],
+        "recovery_risk": "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying.",
+        "runtime_modes": {
+          "agents_user_runtime": "root_symlink",
+          "codex_user_runtime": "root_symlink"
+        },
+        "schema_version": "command-handle-runtime-diagnostics.v1",
+        "selected_runtime_target": "codex"
+      },
+      "runtime_target": "codex",
+      "status": "pass",
+      "verifier": "ask.skills.proof"
+    }
+  ],
+  "visibility_status": "user_observable",
+  "workspace_root": "${WORKSPACE_ROOT}"
+}

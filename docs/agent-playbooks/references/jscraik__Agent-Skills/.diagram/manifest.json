@@ -1,0 +1,87 @@
+{
+  "generatedAt": "2026-03-15T20:11:52.423Z",
+  "rootPath": ".",
+  "diagramDir": ".diagram",
+  "diagrams": [
+    {
+      "type": "architecture",
+      "file": "architecture.mmd",
+      "outputPath": ".diagram/architecture.mmd",
+      "lines": 451,
+      "bytes": 33362,
+      "isPlaceholder": false
+    },
+    {
+      "type": "auth",
+      "file": "auth.mmd",
+      "outputPath": ".diagram/auth.mmd",
+      "lines": 162,
+      "bytes": 6684,
+      "isPlaceholder": false
+    },
+    {
+      "type": "class",
+      "file": "class.mmd",
+      "outputPath": ".diagram/class.mmd",
+      "lines": 62,
+      "bytes": 2222,
+      "isPlaceholder": false
+    },
+    {
+      "type": "database",
+      "file": "database.mmd",
+      "outputPath": ".diagram/database.mmd",
+      "lines": 297,
+      "bytes": 17193,
+      "isPlaceholder": false
+    },
+    {
+      "type": "dependency",
+      "file": "dependency.mmd",
+      "outputPath": ".diagram/dependency.mmd",
+      "lines": 2498,
+      "bytes": 236135,
+      "isPlaceholder": false
+    },
+    {
+      "type": "events",
+      "file": "events.mmd",
+      "outputPath": ".diagram/events.mmd",
+      "lines": 52,
+      "bytes": 3167,
+      "isPlaceholder": false
+    },
+    {
+      "type": "flow",
+      "file": "flow.mmd",
+      "outputPath": ".diagram/flow.mmd",
+      "lines": 21,
+      "bytes": 925,
+      "isPlaceholder": false
+    },
+    {
+      "type": "security",
+      "file": "security.mmd",
+      "outputPath": ".diagram/security.mmd",
+      "lines": 190,
+      "bytes": 9399,
+      "isPlaceholder": false
+    },
+    {
+      "type": "sequence",
+      "file": "sequence.mmd",
+      "outputPath": ".diagram/sequence.mmd",
+      "lines": 3,
+      "bytes": 54,
+      "isPlaceholder": false
+    },
+    {
+      "type": "user",
+      "file": "user.mmd",
+      "outputPath": ".diagram/user.mmd",
+      "lines": 138,
+      "bytes": 6078,
+      "isPlaceholder": false
+    }
+  ]
+}

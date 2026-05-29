@@ -1,0 +1,16 @@
+name: knobs_example
+description: An example project that demonstrates how to knobs.
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.0
+  flutter: ^3.41.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  widgetbook: ^3.23.0
+
+flutter:
+  uses-material-design: true

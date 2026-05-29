@@ -1,0 +1,313 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:forui/forui.dart';
+import '../../test_scaffold.dart';
+
+void main() {
+  group('lifted', () {
+    testWidgets('lifted', (tester) async {
+      var value = const TextEditingValue(text: 'initial');
+      TextEditingValue? received;
+
+      Widget buildWidget() => TestScaffold.app(
+        child: FTextField(
+          control: .lifted(value: value, onChange: (v) => received = v),
+        ),
+      );
+
+      await tester.pumpWidget(buildWidget());
+
+      expect(find.text('initial'), findsOneWidget);
+
+      await tester.enterText(find.byType(EditableText), 'typed');
+      await tester.pumpAndSettle();
+      expect(received?.text, 'typed');
+
+      value = const TextEditingValue(text: 'external');
+      await tester.pumpWidget(buildWidget());
+      await tester.pumpAndSettle();
+      expect(find.text('external'), findsOneWidget);
+    });
+  });
+
+  group('managed', () {
+    testWidgets('onChange called', (tester) async {
+      TextEditingValue? lastValue;
+
+      await tester.pumpWidget(
+        TestScaffold.app(
+          child: FTextField(control: .managed(onChange: (value) => lastValue = value)),
+        ),
+      );
+
+      await tester.enterText(find.byType(EditableText), 'hello');
+      await tester.pumpAndSettle();
+
+      expect(lastValue?.text, 'hello');
+    });
+  });
+
+  group('embedding', () {
+    testWidgets('embedded in CupertinoApp', (tester) async {
+      await tester.pumpWidget(CupertinoApp(home: TestScaffold(child: const FTextField())));
+
+      expect(tester.takeException(), null);
+    });
+
+    testWidgets('embedded in MaterialApp', (tester) async {
+      await tester.pumpWidget(MaterialApp(home: TestScaffold(child: const FTextField())));
+
+      expect(tester.takeException(), null);
+    });
+
+    testWidgets('not embedded in any App', (tester) async {
+      await tester.pumpWidget(TestScaffold(child: const FTextField()));
+
+      expect(tester.takeException(), null);
+    });
+
+    testWidgets('non-English Locale', (tester) async {
+      await tester.pumpWidget(
+        Localizations(
+          locale: const Locale('fr', 'FR'),
+          delegates: const [
+            DefaultMaterialLocalizations.delegate,
+            DefaultCupertinoLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+          ],
+          child: TestScaffold(theme: FThemes.neutral.light.touch, child: const FTextField()),
+        ),
+      );
+
+      expect(tester.takeException(), null);
+    });
+  });
+
+  group('clearable', () {
+    testWidgets('no icon when clearable return false', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: FThemes.neutral.light.touch,
+          child: FTextField(clearable: (_) => false),
+        ),
+      );
+
+      expect(find.bySemanticsLabel('Clear'), findsNothing);
+    });
+
+    testWidgets('no icon when disabled', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: FThemes.neutral.light.touch,
+          child: FTextField(enabled: false, clearable: (_) => true),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.bySemanticsLabel('Clear'), findsNothing);
+    });
+
+    testWidgets('suffix & no icon when disabled', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: FThemes.neutral.light.touch,
+          child: FTextField(enabled: false, clearable: (_) => true, suffixBuilder: (_, _, _) => const SizedBox()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.bySemanticsLabel('Clear'), findsNothing);
+    });
+
+    testWidgets('clears text-field', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: FThemes.neutral.light.touch,
+          child: FTextField(
+            control: const .managed(initial: TextEditingValue(text: 'Testing')),
+            clearable: (value) => value.text.isNotEmpty,
+          ),
+        ),
+      );
+
+      expect(find.text('Testing'), findsOneWidget);
+
+      await tester.tap(find.bySemanticsLabel('Clear'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Testing'), findsNothing);
+    });
+
+    testWidgets('shows clear icon when controller text changes while focused', (tester) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: FThemes.neutral.light.touch,
+          child: FTextField(
+            control: .managed(controller: controller),
+            clearable: (value) => value.text.isNotEmpty,
+          ),
+        ),
+      );
+
+      // Focus the field first
+      await tester.tap(find.byType(EditableText));
+      await tester.pumpAndSettle();
+
+      expect(find.bySemanticsLabel('Clear'), findsNothing);
+
+      // Programmatically set text while already focused
+      controller.text = 'hello';
+      await tester.pumpAndSettle();
+
+      expect(find.bySemanticsLabel('Clear'), findsOneWidget);
+    });
+
+    testWidgets('suffix & clears text-field', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: FThemes.neutral.light.touch,
+          child: FTextField(
+            control: const .managed(initial: TextEditingValue(text: 'Testing')),
+            clearable: (value) => value.text.isNotEmpty,
+            suffixBuilder: (_, _, _) => const SizedBox(),
+          ),
+        ),
+      );
+
+      expect(find.text('Testing'), findsOneWidget);
+
+      await tester.tap(find.bySemanticsLabel('Clear'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Testing'), findsNothing);
+    });
+  });
+
+  testWidgets('email - localized', (tester) async {
+    await tester.pumpWidget(TestScaffold.app(locale: const Locale('zh'), child: const FTextField.email()));
+
+    expect(find.text('电子邮件'), findsOneWidget);
+  });
+
+  testWidgets('password - localized', (tester) async {
+    await tester.pumpWidget(TestScaffold.app(locale: const Locale('zh'), child: FTextField.password()));
+
+    expect(find.text('密码'), findsOneWidget);
+  });
+
+  testWidgets('expands', (tester) async {
+    await tester.pumpWidget(TestScaffold.app(child: const FTextField(maxLines: null, expands: true)));
+
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('error does not cause overlay to fail', (tester) async {
+    await tester.pumpWidget(
+      TestScaffold.app(
+        child: FTextField(
+          builder: (_, _, _, child) => FPopover(
+            control: const .managed(initial: true),
+            popoverBuilder: (_, _) => Container(height: 100, width: 100, color: Colors.blue),
+            child: child,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(
+      TestScaffold.app(
+        child: FTextField(
+          error: Container(height: 100, width: 100, color: Colors.red),
+          builder: (_, _, _, child) => FPopover(
+            control: const .managed(initial: true),
+            popoverBuilder: (_, _) => Container(height: 100, width: 100, color: Colors.blue),
+            child: child,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('updates error when error changes', (tester) async {
+    await tester.pumpWidget(TestScaffold.app(child: const FTextField(error: Text('Error A'))));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Error A'), findsOneWidget);
+    expect(find.text('Error B'), findsNothing);
+
+    await tester.pumpWidget(TestScaffold.app(child: const FTextField(error: Text('Error B'))));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Error A'), findsNothing);
+    expect(find.text('Error B'), findsOneWidget);
+  });
+
+  group('design system', skip: !Platform.isMacOS, () {
+    for (final (theme, themeName, sizes) in [
+      (
+        FThemes.neutral.light.desktop,
+        'desktop',
+        [
+          (FTextFieldSizeVariant.sm, 'sm', FThemes.neutral.light.desktop.style.sizes.field.sm),
+          (FTextFieldSizeVariant.md, 'md', FThemes.neutral.light.desktop.style.sizes.field.md),
+          (FTextFieldSizeVariant.lg, 'lg', FThemes.neutral.light.desktop.style.sizes.field.lg),
+        ],
+      ),
+      (
+        FThemes.neutral.light.touch,
+        'touch',
+        [
+          (FTextFieldSizeVariant.sm, 'sm', FThemes.neutral.light.touch.style.sizes.field.sm),
+          (FTextFieldSizeVariant.md, 'md', FThemes.neutral.light.touch.style.sizes.field.md),
+          (FTextFieldSizeVariant.lg, 'lg', FThemes.neutral.light.touch.style.sizes.field.lg),
+        ],
+      ),
+    ]) {
+      for (final (size, name, height) in sizes) {
+        testWidgets('$themeName $name default text field has consistent height ($height)', (tester) async {
+          await tester.pumpWidget(
+            TestScaffold.app(
+              theme: theme,
+              child: FTextField(size: size),
+            ),
+          );
+
+          expect(tester.getSize(find.byType(FTextField)).height, closeTo(height, 0.001));
+        });
+
+        testWidgets('$themeName $name email text field has consistent height ($height)', (tester) async {
+          await tester.pumpWidget(
+            TestScaffold.app(
+              theme: theme,
+              child: FTextField.email(size: size, label: null),
+            ),
+          );
+
+          expect(tester.getSize(find.byType(FTextField)).height, closeTo(height, 0.001));
+        });
+
+        testWidgets('$themeName $name password text field has consistent height ($height)', (tester) async {
+          await tester.pumpWidget(
+            TestScaffold.app(
+              theme: theme,
+              child: FTextField.password(size: size, label: null, key: const Key('password')),
+            ),
+          );
+
+          expect(tester.getSize(find.byKey(const Key('password'))).height, closeTo(height, 0.001));
+        });
+      }
+    }
+  });
+}

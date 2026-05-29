@@ -1,0 +1,29 @@
+# `genai_primitives` Changelog
+
+## 0.2.4-dev001
+
+- **Feature**: Use `log` instead of `print` in example ([#546dab9be](https://github.com/flutter/genui/commit/546dab9be)).
+
+## 0.2.3
+
+- **Feature**: Add methods `copyWith` and `concatenate` to `ChatMessage` (#760).
+
+## 0.2.2
+
+- **Feature**: Define `FinishStatus` and add `finishStatus` field to `ChatMessage` (#698).
+
+## 0.2.1
+
+- Update README.md (#693).
+
+## 0.2.0
+
+- **BREAKING**: Rename `Part` to `StandardPart` and `BasePart` to `Part` (#683).
+
+## 0.1.0
+
+- **BREAKING**: Differentiate `Part(sealed)` and `BasePart(extendable)` (#680).
+
+## 0.0.1
+
+- Initial release

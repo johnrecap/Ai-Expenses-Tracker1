@@ -1,0 +1,409 @@
+# Harness Engineering Plan Artifact Templates
+
+Read when: you are writing or verifying the actual plan artifact selected by `he-plan`.
+
+## Table of Contents
+- [General plan template](#general-plan-template)
+- [Template scaffold workflow](#template-scaffold-workflow)
+- [Plan depth guidance](#plan-depth-guidance)
+- [Deep-plan extensions](#deep-plan-extensions)
+- [Dedicated UI plan template](#dedicated-ui-plan-template)
+- [Execution Ledger](#execution-ledger)
+- [Verification matrix](#verification-matrix)
+- [Handoff options](#handoff-options)
+
+## Template scaffold workflow
+
+Canonical scaffold files for this skill:
+- `plan.md.tmpl`
+- rendered baseline: `Infrastructure/references/plan-template.md`
+
+Render / refresh:
+
+```bash
+python3 Plugins/harness-engineering/skills/he-plan/Infrastructure/scripts/render_plan_template.py
+python3 Plugins/harness-engineering/skills/he-plan/Infrastructure/scripts/check_plan_template_drift.py --update
+```
+
+Verify no drift:
+
+```bash
+python3 Plugins/harness-engineering/skills/he-plan/Infrastructure/scripts/check_plan_template_drift.py
+```
+
+Validate tracked-work traceability:
+
+```bash
+./bin/ask python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/plan/<filename>.md
+```
+
+## General plan template
+Preferred path:
+- `.harness/plan/YYYY-MM-DD-<type>-<descriptive-name>-plan.md`
+
+Suggested frontmatter:
+
+```yaml
+---
+schema_version: 1
+title: <plan title>
+type: feat|fix|refactor
+status: active
+date: YYYY-MM-DD
+origin: .harness/brainstorm/YYYY-MM-DD-<topic>-requirements.md # if applicable; resume legacy *-brainstorm.md only when that is the source artifact
+requirements: .harness/brainstorm/YYYY-MM-DD-<topic>-requirements.md  # if applicable
+spec: .harness/specs/YYYY-MM-DD-<topic>-spec.md                 # if applicable
+source_spec: .harness/specs/YYYY-MM-DD-<topic>-spec.md          # compatibility alias if repo uses it
+ui_spec: .harness/specs/YYYY-MM-DD-<name>-ui-spec.md         # if applicable
+parent_plan: .harness/plan/YYYY-MM-DD-<name>-plan.md           # if applicable
+deepened: YYYY-MM-DD                                        # if applicable
+linear_project: TEAM|project-slug                           # required for non-trivial tracked work
+linear_issue: ABC-123                                       # required for non-trivial tracked work
+linear_parent: ABC-100                                      # if applicable
+linear_children: []                                         # if applicable
+linear_status: Todo|In Progress|In Review|Done
+linear_comment_required: true
+branch: feature/ABC-123-short-name                          # planned or current branch
+pr: pending                                                 # PR URL/number after created
+traceability_required: true
+plan_route: fresh|resume|deepen
+plan_depth: lightweight|standard|deep
+---
+```
+
+Required sections:
+- Overview
+- Problem Frame
+- Linear Work Item Contract
+- Requirements Trace
+- Linear / Spec / Plan / PR Traceability
+- Scope Boundaries
+- Context & Research
+- Key Technical Decisions
+- Open Questions
+- Implementation Units
+- System-Wide Impact
+- Risks & Dependencies
+- Documentation / Operational Notes
+- Execution Ledger (Planning Mode)
+- Sources & References
+
+Optional when materially useful:
+- High-Level Technical Design
+- Alternative Approaches Considered
+- Success Metrics
+- Dependencies / Prerequisites
+- Risk Analysis & Mitigation
+- Phased Delivery
+- Documentation Plan
+- Operational / Rollout Notes
+- Future Considerations
+
+General-plan rules:
+- every phase heading carries a stable `P`-ID prefix
+- every acceptance item carries a stable `AC`-ID prefix
+- every phase has explicit exit criteria
+- every `AC` item maps to a governing spec constraint, brainstorm decision, or invariant
+- non-trivial tracked work includes the Linear Work Item Contract and traceability table
+- specs with stable `SA` IDs include an `SA` to `AC` mapping table
+- every feature-bearing implementation unit names exact file paths and test-file paths
+- high-risk, multi-phase, CLI/API/plugin/service, persistence, or governance work includes execution checkpoints with stop conditions
+- implementation units include rollback guidance when they mutate production behavior, persistent state, generated artifacts, or operator workflows
+- pseudo-code and diagrams are allowed only as directional design guidance, not implementation code
+
+Suggested core template:
+
+```md
+---
+schema_version: 1
+title: <plan title>
+type: feat|fix|refactor
+status: active
+date: YYYY-MM-DD
+origin: .harness/brainstorm/YYYY-MM-DD-<topic>-requirements.md
+requirements: .harness/brainstorm/YYYY-MM-DD-<topic>-requirements.md
+spec: .harness/specs/YYYY-MM-DD-<topic>-spec.md
+source_spec: .harness/specs/YYYY-MM-DD-<topic>-spec.md
+ui_spec: .harness/specs/YYYY-MM-DD-<name>-ui-spec.md
+deepened: YYYY-MM-DD
+linear_project: <team-or-project>
+linear_issue: <ABC-123>
+linear_parent: <ABC-100-or-none>
+linear_children: []
+linear_status: <Todo|In Progress|In Review|Done>
+linear_comment_required: true
+branch: <planned-or-current-branch>
+pr: pending
+traceability_required: true
+plan_route: fresh|resume|deepen
+plan_depth: lightweight|standard|deep
+---
+
+# <Plan Title>
+
+## Overview
+
+<what is changing and why>
+
+## Problem Frame
+
+<user / business / operational problem and current context>
+
+## Linear Work Item Contract
+
+- Linear issue: <ABC-123 and URL>
+- Parent / children: <parent, children, blockers, or none>
+- Current Linear status: <status>
+- Branch: <planned or current branch>
+- PR: <pending or PR URL/number>
+- Linear comment required: <true|false, plus rationale if false>
+
+## Requirements Trace
+
+- R1. <requirement or success criterion>
+- R2. <requirement or success criterion>
+
+## Linear / Spec / Plan / PR Traceability
+
+| Linear issue | Requirement | Source acceptance IDs | Plan units | Acceptance IDs | PR evidence |
+| --- | --- | --- | --- | --- | --- |
+| ABC-123 | R1 | SA1 | P0 | AC1 | pending |
+| ABC-123 | R2 | SA2 | P1 | AC2 | pending |
+
+## Scope Boundaries
+
+- <explicit non-goal>
+
+## Context & Research
+
+### Relevant Code and Patterns
+- <existing file, class, component, or workflow to mirror>
+
+### Institutional Learnings
+- <relevant docs/solutions or .harness/memory finding>
+
+### External References
+- <only when used>
+
+## Key Technical Decisions
+
+- <decision>: <rationale and tradeoff>
+
+## Open Questions
+
+### Resolved During Planning
+- <question>: <resolution>
+
+### Deferred to Implementation
+- <unknown>: <why it is intentionally deferred>
+
+## High-Level Technical Design
+
+> *This illustrates the intended approach and is directional guidance for review, not implementation specification. The implementing agent should treat it as context, not code to reproduce.*
+
+<optional pseudo-code, mermaid, state flow, contract sketch, or data flow>
+
+## Implementation Units
+
+- [ ] **P0 / Unit 1: <name>**
+
+**Goal:** <what this unit accomplishes>
+
+**Requirements:** <R1, R2>
+
+**Dependencies:** <None / earlier unit / prerequisite>
+
+**Files:**
+- Create: `path/to/new_file`
+- Modify: `path/to/existing_file`
+- Test: `path/to/test_file`
+
+**Approach:**
+- <key design or sequencing decision>
+
+**Execution note:** <optional test-first / characterization-first / external-delegate signal>
+
+**Technical design:** <optional pseudo-code or diagram, directional only>
+
+**Patterns to follow:**
+- <existing file / class / pattern>
+
+**Test scenarios:**
+- <specific success path>
+- <edge case or failure path>
+
+**Verification:**
+- <observable outcome when complete>
+
+**Rollback:**
+- <how to revert or recover this unit safely>
+
+## Execution Checkpoints
+
+### Checkpoint A: <seam or risk proven before downstream work>
+
+**Exit criteria:**
+- <observable proof>
+
+**Stop condition:**
+- <condition that requires replanning or upstream clarification>
+
+## System-Wide Impact
+
+- **Interaction graph:** <callbacks, middleware, entry points, or cross-surface touchpoints>
+- **Error propagation:** <how failures should travel>
+- **State lifecycle risks:** <partial write, cache, duplicate, cleanup, migration>
+- **API surface parity:** <other interfaces or surfaces that need matching treatment>
+- **Integration coverage:** <cross-layer cases unit tests alone will not prove>
+
+## Risks & Dependencies
+
+- <meaningful risk or sequencing concern>
+
+## Documentation / Operational Notes
+
+- <docs, rollout, migration, support, or monitoring impacts when relevant>
+
+## Validation Ladder
+
+1. Focused checks for the changed unit.
+2. Integration checks for touched command/API/workflow seams.
+3. Repo-standard validation.
+4. Broader readiness gate only when source/runtime/artifact behavior changed.
+
+## Execution Ledger (Planning Mode)
+
+STEP_ID | status (pending|in_progress|completed) | owner | evidence
+
+## Sources & References
+
+- Linear issue: <ABC-123 URL>
+- Origin document: <path>
+- Spec: <path or none>
+- Plan: <this plan path>
+- Related code: <path or symbol>
+- Related PRs: <pending or refs>
+- External docs: <URLs>
+```
+
+## Plan depth guidance
+- `Lightweight`: usually 2-4 implementation units; omit optional sections that add little value.
+- `Standard`: use the full core template, adding optional sections only when they improve execution quality.
+- `Deep`: usually 4-8 implementation units; group into phases when helpful and add deeper risk, rollout, or alternatives analysis when warranted.
+
+## Deep-plan extensions
+Use these only when they materially improve execution quality or stakeholder alignment.
+
+```md
+## Alternative Approaches Considered
+- <approach>: <why not chosen>
+
+## Success Metrics
+- <how the team will know this solved the intended problem>
+
+## Dependencies / Prerequisites
+- <technical, organizational, or rollout dependency>
+
+## Risk Analysis & Mitigation
+- <risk>: <mitigation>
+
+## Phased Delivery
+### Phase 1
+- <what lands first and why>
+### Phase 2
+- <what follows and why>
+
+## Documentation Plan
+- <docs or runbooks to update>
+
+## Operational / Rollout Notes
+- <monitoring, migration, feature flag, or rollback considerations>
+```
+
+## Dedicated UI plan template
+Preferred path:
+- `docs/ui-plans/YYYY-MM-DD-<descriptive-name>-ui-plan.md`
+
+Compatibility path:
+- `.harness/plan/YYYY-MM-DD-<topic>-ui-plan.md`
+
+Suggested frontmatter:
+
+```yaml
+---
+title: <ui plan title>
+type: feat|fix|refactor
+status: active
+date: YYYY-MM-DD
+ui_spec: .harness/specs/YYYY-MM-DD-<name>-ui-spec.md  # if applicable
+parent_plan: .harness/plan/YYYY-MM-DD-<name>-plan.md    # if applicable
+---
+```
+
+Required sections:
+- Overview
+- Component Dependency Map
+- Implementation Phases
+- Visual Testing Strategy
+- Accessibility Validation Checklist
+- Acceptance Checklist
+- Risks and Mitigations
+- Sources & References
+
+Dedicated-UI rules:
+- every phase heading carries a `UP`-ID prefix
+- every acceptance item carries a `UAC`-ID prefix
+- every `UAC` item references its source `VAC` criterion when applicable
+- include prototype planning, accessibility validation, and visual testing
+- use `UP0` through `UP5` style sequencing unless the scope clearly justifies a variant
+- when the parent delivery plan already exists, keep the UI plan focused on build order, contract fidelity, accessibility, and visual verification rather than re-explaining product behavior
+
+## Execution Ledger
+Use rows like:
+
+```text
+STEP_ID | status (pending|in_progress|completed) | owner | evidence
+```
+
+Rules:
+- exactly one `in_progress` step at a time
+- do not mark `completed` without validation evidence
+- if blocked, record the blocker and fallback or next action
+
+## Verification matrix
+For general plans, verify:
+- frontmatter includes `schema_version`, source links, route, and depth
+- every phase has a `P`-ID
+- every acceptance item has an `AC`-ID
+- the requirements trace exists
+- traceability from source requirements or `SA` IDs to `AC` IDs exists when the source has stable IDs
+- the implementation units section exists
+- feature-bearing units include exact test-file paths
+- feature-bearing units include exit criteria, validation intent, and rollback guidance
+- high-risk plans include checkpoints and stop conditions
+- the validation ladder is focused-to-broad and names blocked-step reporting expectations
+- internal references and source links are not obviously broken
+- deferred implementation unknowns are explicit rather than hidden as certainty
+- any High-Level Technical Design section is clearly directional and non-prescriptive
+
+For dedicated UI plans, verify:
+- every phase heading has a `UP`-ID
+- every acceptance item has a `UAC`-ID
+- every `UAC` references its `VAC` source when applicable
+- prototype planning is present
+
+If the repo has additional plan-graph or structural linting, run it as an extra non-blocking quality check before handoff.
+
+## Handoff options
+Offer the clearest next-step options that fit the mode:
+1. Open the plan in an editor for review
+2. Run `he-code-review`
+3. Review and refine
+4. Proceed to `he-deepen-plan`
+5. Run `he-technical-review`
+6. Generate or merge a companion UI plan when UI work is in scope
+7. Start `he-work`
+8. Create an issue in the tracker
+
+Stable-skill note:
+- `he-plan` keeps issue mutation out of the planning skill itself; hand the finished plan to the installed Linear workflow when issue creation or update is requested, and keep GitHub PR links as delivery evidence against the Linear issue.

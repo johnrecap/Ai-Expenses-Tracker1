@@ -1,0 +1,33 @@
+{
+  "_description": "Maps project tasks to relevant skills. Load only relevant skills to reduce context noise.",
+  "matchers": [
+    {
+      "keywords": ["flutter", "dart", "widget", "screen", "responsive", "layout", "overflow", "material 3"],
+      "skills": ["flutter-build-responsive-layout", "flutter-fix-layout-issues", "flutter-ui-from-design", "ui-only-prototype-guardrails", "dart-run-static-analysis"]
+    },
+    {
+      "keywords": ["stitch", "figma", "screenshot", "ui only", "design", "screens", "design tokens"],
+      "skills": ["flutter-ui-from-design", "ui-only-prototype-guardrails", "flutter-add-widget-preview", "flutter-add-widget-test"]
+    },
+    {
+      "keywords": ["test", "integration", "qa", "device", "adb", "emulator", "screenshot"],
+      "skills": ["mobile-agent-qa", "flutter-add-integration-test", "flutter-add-widget-test", "dart-add-unit-test"]
+    },
+    {
+      "keywords": ["where", "find", "trace", "architecture", "data flow", "implemented"],
+      "skills": ["semantic-code-search"]
+    },
+    {
+      "keywords": ["remember", "decision", "convention", "previous", "memory"],
+      "skills": ["persistent-memory"]
+    },
+    {
+      "keywords": ["skill", "mcp", "tool", "install", "automation", "agent setup"],
+      "skills": ["agent-tooling-audit"]
+    },
+    {
+      "keywords": ["spec", "plan", "tasks", "feature", "build", "implement"],
+      "skills": ["speckit-specify", "speckit-plan", "speckit-tasks", "speckit-implement"]
+    }
+  ]
+}

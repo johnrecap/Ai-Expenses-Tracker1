@@ -1,0 +1,9 @@
+{
+  "label": "Resources",
+  "position": 5,
+  "link": {
+    "title": "Resources",
+    "type": "generated-index",
+    "description": "Learn more about Very Good CLI with tutorials and helpful resources."
+  }
+}

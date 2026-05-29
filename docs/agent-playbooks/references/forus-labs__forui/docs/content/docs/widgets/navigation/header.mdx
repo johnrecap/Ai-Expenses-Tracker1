@@ -1,0 +1,102 @@
+---
+title: Header
+description: A header contains the page's title and navigation actions. It is typically used on pages at the root of the navigation stack.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.header/
+---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import defaultSnippet from '@/snippets/examples/navigation/header/default.json';
+import nestedSnippet from '@/snippets/examples/navigation/header/nested.json';
+import nestedXSnippet from '@/snippets/examples/navigation/header/nested-x.json';
+import headerUsage from '@/snippets/usages/navigation/header/header.json';
+import headerNestedUsage from '@/snippets/usages/navigation/header/nested.json';
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='navigation/header'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={defaultSnippet} />
+  </Tab>
+</Tabs>
+
+## Nested Header
+
+It is typically used on nested pages or sheets.
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='navigation/header' variant='nested'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={nestedSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Headers', 'Header Action']}>
+    <Tab value="Headers">
+        ```shell copy
+        dart run forui style create headers
+        ````
+    </Tab>
+    <Tab value="Header Action">
+        ```shell copy
+        dart run forui style create header-action
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+<Callout type="info">
+  A header is typically used with `FScaffold`. A working example can be found [here](/docs/widgets/layout/scaffold).
+</Callout>
+
+### `FHeader(...)`
+<UsageSnippet usage={headerUsage} />
+
+### `FHeader.nested(...)`
+<UsageSnippet usage={headerNestedUsage} />
+
+## Examples
+
+### Header
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='navigation/header'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={defaultSnippet} />
+  </Tab>
+</Tabs>
+
+### Nested Header with Back Icon
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='navigation/header' variant='nested' />
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={nestedSnippet} />
+  </Tab>
+</Tabs>
+
+### Nested Header with X Icon
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='navigation/header' variant='nested-x' />
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={nestedXSnippet} />
+  </Tab>
+</Tabs>

@@ -1,0 +1,36 @@
+# Configuration for build runners. See https://github.com/dart-lang/build/blob/master/build_config/README.md
+
+targets:
+  $default:
+    builders:
+      controlBuilder:
+        enabled: true
+        generate_for:
+          exclude:
+            - example
+            - test
+      designBuilder:
+        enabled: true
+        generate_for:
+          exclude:
+            - example
+            - test
+      source_gen|combining_builder:
+        options:
+          ignore_for_file:
+            - "type=lint"
+
+builders:
+  controlBuilder:
+    import: "package:forui_internal_gen/forui_internal_gen.dart"
+    builder_factories: [ "controlBuilder" ]
+    build_extensions: { ".dart": [ ".control.dart" ] }
+    auto_apply: dependents
+    build_to: source
+
+  designBuilder:
+    import: "package:forui_internal_gen/forui_internal_gen.dart"
+    builder_factories: [ "designBuilder" ]
+    build_extensions: { ".dart": [".design.dart"] }
+    auto_apply: dependents
+    build_to: source

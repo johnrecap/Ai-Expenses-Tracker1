@@ -1,0 +1,38 @@
+{
+  "schema_version": "skills-system-upstream-lock.v1",
+  "upstream": {
+    "repo": "openai/skills",
+    "path": "skills/.system",
+    "ref": "e940b8a86138adf03972802b990a1dfc57fcbf09",
+    "noted_recent_updates": [
+      "2026-04-15",
+      "2026-04-18",
+      "2026-04-23"
+    ]
+  },
+  "managed_dirs": [
+    {
+      "name": "imagegen",
+      "path": "skills-system/imagegen",
+      "tree_sha256": "0fd8bf74f228de6bd93f0b9f6cb6ac914b8c7bf304094d3567fe037785e370b2"
+    },
+    {
+      "name": "openai-docs",
+      "path": "skills-system/openai-docs",
+      "tree_sha256": "919fe7cd878e32d00b579647d4ae55b66383fdad5ba2f98de653fc3f8d83bd9f"
+    }
+  ],
+  "bridge_entries": [
+    "skills-system/plugin-creator",
+    "skills-system/plugin-installer",
+    "skills-system/skill-creator",
+    "skills-system/skill-installer"
+  ],
+  "local_compatibility_overrides": [
+    {
+      "surface": "openai-docs",
+      "mcp_server": "openaiDeveloperDocs",
+      "tool_prefix": "mcp__openaiDeveloperDocs__"
+    }
+  ]
+}

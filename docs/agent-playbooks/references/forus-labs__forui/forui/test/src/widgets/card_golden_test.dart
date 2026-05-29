@@ -1,0 +1,96 @@
+@Tags(['golden'])
+library;
+
+import 'package:flutter/material.dart';
+
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:forui/forui.dart';
+import '../test_scaffold.dart';
+
+void main() {
+  testWidgets('blue screen', (tester) async {
+    await tester.pumpWidget(
+      TestScaffold.blue(
+        child: FCard(
+          style: TestScaffold.blueScreen.cardStyle,
+          title: const Text('Notifications'),
+          subtitle: const Text('You have 3 unread messages.'),
+        ),
+      ),
+    );
+
+    await expectBlueScreen();
+  });
+
+  for (final theme in TestScaffold.themes) {
+    testWidgets('${theme.name} with FCardContent', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          theme: theme.data,
+          child: FCard(title: const Text('Notifications'), subtitle: const Text('You have 3 unread messages.')),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('card/${theme.name}/content.png'));
+    });
+
+    testWidgets('${theme.name} with title, subtitle, and child', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          theme: theme.data,
+          child: FCard(
+            title: const Text('Account'),
+            subtitle: const Text('Make changes to your account here.'),
+            child: const Column(
+              children: [FTextField(label: Text('Name'), hint: 'Enter your name')],
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('card/${theme.name}/content-with-child.png'));
+    });
+
+    testWidgets('${theme.name} with image', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          theme: theme.data,
+          child: FCard(
+            image: Container(color: Colors.blue, height: 100, width: 250),
+            title: const Text('Notifications'),
+            subtitle: const Text('You have 3 unread messages.'),
+          ),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('card/${theme.name}/content-image.png'));
+    });
+
+    testWidgets('${theme.name} with raw content', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          theme: theme.data,
+          child: const FCard.raw(child: SizedBox(width: 50, height: 50)),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('card/${theme.name}/raw.png'));
+    });
+  }
+
+  for (final clip in [Clip.none, Clip.antiAlias]) {
+    testWidgets('clip ${clip.name}', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          child: FCard.raw(
+            clipBehavior: clip,
+            child: const ColoredBox(color: Colors.red, child: SizedBox(width: 200, height: 100)),
+          ),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('card/clip-${clip.name}.png'));
+    });
+  }
+}

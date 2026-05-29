@@ -1,0 +1,34 @@
+---
+title: Overlay
+description: A low-level overlay primitive that composites content relative to a child widget.
+apiReference: https://pub.dev/documentation/forui/latest/forui.foundation/FOverlay-class.html
+---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import overlayDefault from '@/snippets/examples/foundation/overlay/default.json';
+import overlayUsage from '@/snippets/usages/foundation/overlay/overlay.json';
+
+<Callout type="info">
+  This widget is typically used to create other high-level widgets.
+  Use:
+    * [FPortal](../foundation/portal) to anchor at a child widget's edges (e.g. a dropdown below a button).
+    * [FPointPortal](../foundation/point-portal) to anchor at a coordinate inside a child (e.g. a context menu at the cursor).
+</Callout>
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='foundation/overlay' height={300}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={overlayDefault} />
+  </Tab>
+</Tabs>
+
+## Usage
+
+### `FOverlay(...)`
+<UsageSnippet usage={overlayUsage} />

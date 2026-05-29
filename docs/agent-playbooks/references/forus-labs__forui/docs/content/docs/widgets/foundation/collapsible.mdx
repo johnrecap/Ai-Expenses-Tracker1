@@ -1,0 +1,26 @@
+---
+title: Collapsible
+description: A collapsible widget that animates between visible and hidden states.
+apiReference: https://pub.dev/documentation/forui/latest/forui.foundation/FCollapsible-class.html
+---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import collapsibleDefault from '@/snippets/examples/foundation/collapsible/default.json';
+import collapsibleUsage from '@/snippets/usages/foundation/collapsible/collapsible.json';
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='foundation/collapsible' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={collapsibleDefault} />
+  </Tab>
+</Tabs>
+
+## Usage
+
+### `FCollapsible(...)`
+<UsageSnippet usage={collapsibleUsage} />

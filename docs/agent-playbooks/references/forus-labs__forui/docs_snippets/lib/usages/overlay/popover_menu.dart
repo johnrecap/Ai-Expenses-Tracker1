@@ -1,0 +1,131 @@
+// ignore_for_file: avoid_redundant_argument_values
+
+import 'package:flutter/widgets.dart';
+
+import 'package:forui/forui.dart';
+
+final popoverMenu = FPopoverMenu(
+  // {@category "Control"}
+  control: const .managed(),
+  // {@endcategory}
+  // {@category "Layout"}
+  menuAnchor: .topCenter,
+  childAnchor: .bottomCenter,
+  maxHeight: .infinity,
+  intrinsicWidth: true,
+  spacing: const .spacing(4),
+  overflow: .flip,
+  useViewPadding: true,
+  useViewInsets: true,
+  offset: .zero,
+  cutout: true,
+  cutoutBuilder: FModalBarrier.defaultCutoutBuilder,
+  // {@endcategory}
+  // {@category "Tap Region"}
+  groupId: null,
+  hideRegion: .excludeChild,
+  onTapHide: () {},
+  // {@endcategory}
+  // {@category "Scroll"}
+  scrollController: null,
+  scrollCacheExtent: null,
+  dragStartBehavior: .start,
+  // {@endcategory}
+  // {@category "Accessibility"}
+  autofocus: null,
+  focusNode: null,
+  onFocusChange: (focused) {},
+  semanticsLabel: 'Menu',
+  traversalEdgeBehavior: null,
+  barrierSemanticsLabel: null,
+  barrierSemanticsDismissible: true,
+  // {@endcategory}
+  // {@category "Core"}
+  style: const .delta(maxWidth: 250),
+  faded: null,
+  divider: .full,
+  menu: [
+    .group(
+      children: [
+        .item(title: const Text('Edit'), onPress: () {}),
+        .item(title: const Text('Delete'), onPress: () {}),
+      ],
+    ),
+  ],
+  menuBuilder: (context, controller, menu) => menu!,
+  builder: (context, controller, child) => child!,
+  child: FButton(onPress: () {}, child: const Text('Menu')),
+  // {@endcategory}
+);
+
+final popoverMenuTiles = FPopoverMenu.tiles(
+  // {@category "Control"}
+  control: const .managed(),
+  // {@endcategory}
+  // {@category "Layout"}
+  maxHeight: .infinity,
+  intrinsicWidth: true,
+  menuAnchor: .topCenter,
+  childAnchor: .bottomCenter,
+  spacing: const .spacing(4),
+  overflow: .flip,
+  useViewPadding: true,
+  useViewInsets: true,
+  offset: .zero,
+  cutout: true,
+  cutoutBuilder: FModalBarrier.defaultCutoutBuilder,
+  // {@endcategory}
+  // {@category "Tap Region"}
+  groupId: null,
+  hideRegion: .excludeChild,
+  onTapHide: () {},
+  // {@endcategory}
+  // {@category "Scroll"}
+  scrollController: null,
+  scrollCacheExtent: null,
+  dragStartBehavior: .start,
+  // {@endcategory}
+  // {@category "Accessibility"}
+  autofocus: null,
+  focusNode: null,
+  onFocusChange: (focused) {},
+  semanticsLabel: 'Menu',
+  traversalEdgeBehavior: null,
+  barrierSemanticsLabel: null,
+  barrierSemanticsDismissible: true,
+  // {@endcategory}
+  // {@category "Core"}
+  style: const .delta(maxWidth: 250),
+  faded: null,
+  divider: .full,
+  menu: [
+    .group(
+      children: [
+        .tile(title: const Text('Edit'), onPress: () {}),
+        .tile(title: const Text('Delete'), onPress: () {}),
+      ],
+    ),
+  ],
+  menuBuilder: (context, controller, menu) => menu!,
+  builder: (context, controller, child) => child!,
+  child: FButton(onPress: () {}, child: const Text('Menu')),
+  // {@endcategory}
+);
+
+// {@category "Control" "`.lifted()`"}
+/// Externally controls the popover's visibility.
+final FPopoverControl lifted = .lifted(shown: false, onChange: (shown) {});
+
+// {@category "Control" "`.managed()` with internal controller"}
+/// Manages the popover state internally.
+final FPopoverControl managedInternal = .managed(initial: false, onChange: (shown) {});
+
+// {@category "Control" "`.managed()` with external controller"}
+/// Uses an external controller to control the popover's state.
+final FPopoverControl managedExternal = .managed(
+  // Don't create a controller inline. Store it in a State instead.
+  controller: FPopoverController(vsync: vsync, shown: false),
+  onChange: (shown) {},
+);
+
+TickerProvider get vsync => throw UnimplementedError();

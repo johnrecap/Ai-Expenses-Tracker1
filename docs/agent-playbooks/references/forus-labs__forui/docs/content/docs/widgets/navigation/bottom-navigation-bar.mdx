@@ -1,0 +1,52 @@
+---
+title: Bottom Navigation Bar
+description: A bottom navigation bar is usually present at the bottom of root pages. It is used to navigate between a small number of views, typically between three and five.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.bottom_navigation_bar/
+---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import defaultSnippet from '@/snippets/examples/navigation/bottom-navigation-bar/default.json';
+import bottomNavigationBarUsage from '@/snippets/usages/navigation/bottom_navigation_bar/bottomNavigationBar.json';
+import bottomNavigationBarItemUsage from '@/snippets/usages/navigation/bottom_navigation_bar/bottomNavigationBarItem.json';
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='navigation/bottom-navigation-bar'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={defaultSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Bottom Navigation Bar', 'Bottom Navigation Bar Item']}>
+    <Tab value="Bottom Navigation Bar">
+        ```shell copy
+        dart run forui style create bottom-navigation-bar
+        ````
+    </Tab>
+    <Tab value="Bottom Navigation Bar Item">
+        ```shell copy
+        dart run forui style create bottom-navigation-bar-item
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+<Callout type="info">
+  A bottom navigation bar is typically used with `FScaffold`. A working example can be found [here](/docs/widgets/layout/scaffold).
+</Callout>
+
+### `FBottomNavigationBar(...)`
+<UsageSnippet usage={bottomNavigationBarUsage} />
+
+### `FBottomNavigationBarItem(...)`
+<UsageSnippet usage={bottomNavigationBarItemUsage} />

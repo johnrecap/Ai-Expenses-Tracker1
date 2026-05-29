@@ -1,0 +1,81 @@
+---
+title: Persistent Sheet
+description: A persistent sheet is displayed above another widget while still allowing users to interact with the widget below.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.sheet/
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import defaultSnippet from '@/snippets/examples/overlay/persistent-sheet/default.json';
+import draggableSnippet from '@/snippets/examples/overlay/persistent-sheet/draggable.json';
+import keepAliveOffstageSnippet from '@/snippets/examples/overlay/persistent-sheet/keep-alive-offstage.json';
+import persistentSheetShowUsage from '@/snippets/usages/overlay/persistent_sheet/show.json';
+import persistentSheetSheetsUsage from '@/snippets/usages/overlay/persistent_sheet/sheets.json';
+
+It is part of [FScaffold](/docs/widgets/layout/scaffold), which should be preferred in most cases.
+
+<Callout type="info">
+    A closely related widget is a [modal sheet](/docs/widgets/overlay/sheet) which prevents the user from interacting with the
+    rest of the app.
+</Callout>
+
+<Callout type="warn">
+    All calls to `showFPersistentSheet(...)` should be made inside widgets that have either `FScaffold` or `FSheets` as
+    their ancestor.
+</Callout>
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/persistent-sheet' height={500}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={defaultSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Persistent Sheet']}>
+    <Tab value="Persistent Sheet">
+        ```shell copy
+        dart run forui style create persistent-sheet
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `showFPersistentSheet(...)`
+<UsageSnippet usage={persistentSheetShowUsage} />
+
+### `FSheets(...)`
+<UsageSnippet usage={persistentSheetSheetsUsage} />
+
+## Examples
+
+### With `KeepAliveOffstage`
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/persistent-sheet' variant='keep-alive-offstage' height={500}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={keepAliveOffstageSnippet} />
+  </Tab>
+</Tabs>
+
+### With `DraggableScrollableSheet`
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/persistent-sheet' variant='draggable' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={draggableSnippet} />
+  </Tab>
+</Tabs>

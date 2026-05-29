@@ -1,0 +1,92 @@
+name: Docs Preview Build
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docs_preview_build.yaml'
+      - 'docs_preview_deploy.yaml'
+      - 'docs/**'
+      - 'docs_snippets/**'
+
+jobs:
+  build:
+    name: Build Docs & Snippets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2.23.0
+
+      # Build docs_snippets
+      - working-directory: forui
+        run: |
+          flutter pub get
+          dart run build_runner build
+      - working-directory: ./docs_snippets
+        run: |
+          flutter pub get
+          dart run build_runner build
+          flutter build web
+      - uses: actions/upload-artifact@v7
+        with:
+          name: docs-snippets-build
+          path: ./docs_snippets/build/web
+          retention-days: 1
+
+      # Generate JSON snippets for docs
+      - name: Generate snippets
+        working-directory: ./docs_snippets
+        run: dart run tool/snippet_generator/main.dart
+
+      # Escape branch name and create short SHA for snippets URL
+      - id: escape-branch
+        run: |
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          ESCAPED="${BRANCH//\//-}"
+          echo "branch=$ESCAPED" >> $GITHUB_OUTPUT
+      - id: short-sha
+        run: |
+          SHA="${{ github.event.pull_request.head.sha }}"
+          echo "sha=${SHA:0:7}" >> $GITHUB_OUTPUT
+      - id: snippets-slug
+        run: |
+          SLUG="${{ steps.escape-branch.outputs.branch }}-${{ steps.short-sha.outputs.sha }}"
+          echo "slug=${SLUG:0:28}" >> $GITHUB_OUTPUT
+
+      # Build docs
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+      - working-directory: ./docs
+        run: pnpm install
+      - working-directory: ./docs
+        run: pnpm exec opennextjs-cloudflare build
+        env:
+          # We don't use the CLOUDFLARE_SNIPPETS_PROJECT_NAME environment variable since it requires us to set the
+          # environment for this workflow, unintentionally leaking environment secrets.
+          NEXT_PUBLIC_SNIPPETS_URL: https://${{ steps.snippets-slug.outputs.slug }}.forui-docs-snippets-dev.pages.dev
+      - name: Archive docs build
+        working-directory: ./docs
+        run: tar -cf docs-build.tar .open-next
+      - uses: actions/upload-artifact@v7
+        with:
+          name: docs-build
+          path: ./docs/docs-build.tar
+          retention-days: 1
+
+      # Upload PR metadata
+      - run: |
+          echo "${{ github.event.number }}" > pr-number.txt
+          echo "${{ github.event.pull_request.head.ref }}" > pr-head-ref.txt
+          echo "${{ github.event.pull_request.head.sha }}" > pr-head-sha.txt
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: pr-metadata
+          path: |
+            pr-number.txt
+            pr-head-ref.txt
+            pr-head-sha.txt
+          retention-days: 1

@@ -1,0 +1,108 @@
+# Gold-Standard Hook Patterns
+
+Read when: you want starter behaviors that feel production-ready while matching the current Codex hooks documentation.
+
+## Table of Contents
+- [Principles](#principles)
+- [Recommended starter pack](#recommended-starter-pack)
+- [Project vs user scope](#project-vs-user-scope)
+- [Behavior patterns](#behavior-patterns)
+- [Validation standard](#validation-standard)
+- [What to avoid](#what-to-avoid)
+
+## Principles
+- Keep the pack small because hook latency compounds across every session and turn.
+- Fail open on missing optional tooling because a transient local environment issue should not block all Codex work.
+- Use explicit JSON outputs because structured control flow is easier to test than ad hoc stdout parsing.
+- Make blocking behavior narrow and explainable because hooks should guide, not surprise.
+- Keep policies local to the right config layer because repo policy and personal policy age differently.
+
+## Recommended starter pack
+For most repos, start with three hooks:
+
+1. `SessionStart`
+- Add a short repo-aware context string.
+- Mention dirty worktree state, branch, and validation hints.
+- Use `matcher: "^(startup|resume|clear)$"` so the starter aligns to current release/schema behavior while docs text catches up.
+
+2. `UserPromptSubmit`
+- Block direct attempts to waive higher-priority system, developer, or repo instructions.
+- Add small context for risky shortcut prompts such as skipping validation or using destructive commands.
+- Keep this narrow so normal prompts are unaffected.
+
+3. `Stop`
+- Prevent clearly incomplete final responses.
+- Catch draft markers, unresolved checklist items, and validation-skipped claims without reasons.
+- Respect `stop_hook_active` so the hook does not trap the session in a retry loop.
+
+Optional, when explicitly requested:
+
+4. `PreToolUse` (Bash-only today)
+- Use for narrow, high-confidence command interception.
+- Match on `tool_name` and remember Codex currently emits `Bash` for this event.
+- Keep matcher patterns explicit (`^Bash$` for narrow scope, or `*`/empty string only when broad matching is intentional).
+- Keep a clear note that this is a guardrail, not complete enforcement.
+- Classify commit, push, scaffold, or other command classes inside the script because matcher cannot see subcommand intent today.
+- Use supported block paths only: `permissionDecision: "deny"`, legacy `decision: "block"`, or exit code `2` with `stderr`.
+
+5. `PostToolUse` (Bash-only today)
+- Use for after-command feedback and additional context.
+- Do not treat it as rollback because command side effects have already happened.
+- Use it only when the extra latency is worth the additional safety signal.
+- Include `statusMessage` so operators can see which post-tool guardrail is running.
+- Make post hooks cheap to skip, file-target aware, and fail-open by default.
+
+6. `PermissionRequest` (approval-stage, Bash-associated today)
+- Use to make an allow/deny decision when Codex is about to surface an approval prompt.
+- Keep decisions narrow and auditable: deny only high-confidence risky requests.
+- Keep matcher explicit (`^Bash$`) and classify risk from `tool_input.command` inside the script.
+- Do not emit reserved rewrite fields (`updatedInput`, `updatedPermissions`, or `interrupt: true`) because these fail closed in current runtime.
+
+## Project vs user scope
+Prefer project scope when:
+- validation rules differ by repo;
+- startup context depends on repo layout;
+- the hook pack would be noisy in unrelated repos.
+
+Prefer user scope when:
+- the rule is personal and durable across all repos;
+- the same safety guardrails genuinely apply everywhere;
+- you want one global starter pack in `~/.codex`.
+
+Do not install the same pack in both places unless you intentionally want duplicate execution.
+
+## Behavior patterns
+`SessionStart`
+- good pattern: infer nearest scoped repo root from `cwd`, then emit concise context and warnings
+- bad pattern: dump long build docs or policy essays into `additionalContext`
+
+`UserPromptSubmit`
+- good pattern: block prompt-injection phrasing and annotate risky shortcut language
+- bad pattern: try to lint or rewrite the entire user prompt
+
+`Stop`
+- good pattern: block only on obvious incompleteness with a one-shot corrective reason
+- bad pattern: block stylistic differences or subjective tone choices
+
+`PreToolUse`, `PermissionRequest`, and `PostToolUse`
+- good pattern: gate or annotate a small set of risky Bash behaviors with explicit reasons
+- bad pattern: pretend Bash-only interception can enforce all command execution paths
+- bad pattern: rely on matcher to distinguish `git commit`, `git push`, or file-edit intent
+
+## Validation standard
+Minimum:
+- `zsh -n` every hook script
+- `jq .` the generated `hooks.json`
+- dry-run one representative payload per enabled event
+
+Better:
+- rerun the `Stop` dry-run with `stop_hook_active: true` to prove it does not re-block
+- test one harmless prompt and one policy-violating prompt through `UserPromptSubmit`
+- test `SessionStart` on both a repo directory and a non-repo directory
+
+## What to avoid
+- undocumented non-command hook handler types sold as stable;
+- relative command paths inside `hooks.json`;
+- giant `SessionStart.additionalContext` strings;
+- `Stop` logic that blocks because tests were skipped even when a valid reason is present;
+- hook scripts that assume one package manager or repo shape without checking.

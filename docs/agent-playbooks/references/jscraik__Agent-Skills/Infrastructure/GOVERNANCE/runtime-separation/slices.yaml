@@ -1,0 +1,59 @@
+schema_version: 2
+reader_min_version: 1
+policy_export_version: "2026-04-12.v9"
+slices:
+  - id: phase0-pilot-plugin-coderabbit
+    phase: phase_0b_pilot_slice
+    owner_lane: plugins
+    activation_state: declared
+    discovery_compatibility: dual_read
+    path_compatibility:
+      - combined
+    discovery_precedence:
+      - Plugins/cache/openai-curated/coderabbit
+      - Infrastructure/catalog/Plugins/cache/openai-curated/coderabbit
+    forwarder_type: package_root_projection
+    overlap_class: none
+    authoritative_write_root: Plugins/cache/openai-curated/coderabbit
+    inventory_selector:
+      reader_roots:
+        - plugins_status.coderabbit
+        - plugins_doctor
+      path_consumer_roots:
+        - plugins
+        - Infrastructure/catalog/plugins
+    path_consumer_inventory_ref: GOVERNANCE/runtime-separation/path-consumers.yaml
+    path_consumer_inventory_digest: "4b84ae677560ddf3fa59801761b818e2aec9e2d7f638c2cbc6c67def64d29372"
+    reader_inventory_ref: GOVERNANCE/runtime-separation/readers.yaml
+    reader_inventory_digest: "2d68d712f8a2d6cf957e690217d06ae63ee9fd801c88a881dc8f791e26df0704"
+    policy_export_version: "2026-04-12.v9"
+    canonical_paths:
+      - Plugins/cache/openai-curated/coderabbit
+    legacy_paths:
+      - Plugins/coderabbit
+    planned_deltas: []
+    representative_commands:
+      - command: bin/ask plugins status coderabbit --json
+        comparison_mode: both
+        args_legacy: []
+        args_canonical: []
+        expected_exit_code: 0
+        normalized_assertions:
+          - status=success
+        expected_result_ref: GOVERNANCE/runtime-separation/baseline.json#/summary/command_checks/plugins_status/coderabbit/normalized_fields
+    plugin_lifecycle_checks:
+      - id: coderabbit-status
+        command: bin/ask plugins status coderabbit --json
+        args: []
+        expected_exit_code: 0
+        normalized_assertions:
+          - status=success
+        applies_to_phase:
+          - all
+        applies_to_rollback: true
+    entry_checks:
+      - bash Infrastructure/scripts/verify-work.sh --project-governance
+    exit_checks:
+      - bin/ask plugins status coderabbit --json
+    rollback_commands:
+      - git checkout -- Plugins/cache/openai-curated/coderabbit

@@ -1,0 +1,776 @@
+[
+    {
+        "area":  "skill-pack",
+        "name":  "all",
+        "status":  "SKIP",
+        "role":  "Skill pack installation.",
+        "command":  "",
+        "details":  "-SkipSkillPacks was used.",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agents\\skills\\semantic-code-search\\SKILL.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agent\\skills\\semantic-code-search\\SKILL.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agents\\skills\\persistent-memory\\SKILL.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agent\\skills\\persistent-memory\\SKILL.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agents\\skills\\stable-local-urls\\SKILL.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agent\\skills\\stable-local-urls\\SKILL.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agents\\skills\\mobile-agent-qa\\SKILL.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agent\\skills\\mobile-agent-qa\\SKILL.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agents\\skills\\flutter-ui-from-design\\SKILL.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agent\\skills\\flutter-ui-from-design\\SKILL.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agents\\skills\\ui-only-prototype-guardrails\\SKILL.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agent\\skills\\ui-only-prototype-guardrails\\SKILL.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agents\\skills\\agent-tooling-audit\\SKILL.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agent\\skills\\agent-tooling-audit\\SKILL.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-skill",
+        "name":  "semantic-code-search",
+        "status":  "OK",
+        "role":  "Skill is readable by agents.",
+        "command":  "",
+        "details":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agents\\skills\\semantic-code-search\\SKILL.md",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-skill",
+        "name":  "semantic-code-search",
+        "status":  "OK",
+        "role":  "Skill is readable by agents.",
+        "command":  "",
+        "details":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agent\\skills\\semantic-code-search\\SKILL.md",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-skill",
+        "name":  "persistent-memory",
+        "status":  "OK",
+        "role":  "Skill is readable by agents.",
+        "command":  "",
+        "details":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agents\\skills\\persistent-memory\\SKILL.md",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-skill",
+        "name":  "persistent-memory",
+        "status":  "OK",
+        "role":  "Skill is readable by agents.",
+        "command":  "",
+        "details":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agent\\skills\\persistent-memory\\SKILL.md",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-skill",
+        "name":  "stable-local-urls",
+        "status":  "OK",
+        "role":  "Skill is readable by agents.",
+        "command":  "",
+        "details":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agents\\skills\\stable-local-urls\\SKILL.md",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-skill",
+        "name":  "stable-local-urls",
+        "status":  "OK",
+        "role":  "Skill is readable by agents.",
+        "command":  "",
+        "details":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agent\\skills\\stable-local-urls\\SKILL.md",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-skill",
+        "name":  "mobile-agent-qa",
+        "status":  "OK",
+        "role":  "Skill is readable by agents.",
+        "command":  "",
+        "details":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agents\\skills\\mobile-agent-qa\\SKILL.md",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-skill",
+        "name":  "mobile-agent-qa",
+        "status":  "OK",
+        "role":  "Skill is readable by agents.",
+        "command":  "",
+        "details":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agent\\skills\\mobile-agent-qa\\SKILL.md",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-skill",
+        "name":  "flutter-ui-from-design",
+        "status":  "OK",
+        "role":  "Skill is readable by agents.",
+        "command":  "",
+        "details":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agents\\skills\\flutter-ui-from-design\\SKILL.md",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-skill",
+        "name":  "flutter-ui-from-design",
+        "status":  "OK",
+        "role":  "Skill is readable by agents.",
+        "command":  "",
+        "details":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agent\\skills\\flutter-ui-from-design\\SKILL.md",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-skill",
+        "name":  "ui-only-prototype-guardrails",
+        "status":  "OK",
+        "role":  "Skill is readable by agents.",
+        "command":  "",
+        "details":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agents\\skills\\ui-only-prototype-guardrails\\SKILL.md",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-skill",
+        "name":  "ui-only-prototype-guardrails",
+        "status":  "OK",
+        "role":  "Skill is readable by agents.",
+        "command":  "",
+        "details":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agent\\skills\\ui-only-prototype-guardrails\\SKILL.md",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-skill",
+        "name":  "agent-tooling-audit",
+        "status":  "OK",
+        "role":  "Skill is readable by agents.",
+        "command":  "",
+        "details":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agents\\skills\\agent-tooling-audit\\SKILL.md",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-skill",
+        "name":  "agent-tooling-audit",
+        "status":  "OK",
+        "role":  "Skill is readable by agents.",
+        "command":  "",
+        "details":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agent\\skills\\agent-tooling-audit\\SKILL.md",
+        "fix":  ""
+    },
+    {
+        "area":  "global-tool",
+        "name":  "all",
+        "status":  "SKIP",
+        "role":  "Global CLI installation.",
+        "command":  "",
+        "details":  "-SkipGlobalTools was used.",
+        "fix":  ""
+    },
+    {
+        "area":  "speckit",
+        "name":  "specify version",
+        "status":  "OK",
+        "role":  "Verify Spec Kit CLI.",
+        "command":  "specify System.String[]",
+        "details":  "specify 0.8.15",
+        "fix":  ""
+    },
+    {
+        "area":  "speckit",
+        "name":  ".specify",
+        "status":  "OK",
+        "role":  "Spec Kit already initialized.",
+        "command":  "",
+        "details":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.specify",
+        "fix":  ""
+    },
+    {
+        "area":  "flutter-package",
+        "name":  "all",
+        "status":  "SKIP",
+        "role":  "Flutter package installation.",
+        "command":  "",
+        "details":  "-SkipFlutterPackages was used.",
+        "fix":  ""
+    },
+    {
+        "area":  "reference-repo",
+        "name":  "Solido/awesome-flutter",
+        "status":  "OK",
+        "role":  "Broad Flutter ecosystem and package catalog.",
+        "command":  "",
+        "details":  "Reference folder already exists as vendored files without nested .git metadata.",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-reference",
+        "name":  "Solido/awesome-flutter",
+        "status":  "OK",
+        "role":  "Broad Flutter ecosystem and package catalog.",
+        "command":  "",
+        "details":  "Readable: C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\docs\\agent-playbooks\\references\\Solido__awesome-flutter\\README.md",
+        "fix":  ""
+    },
+    {
+        "area":  "reference-repo",
+        "name":  "fluttergems/awesome-open-source-flutter-apps",
+        "status":  "OK",
+        "role":  "Open-source Flutter apps catalog.",
+        "command":  "",
+        "details":  "Reference folder already exists as vendored files without nested .git metadata.",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-reference",
+        "name":  "fluttergems/awesome-open-source-flutter-apps",
+        "status":  "OK",
+        "role":  "Open-source Flutter apps catalog.",
+        "command":  "",
+        "details":  "Readable: C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\docs\\agent-playbooks\\references\\fluttergems__awesome-open-source-flutter-apps\\README.md",
+        "fix":  ""
+    },
+    {
+        "area":  "reference-repo",
+        "name":  "fluttergems/fluttergems",
+        "status":  "OK",
+        "role":  "Flutter Gems catalog source and package taxonomy.",
+        "command":  "",
+        "details":  "Reference folder already exists as vendored files without nested .git metadata.",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-reference",
+        "name":  "fluttergems/fluttergems",
+        "status":  "OK",
+        "role":  "Flutter Gems catalog source and package taxonomy.",
+        "command":  "",
+        "details":  "Readable: C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\docs\\agent-playbooks\\references\\fluttergems__fluttergems\\README.md",
+        "fix":  ""
+    },
+    {
+        "area":  "reference-repo",
+        "name":  "Hamed233/Awesome-Flutter-Packages",
+        "status":  "OK",
+        "role":  "Awesome Flutter packages reference.",
+        "command":  "",
+        "details":  "Reference folder already exists as vendored files without nested .git metadata.",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-reference",
+        "name":  "Hamed233/Awesome-Flutter-Packages",
+        "status":  "OK",
+        "role":  "Awesome Flutter packages reference.",
+        "command":  "",
+        "details":  "Readable: C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\docs\\agent-playbooks\\references\\Hamed233__Awesome-Flutter-Packages\\README.md",
+        "fix":  ""
+    },
+    {
+        "area":  "reference-repo",
+        "name":  "VoltAgent/awesome-agent-skills",
+        "status":  "OK",
+        "role":  "Agent skills discovery catalog.",
+        "command":  "",
+        "details":  "Reference folder already exists as vendored files without nested .git metadata.",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-reference",
+        "name":  "VoltAgent/awesome-agent-skills",
+        "status":  "OK",
+        "role":  "Agent skills discovery catalog.",
+        "command":  "",
+        "details":  "Readable: C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\docs\\agent-playbooks\\references\\VoltAgent__awesome-agent-skills\\README.md",
+        "fix":  ""
+    },
+    {
+        "area":  "reference-repo",
+        "name":  "forus-labs/forui",
+        "status":  "OK",
+        "role":  "Forui minimal Flutter UI library source/docs.",
+        "command":  "",
+        "details":  "Reference folder already exists as vendored files without nested .git metadata.",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-reference",
+        "name":  "forus-labs/forui",
+        "status":  "OK",
+        "role":  "Forui minimal Flutter UI library source/docs.",
+        "command":  "",
+        "details":  "Readable: C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\docs\\agent-playbooks\\references\\forus-labs__forui\\README.md",
+        "fix":  ""
+    },
+    {
+        "area":  "reference-repo",
+        "name":  "VeryGoodOpenSource/very_good_cli",
+        "status":  "OK",
+        "role":  "Very Good CLI source and conventions.",
+        "command":  "",
+        "details":  "Reference folder already exists as vendored files without nested .git metadata.",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-reference",
+        "name":  "VeryGoodOpenSource/very_good_cli",
+        "status":  "OK",
+        "role":  "Very Good CLI source and conventions.",
+        "command":  "",
+        "details":  "Readable: C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\docs\\agent-playbooks\\references\\VeryGoodOpenSource__very_good_cli\\README.md",
+        "fix":  ""
+    },
+    {
+        "area":  "reference-repo",
+        "name":  "widgetbook/widgetbook",
+        "status":  "OK",
+        "role":  "Widgetbook component catalog source/docs.",
+        "command":  "",
+        "details":  "Reference folder already exists as vendored files without nested .git metadata.",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-reference",
+        "name":  "widgetbook/widgetbook",
+        "status":  "OK",
+        "role":  "Widgetbook component catalog source/docs.",
+        "command":  "",
+        "details":  "Readable: C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\docs\\agent-playbooks\\references\\widgetbook__widgetbook\\README.md",
+        "fix":  ""
+    },
+    {
+        "area":  "reference-repo",
+        "name":  "flutter/samples",
+        "status":  "OK",
+        "role":  "Official Flutter samples.",
+        "command":  "",
+        "details":  "Reference folder already exists as vendored files without nested .git metadata.",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-reference",
+        "name":  "flutter/samples",
+        "status":  "OK",
+        "role":  "Official Flutter samples.",
+        "command":  "",
+        "details":  "Readable: C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\docs\\agent-playbooks\\references\\flutter__samples\\README.md",
+        "fix":  ""
+    },
+    {
+        "area":  "reference-repo",
+        "name":  "gskinnerTeam/flutter_vignettes",
+        "status":  "OK",
+        "role":  "Polished Flutter UI and animation examples.",
+        "command":  "",
+        "details":  "Reference folder already exists as vendored files without nested .git metadata.",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-reference",
+        "name":  "gskinnerTeam/flutter_vignettes",
+        "status":  "OK",
+        "role":  "Polished Flutter UI and animation examples.",
+        "command":  "",
+        "details":  "Readable: C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\docs\\agent-playbooks\\references\\gskinnerTeam__flutter_vignettes\\README.md",
+        "fix":  ""
+    },
+    {
+        "area":  "reference-repo",
+        "name":  "RIP-Comm/sossoldi",
+        "status":  "OK",
+        "role":  "Personal finance Flutter UX reference.",
+        "command":  "",
+        "details":  "Reference folder already exists as vendored files without nested .git metadata.",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-reference",
+        "name":  "RIP-Comm/sossoldi",
+        "status":  "OK",
+        "role":  "Personal finance Flutter UX reference.",
+        "command":  "",
+        "details":  "Readable: C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\docs\\agent-playbooks\\references\\RIP-Comm__sossoldi\\README.md",
+        "fix":  ""
+    },
+    {
+        "area":  "reference-repo",
+        "name":  "TNT-Likely/BeeCount",
+        "status":  "OK",
+        "role":  "AI bookkeeping and finance UX reference.",
+        "command":  "",
+        "details":  "Reference folder already exists as vendored files without nested .git metadata.",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-reference",
+        "name":  "TNT-Likely/BeeCount",
+        "status":  "OK",
+        "role":  "AI bookkeeping and finance UX reference.",
+        "command":  "",
+        "details":  "Readable: C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\docs\\agent-playbooks\\references\\TNT-Likely__BeeCount\\README.md",
+        "fix":  ""
+    },
+    {
+        "area":  "reference-repo",
+        "name":  "am-will/codex-skills",
+        "status":  "OK",
+        "role":  "Additional Codex skill examples and workflows.",
+        "command":  "",
+        "details":  "Reference folder already exists as vendored files without nested .git metadata.",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-reference",
+        "name":  "am-will/codex-skills",
+        "status":  "OK",
+        "role":  "Additional Codex skill examples and workflows.",
+        "command":  "",
+        "details":  "Readable: C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\docs\\agent-playbooks\\references\\am-will__codex-skills\\README.md",
+        "fix":  ""
+    },
+    {
+        "area":  "reference-repo",
+        "name":  "jscraik/Agent-Skills",
+        "status":  "OK",
+        "role":  "Agent skill organization and governance examples.",
+        "command":  "",
+        "details":  "Reference folder already exists as vendored files without nested .git metadata.",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-reference",
+        "name":  "jscraik/Agent-Skills",
+        "status":  "WARN",
+        "role":  "Agent skill organization and governance examples.",
+        "command":  "",
+        "details":  "Cloned but no README was found at root.",
+        "fix":  "Inspect the repo manually and document the correct entry point."
+    },
+    {
+        "area":  "reference-repo",
+        "name":  "flutter/genui",
+        "status":  "OK",
+        "role":  "Flutter generative UI research/reference. Reference only, not required for prototype implementation.",
+        "command":  "",
+        "details":  "Reference folder already exists as vendored files without nested .git metadata.",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-reference",
+        "name":  "flutter/genui",
+        "status":  "OK",
+        "role":  "Flutter generative UI research/reference. Reference only, not required for prototype implementation.",
+        "command":  "",
+        "details":  "Readable: C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\docs\\agent-playbooks\\references\\flutter__genui\\README.md",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\docs\\agent-playbooks\\references\\flutter-gems-animation-transition.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\docs\\agent-playbooks\\references\\forui-package.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\docs\\agent-playbooks\\references\\awesome-flutter-packages-search.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agents\\workflows\\development.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agent\\workflows\\development.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agents\\skill-matcher.json",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agent\\skill-matcher.json",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\AGENTS.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agents\\MANDATORY_RULES.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\.agent\\MANDATORY_RULES.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "file",
+        "name":  "C:\\Users\\SOUQ\\Downloads\\apps\\Expense-Tracker\\new app\\docs\\agent-playbooks\\tooling-inventory.md",
+        "status":  "OK",
+        "role":  "Wrote UTF-8 file.",
+        "command":  "",
+        "details":  "",
+        "fix":  ""
+    },
+    {
+        "area":  "gitignore",
+        "name":  ".osgrep/",
+        "status":  "OK",
+        "role":  "No .gitignore file present.",
+        "command":  "",
+        "details":  "Nothing to remove.",
+        "fix":  ""
+    },
+    {
+        "area":  "gitignore",
+        "name":  ".memsearch/",
+        "status":  "OK",
+        "role":  "No .gitignore file present.",
+        "command":  "",
+        "details":  "Nothing to remove.",
+        "fix":  ""
+    },
+    {
+        "area":  "gitignore",
+        "name":  ".mobilerun/",
+        "status":  "OK",
+        "role":  "No .gitignore file present.",
+        "command":  "",
+        "details":  "Nothing to remove.",
+        "fix":  ""
+    },
+    {
+        "area":  "gitignore",
+        "name":  ".portless/",
+        "status":  "OK",
+        "role":  "No .gitignore file present.",
+        "command":  "",
+        "details":  "Nothing to remove.",
+        "fix":  ""
+    },
+    {
+        "area":  "gitignore",
+        "name":  ".dart_tool/",
+        "status":  "OK",
+        "role":  "No .gitignore file present.",
+        "command":  "",
+        "details":  "Nothing to remove.",
+        "fix":  ""
+    },
+    {
+        "area":  "gitignore",
+        "name":  "build/",
+        "status":  "OK",
+        "role":  "No .gitignore file present.",
+        "command":  "",
+        "details":  "Nothing to remove.",
+        "fix":  ""
+    },
+    {
+        "area":  "gitignore",
+        "name":  "docs/agent-playbooks/references/",
+        "status":  "OK",
+        "role":  "No .gitignore file present.",
+        "command":  "",
+        "details":  "Nothing to remove.",
+        "fix":  ""
+    },
+    {
+        "area":  "gitignore",
+        "name":  "docs/agent-playbooks/references/**/.git/",
+        "status":  "OK",
+        "role":  "No .gitignore file present.",
+        "command":  "",
+        "details":  "Nothing to remove.",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-tool",
+        "name":  "flutter",
+        "status":  "OK",
+        "role":  "Flutter SDK available.",
+        "command":  "flutter System.String[]",
+        "details":  "Flutter 3.44.0 • channel stable • https://github.com/flutter/flutter.git Framework • revision 559ffa3f75 (12 days ago) • 2026-05-15 14:13:13 -0700 Engine • hash fcf463a2242790d1fdcd9d044f533080f5022e18 (revision 4c525dac5e) (12 days ago) • 2026-05-15 19:00:04.000Z Tools • Dart 3.12.0 • DevTools 2.57.0",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-tool",
+        "name":  "dart",
+        "status":  "OK",
+        "role":  "Dart SDK available.",
+        "command":  "dart System.String[]",
+        "details":  "Dart SDK version: 3.12.0 (stable) (Fri May 8 01:51:14 2026 -0700) on \"windows_x64\"",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-tool",
+        "name":  "npx",
+        "status":  "OK",
+        "role":  "Skills CLI runner available.",
+        "command":  "npx System.String[]",
+        "details":  "11.6.2",
+        "fix":  ""
+    },
+    {
+        "area":  "verify-tool",
+        "name":  "uv",
+        "status":  "OK",
+        "role":  "Python tool installer available.",
+        "command":  "uv System.String[]",
+        "details":  "uv 0.10.12 (00d72dac7 2026-03-19 x86_64-pc-windows-msvc)",
+        "fix":  ""
+    }
+]

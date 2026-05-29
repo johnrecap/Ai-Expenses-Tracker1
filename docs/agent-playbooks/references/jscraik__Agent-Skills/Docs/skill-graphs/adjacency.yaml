@@ -1,0 +1,180 @@
+# Agent-Skills See Also adjacency map
+# Auto-bootstrapped from SKILL.md See Also tables.
+# Edit this file to add/change cross-skill links.
+# extract-skill-edges.py reads this as a seed.
+#
+# Format:
+#   skill-name:
+#     related-skill: "when to use together"
+#
+
+agents-md:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+autofix:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+autoresearch:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+codex-agent-creator:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+coding-harness:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+context7:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+diagram-cli:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+docs-expert:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+elixir-pro:
+  he-fix-bugs: Triage distributed process failures with evidence-first diagnosis
+  rust-pro: Systems-level concurrency patterns that share OTP-style supervision thinking
+frontend-design:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+frontend-ui-design:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+gh-workflow:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+go:
+  he-fix-bugs: Triage Go runtime errors with evidence-first diagnosis
+  rust-pro: Systems programming with similar error-propagation and ownership concerns
+improve-codebase-architecture:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+insight-report:
+  codex-automation-architect: Convert recommendations into Codex automations
+  skill-refactor: Analyze skill usage and improvement opportunities
+  ubiquitous-language: Extract terminology Jamie can reuse in future prompts
+interview-me:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+javascript-pro:
+  biome-linting: Enforce JavaScript/TypeScript lint and format rules with Biome
+  typescript: Typed JavaScript superset when strict contracts and module boundaries
+    are needed
+llm-wiki:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+oak-api:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+og-image-creator:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+recon-workbench:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+release-notes:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+rust-pro:
+  go: Systems programming with similar error-handling and concurrency patterns
+  he-fix-bugs: Triage Rust ownership and borrow-checker errors with evidence-first
+    diagnosis
+security-ownership-map:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+simplify:
+  he-code-review: Run a structured code-review pass to surface and prioritize risk
+    findings before fix work
+  he-fix-bugs: Use when simplify findings indicate likely regressions or uncertain
+    root cause needing evidence-first diagnosis
+skill-builder:
+  codex-agent-creator: Reuse existing agent TOMLs or create role-specific custom agents
+    for skill-linked delegation flows
+  decide-build-primitive: Decide whether the capability should be a skill, prompt,
+    or agent before authoring it
+  skill-refactor: Audit skill coverage, failures, and overlap using real session evidence
+    instead of authoring doctrine alone
+skill-creator:
+  codex-agent-creator: Create or update custom agents when skill workflows need dedicated
+    role files
+  skillify: Convert hand-authored or rough skills into canonical, graph-aware skill
+    packages
+skill-installer:
+  skill-creator: Author or repair local skill packages before installation
+  skillify: Harden source skills into canonical templates before install/distribution
+swift-development:
+  he-fix-bugs: Triage Swift concurrency and actor isolation issues with evidence-first
+    diagnosis
+  rust-pro: Systems-level safety patterns that share Swift's value-type and concurrency
+    thinking
+toml:
+  he-fix-bugs: Triage config parsing failures with evidence-first diagnosis
+  yaml: Schema-aware config review for YAML-based tooling configs
+triage:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+typescript:
+  biome-linting: Enforce TypeScript lint and format rules with Biome
+  javascript-pro: Base JavaScript patterns when runtime compatibility and async flow
+    need attention
+ubiquitous-language:
+  agents-md: Use when the glossary needs to influence repo-level agent instructions
+    after terminology is stable.
+  docs-expert: Use for broader documentation rewrites after the canonical vocabulary
+    is agreed.
+  verification-before-completion: Pair with prompt translations that turn vague completion
+    language into exact validation evidence.
+ui-ux-creative-coding:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+visual-explainer:
+  project-brain: Capture durable repo learnings and route updates into the canonical
+    memory surface
+  verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
+    evidence before closeout
+yaml:
+  he-fix-bugs: Triage config parsing failures with evidence-first diagnosis
+  toml: Schema-aware config review for TOML-based tooling configs

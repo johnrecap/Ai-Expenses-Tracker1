@@ -1,0 +1,80 @@
+---
+title: Popover Menu
+description: A popover menu displays a menu in a portal aligned to a child.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.popover_menu/
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import defaultSnippet from '@/snippets/examples/overlay/popover-menu/default.json';
+import blurredSnippet from '@/snippets/examples/overlay/popover-menu/blurred.json';
+import nestedSnippet from '@/snippets/examples/overlay/popover-menu/nested.json';
+import tilesSnippet from '@/snippets/examples/overlay/popover-menu/tiles.json';
+import popoverMenuUsage from '@/snippets/usages/overlay/popover_menu/popoverMenu.json';
+import popoverMenuTilesUsage from '@/snippets/usages/overlay/popover_menu/popoverMenuTiles.json';
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/popover-menu' height={500}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={defaultSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Popover Menu']}>
+    <Tab value="Popover Menu">
+        ```shell copy
+        dart run forui style create popover-menu
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `FPopoverMenu(...)`
+<UsageSnippet usage={popoverMenuUsage} />
+
+### `FPopoverMenu.tiles(...)`
+<UsageSnippet usage={popoverMenuTilesUsage} />
+
+## Examples
+
+### Nested Submenu
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/popover-menu' variant='nested' height={500}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={nestedSnippet} />
+  </Tab>
+</Tabs>
+
+### Tiles
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/popover-menu' variant='tiles' height={500}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={tilesSnippet} />
+  </Tab>
+</Tabs>
+
+### Blurred Barrier
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/popover-menu' variant='blurred' height={500}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={blurredSnippet} />
+  </Tab>
+</Tabs>

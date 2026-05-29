@@ -1,0 +1,115 @@
+{
+  "harnessVersion": "0.12.0",
+  "ciProvider": "circleci",
+  "files": [
+    {
+      "path": "harness.contract.json",
+      "action": "created"
+    },
+    {
+      "path": "memory.json",
+      "action": "created"
+    },
+    {
+      "path": ".coderabbit.yaml",
+      "action": "created"
+    },
+    {
+      "path": ".circleci/config.yml",
+      "action": "created"
+    },
+    {
+      "path": "scripts/validate-commit-msg.js",
+      "action": "created"
+    },
+    {
+      "path": "scripts/setup-git-hooks.js",
+      "action": "created"
+    },
+    {
+      "path": "scripts/check-staged-secrets.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/check-doc-style.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/check-related-tests.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/check-semgrep-changed.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/semgrep-pre-push.yml",
+      "action": "created"
+    },
+    {
+      "path": "scripts/refresh-diagram-context.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/check-diagram-freshness.sh",
+      "action": "created"
+    },
+    {
+      "path": "prek.toml",
+      "action": "created"
+    },
+    {
+      "path": "CODESTYLE.md",
+      "action": "created"
+    },
+    {
+      "path": "scripts/codex-preflight.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/codex-preflight-local-memory-legacy.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/codex-learn",
+      "action": "created"
+    },
+    {
+      "path": "scripts/codex-enforced",
+      "action": "created"
+    },
+    {
+      "path": "scripts/verify-work.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/validate-codestyle.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/prepare-worktree.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/harness-cli.sh",
+      "action": "created"
+    },
+    {
+      "path": "scripts/check-environment.sh",
+      "action": "created"
+    },
+    {
+      "path": ".codex/environments/environment.toml",
+      "action": "modified",
+      "backupHash": "cd49adffccd28c2b"
+    },
+    {
+      "path": ".github/CODEOWNERS",
+      "action": "created"
+    },
+    {
+      "path": "WORKFLOW.md",
+      "action": "created"
+    }
+  ]
+}

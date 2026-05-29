@@ -1,0 +1,113 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../constants/constants.dart';
+import '../../ui/widgets/default_card.dart';
+import '../../ui/widgets/rounded_icon.dart';
+import '../../model/bank_account.dart';
+import '../../providers/accounts_provider.dart';
+import '../../ui/device.dart';
+
+class AccountListPage extends ConsumerStatefulWidget {
+  const AccountListPage({super.key});
+
+  @override
+  ConsumerState<AccountListPage> createState() => _AccountListPage();
+}
+
+class _AccountListPage extends ConsumerState<AccountListPage> {
+  @override
+  Widget build(BuildContext context) {
+    final accountsList = ref.watch(activeAccountsProvider);
+    ref.listen(selectedAccountProvider, (_, _) {});
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text('Accounts'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              ref.read(accountsProvider.notifier).reset();
+              Navigator.of(context).pushNamed('/add-account');
+            },
+            icon: const Icon(Icons.add_circle),
+            splashRadius: 28,
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.only(top: Sizes.xl),
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          children: [
+            accountsList.when(
+              data: (accounts) => ReorderableListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: accounts.length,
+                onReorder: (oldIndex, newIndex) {
+                  ref
+                      .read(accountsProvider.notifier)
+                      .reorderAccounts(oldIndex, newIndex);
+                },
+                proxyDecorator: (child, index, animation) {
+                  return Material(
+                    elevation: 5,
+                    color: Colors.transparent,
+                    child: child,
+                  );
+                },
+                itemBuilder: (context, i) {
+                  BankAccount account = accounts[i];
+                  return Container(
+                    key: ValueKey(account.id),
+                    margin: const EdgeInsets.only(bottom: Sizes.lg),
+                    child: DefaultCard(
+                      onTap: () {
+                        ref
+                            .read(selectedAccountProvider.notifier)
+                            .setAccount(account);
+                        Navigator.of(context).pushNamed('/add-account');
+                      },
+                      child: Row(
+                        spacing: Sizes.md,
+                        children: [
+                          RoundedIcon(
+                            icon: accountIconList[account.symbol],
+                            backgroundColor:
+                                accountColorListTheme[account.color],
+                            size: 30,
+                          ),
+                          Expanded(
+                            child: Text(
+                              account.name,
+                              style: Theme.of(context).textTheme.titleLarge!
+                                  .copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                            ),
+                          ),
+                          Icon(
+                            Icons.drag_handle,
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, stack) => Text('Error: $err'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

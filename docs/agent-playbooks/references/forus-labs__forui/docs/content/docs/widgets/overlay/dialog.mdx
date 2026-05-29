@@ -1,0 +1,94 @@
+---
+title: Dialog
+description: A modal dialog interrupts the user with important content and expects a response.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.dialog/
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import defaultSnippet from '@/snippets/examples/overlay/dialog/default.json';
+import verticalSnippet from '@/snippets/examples/overlay/dialog/vertical.json';
+import blurredSnippet from '@/snippets/examples/overlay/dialog/blurred.json';
+import dialogShowUsage from '@/snippets/usages/overlay/dialog/show.json';
+import dialogUsage from '@/snippets/usages/overlay/dialog/dialog.json';
+import dialogAdaptiveUsage from '@/snippets/usages/overlay/dialog/adaptive.json';
+import dialogRawUsage from '@/snippets/usages/overlay/dialog/raw.json';
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/dialog' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={defaultSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Dialog', 'Dialog Route']}>
+    <Tab value="Dialog">
+        ```shell copy
+        dart run forui style create dialog
+        ````
+    </Tab>
+    <Tab value="Dialog Route">
+        ```shell copy
+        dart run forui style create dialog-route
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `showFDialog(...)`
+<UsageSnippet usage={dialogShowUsage} />
+
+### `FDialog(...)`
+<UsageSnippet usage={dialogUsage} />
+
+### `FDialog.adaptive(...)`
+<UsageSnippet usage={dialogAdaptiveUsage} />
+
+### `FDialog.raw(...)`
+<UsageSnippet usage={dialogRawUsage} />
+
+## Examples
+
+### Horizontal Layout
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/dialog' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={defaultSnippet} />
+  </Tab>
+</Tabs>
+
+### Vertical Layout
+
+We recommend using the vertical layout on mobile devices.
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/dialog' variant='vertical' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={verticalSnippet} />
+  </Tab>
+</Tabs>
+
+### Blurred Barrier
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/dialog' variant='blurred' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={blurredSnippet} />
+  </Tab>
+</Tabs>

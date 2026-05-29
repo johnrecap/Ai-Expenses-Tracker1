@@ -1,0 +1,91 @@
+---
+title: Badge
+description: A badge draws attention to specific information, such as labels and counts. Use badges to display status, notifications, or small pieces of information that need to stand out.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.badge/
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import primarySnippet from '@/snippets/examples/data/badge/primary.json';
+import secondarySnippet from '@/snippets/examples/data/badge/secondary.json';
+import outlineSnippet from '@/snippets/examples/data/badge/outline.json';
+import destructiveSnippet from '@/snippets/examples/data/badge/destructive.json';
+import badgeUsage from '@/snippets/usages/data/badge/badge.json';
+import badgeRawUsage from '@/snippets/usages/data/badge/raw.json';
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+      <Widget name='data/badge' variant='primary'/>
+  </Tab>
+  <Tab value="Code">
+      <CodeSnippet snippet={primarySnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Badges']}>
+    <Tab value="Badges">
+        ```shell copy
+        dart run forui style create badges
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `FBadge(...)`
+<UsageSnippet usage={badgeUsage} />
+
+### `FBadge.raw(...)`
+<UsageSnippet usage={badgeRawUsage} />
+
+## Examples
+
+### Primary
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+      <Widget name='data/badge' variant='primary'/>
+  </Tab>
+  <Tab value="Code">
+      <CodeSnippet snippet={primarySnippet} />
+  </Tab>
+</Tabs>
+
+### Secondary
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+      <Widget name='data/badge' variant='secondary'/>
+  </Tab>
+  <Tab value="Code">
+      <CodeSnippet snippet={secondarySnippet} />
+  </Tab>
+</Tabs>
+
+### Outline
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+      <Widget name='data/badge' variant='outline'/>
+  </Tab>
+  <Tab value="Code">
+      <CodeSnippet snippet={outlineSnippet} />
+  </Tab>
+</Tabs>
+
+### Destructive
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+      <Widget name='data/badge' variant='destructive'/>
+  </Tab>
+  <Tab value="Code">
+      <CodeSnippet snippet={destructiveSnippet} />
+  </Tab>
+</Tabs>

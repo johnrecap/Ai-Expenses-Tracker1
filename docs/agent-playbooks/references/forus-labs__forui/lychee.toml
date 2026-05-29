@@ -1,0 +1,21 @@
+exclude_path = [
+    "doc/**",
+    "forui/example/**",
+    "forui/src/**",
+    "forui/lib/**",
+    "forui/example/**",
+    "forui_assets/lib/**",
+    "forui_hooks/lib/**",
+    "samples/android/**",
+    "samples/ios/**",
+    "samples/macos/**",
+    "samples/web/**",
+    "samples/lib/**",
+]
+
+exclude = [
+    'https://ux.stackexchange.com/questions/105024/why-dont-button-html-elements-have-a-css-cursor-pointer-by-default',
+    'https://lucide.dev/icons/',
+    '^https://(www\.)?medium\.com',
+    '^https://(www\.)?github\.com',
+]

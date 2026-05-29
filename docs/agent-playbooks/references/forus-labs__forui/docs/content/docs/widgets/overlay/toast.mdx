@@ -1,0 +1,195 @@
+---
+title: Toast
+description: An opinionated toast that temporarily displays a succinct message.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.toast/
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import defaultSnippet from '@/snippets/examples/overlay/toast/default.json';
+import showToastUsage from '@/snippets/usages/overlay/toast/showToast.json';
+import showRawToastUsage from '@/snippets/usages/overlay/toast/showRawToast.json';
+import toastUsage from '@/snippets/usages/overlay/toast/toast.json';
+import toasterUsage from '@/snippets/usages/overlay/toast/toaster.json';
+import rawSnippet from '@/snippets/examples/overlay/toast/raw.json';
+import swipeSnippet from '@/snippets/examples/overlay/toast/swipe.json';
+import swipeDownSnippet from '@/snippets/examples/overlay/toast/swipe-down.json';
+import swipeDisabledSnippet from '@/snippets/examples/overlay/toast/swipe-disabled.json';
+import noAutoDismissSnippet from '@/snippets/examples/overlay/toast/no-auto-dismiss.json';
+import alwaysExpandSnippet from '@/snippets/examples/overlay/toast/always-expand.json';
+import disabledExpandSnippet from '@/snippets/examples/overlay/toast/disabled-expand.json';
+import destructiveSnippet from '@/snippets/examples/overlay/toast/destructive.json';
+import customAlignmentSnippet from '@/snippets/examples/overlay/toast/custom-alignment.json';
+
+<Callout type="info">
+    To show a toast, use the `showFToast(...)` or `showRawFToast(...)` functions. The function must be called from a
+    descendant of a `FToaster`.
+
+    We recommend placing `FToaster` in the `builder` method of `MaterialApp`/`WidgetsApp`/`CupertinoApp`:
+    ```dart
+    MaterialApp(
+      builder: (context, child) => FTheme(
+        data: FThemes.neutral.light,
+        child: FToaster(child: child!),
+      ),
+      home: HomePage(),
+    );
+    ```
+</Callout>
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/toast' height={500}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={defaultSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Toaster', 'Toasts', 'Toast']}>
+    <Tab value="Toaster">
+        ```shell copy
+        dart run forui style create toaster
+        ````
+    </Tab>
+    <Tab value="Toasts">
+        ```shell copy
+        dart run forui style create toasts
+        ````
+    </Tab>
+    <Tab value="Toast">
+        ```shell copy
+        dart run forui style create toast
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `showFToast(...)`
+<UsageSnippet usage={showToastUsage} />
+
+### `showRawFToast(...)`
+<UsageSnippet usage={showRawToastUsage} />
+
+### `FToast(...)`
+<UsageSnippet usage={toastUsage} />
+
+### `FToaster(...)`
+<UsageSnippet usage={toasterUsage} />
+
+## Examples
+
+### Appearance
+
+#### Destructive
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/toast' variant='destructive' height={300}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={destructiveSnippet} />
+  </Tab>
+</Tabs>
+
+#### Custom Alignment
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/toast' variant='custom-alignment' height={300}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={customAlignmentSnippet} />
+  </Tab>
+</Tabs>
+
+#### No Auto-Dismiss
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/toast' variant='no-auto-dismiss' height={300}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={noAutoDismissSnippet} />
+  </Tab>
+</Tabs>
+
+#### Raw
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/toast' variant='raw' height={620}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={rawSnippet} />
+  </Tab>
+</Tabs>
+
+### Behavior
+
+#### Always Expanded
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/toast' variant='always-expand' height={300}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={alwaysExpandSnippet} />
+  </Tab>
+</Tabs>
+
+#### Expansion Disabled
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/toast' variant='disabled-expand'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={disabledExpandSnippet} />
+  </Tab>
+</Tabs>
+
+### Swipe to Dismiss
+
+#### Default
+
+By default, toasts are dismissible by horizontally swiping towards the closest edge of the screen.
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/toast' variant='swipe' height={300}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={swipeSnippet} />
+  </Tab>
+</Tabs>
+
+#### Down
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/toast' variant='swipe-down' height={300}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={swipeDownSnippet} />
+  </Tab>
+</Tabs>
+
+#### Disabled
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='overlay/toast' variant='swipe-disabled' height={300}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={swipeDisabledSnippet} />
+  </Tab>
+</Tabs>

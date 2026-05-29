@@ -1,0 +1,128 @@
+name: Forui Build
+
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - .github/workflows/forui_build.yaml
+      - forui/**
+  pull_request:
+    paths:
+      - forui/**
+
+jobs:
+  test:
+    name: Build & test
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: forui
+    strategy:
+      matrix:
+        flutter-version: [ 3.x ]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2.23.0
+        with:
+          flutter-version: ${{ matrix.flutter-version }}
+      - run: flutter pub get
+      - run: dart run build_runner build
+      - run: flutter analyze
+      # Goldens are skipped in CI until the macos-latest runner image catches up to the
+      # macOS version most contributors are on. See flutter/flutter#184182. Re-enable by
+      # removing --exclude-tags.
+      - run: flutter test --coverage --exclude-tags golden
+      - run: |
+          if output=$(dart doc --dry-run 2>&1); then
+              if echo "$output" | grep -q -i "warning:"; then
+                  echo "Documentation warnings found:"
+                  echo "$output" | grep -i "warning:"
+                  exit 1
+              else
+                  echo "No documentation warnings found!"
+                  exit 0
+              fi
+          else
+              echo "Error: dart doc command failed"
+              echo "$output"
+              exit 1
+          fi
+      - uses: codecov/codecov-action@v6
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+
+  test-cli:
+    name: Build CLI
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flutter-version: [ 3.x ]
+    defaults:
+      run:
+        working-directory: forui/example
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2.23.0
+        with:
+          flutter-version: ${{ matrix.flutter-version }}
+      - run: dart run build_runner build
+        working-directory: forui
+      - run: dart run forui init -f
+      - run: dart run forui theme create zinc -f
+      - run: dart run forui style create -af
+      - run: dart run forui style create -af -o ./lib/theme/all_styles.dart
+      - run: dart run forui snippet create icon-mapping -f
+      - run: dart run forui snippet create main-basic -f
+      - run: dart run forui snippet create main-router -f
+      - run: dart run forui snippet create material-theme -f
+      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+  build-android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flutter-version: [ 3.x ]
+    defaults:
+      run:
+        working-directory: forui/example
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 17
+      - uses: subosito/flutter-action@v2.23.0
+        with:
+          flutter-version: ${{ matrix.flutter-version }}
+      - run: dart run build_runner build
+        working-directory: forui
+
+      - run: flutter pub get
+      - run: dart run build_runner build
+      - run: flutter build appbundle --debug --no-pub --no-tree-shake-icons
+
+  build-ios:
+    name: Build iOS
+    # TODO: Revert to macos-latest after Sept 12025.
+    # github.blog/changelog/2025-07-11-upcoming-changes-to-macos-hosted-runners-macos-latest-migration-and-xcode-support-policy-updates/
+    # https://github.com/actions/runner-images/issues/12758
+    runs-on: macos-26
+    defaults:
+      run:
+        working-directory: forui/example
+    strategy:
+      matrix:
+        flutter-version: [ 3.x ]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2.23.0
+        with:
+          flutter-version: ${{ matrix.flutter-version }}
+      - run: dart run build_runner build
+        working-directory: forui
+
+      - run: flutter pub get
+      - run: dart run build_runner build
+      - run: flutter build ios --debug --no-codesign --no-pub

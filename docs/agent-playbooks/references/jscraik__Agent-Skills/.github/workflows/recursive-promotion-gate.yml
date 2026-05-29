@@ -1,0 +1,55 @@
+name: recursive-promotion-gate
+
+on:
+  pull_request:
+    paths:
+      - "Infrastructure/artifacts/skill-graphs/runs/**/promotion_decision.json"
+      - "Infrastructure/artifacts/skill-graphs/runs/**/iteration_journal.jsonl"
+      - "Infrastructure/artifacts/skill-graphs/runs/**/run.json"
+      - "Infrastructure/artifacts/skill-graphs/lessons/**"
+      - "Docs/skill-graphs/governance/recursive-loop-approvers.yaml"
+      - "Docs/skill-graphs/governance/recursive-loop-approvers.sig"
+      - "Infrastructure/scripts/human_promote_recursive_run.sh"
+      - "Infrastructure/scripts/validate_recursive_promotions.sh"
+      - "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/validate_recursive_promotion.py"
+      - ".github/workflows/recursive-promotion-gate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-promotion-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Validate changed promotion decisions
+        if: github.event_name == 'pull_request'
+        run: |
+          bash Infrastructure/scripts/validate_recursive_promotions.sh \
+            --changed-only \
+            --base-sha "${{ github.event.pull_request.base.sha }}" \
+            --head-sha "${{ github.event.pull_request.head.sha }}" \
+            --report-json Infrastructure/artifacts/skill-graphs/pilot/promotion-validation-report.json \
+            --strict-runs
+
+      - name: Validate all promotion decisions (manual)
+        if: github.event_name != 'pull_request'
+        run: |
+          bash Infrastructure/scripts/validate_recursive_promotions.sh \
+            --report-json Infrastructure/artifacts/skill-graphs/pilot/promotion-validation-report.json \
+            --strict-runs
+
+      - name: Upload promotion validation report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: recursive-promotion-validation
+          path: Infrastructure/artifacts/skill-graphs/pilot/promotion-validation-report.json

@@ -1,0 +1,131 @@
+---
+title: Sidebar
+description: A sidebar widget that provides an opinionated layout for navigation on the side of the screen.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.sidebar/
+---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import defaultSnippet from '@/snippets/examples/navigation/sidebar/default.json';
+import nestedSnippet from '@/snippets/examples/navigation/sidebar/nested.json';
+import customWidthSnippet from '@/snippets/examples/navigation/sidebar/custom-width.json';
+import sheetSnippet from '@/snippets/examples/navigation/sidebar/sheet.json';
+import sidebarUsage from '@/snippets/usages/navigation/sidebar/sidebar.json';
+import sidebarBuilderUsage from '@/snippets/usages/navigation/sidebar/sidebarBuilder.json';
+import sidebarRawUsage from '@/snippets/usages/navigation/sidebar/sidebarRaw.json';
+import sidebarGroupUsage from '@/snippets/usages/navigation/sidebar/sidebarGroup.json';
+import sidebarItemUsage from '@/snippets/usages/navigation/sidebar/sidebarItem.json';
+
+<Callout type="info">
+  A sidebar is typically used with `FScaffold`. Usage of `FScaffold` can be found [here](/docs/widgets/layout/scaffold).
+</Callout>
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='navigation/sidebar' height={500}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={defaultSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Sidebar', 'Sidebar Group', 'Sidebar Item']}>
+    <Tab value="Sidebar">
+        ```shell copy
+        dart run forui style create sidebar
+        ````
+    </Tab>
+    <Tab value="Sidebar Group">
+        ```shell copy
+        dart run forui style create sidebar-group
+        ````
+    </Tab>
+    <Tab value="Sidebar Item">
+        ```shell copy
+        dart run forui style create sidebar-item
+        ````
+    </Tab>
+</Tabs>
+
+## Anatomy
+
+This segment describes the anatomy of the various elements of a sidebar.
+
+### `FSidebar`
+
+The widget that provides an opinionated layout on the side of the screen. The widget has the following sections:
+
+| Name    | Parameter      | Position   | Optional |
+| :------ | :------------- | :--------- | :------- |
+| header  | header         | sticky     | Yes      |
+| content | child/children | scrollable | No       |
+| footer  | footer         | sticky     | Yes      |
+
+### `FSidebarGroup`
+
+A widget that is used to group several `FSidebarItem`s.
+
+### `FSidebarItem`
+
+Represents an item on the sidebar. May be nested in `FSidebarItem.children` to create nested items.
+
+## Usage
+
+### `FSidebar(...)`
+<UsageSnippet usage={sidebarUsage} />
+
+### `FSidebar.builder(...)`
+<UsageSnippet usage={sidebarBuilderUsage} />
+
+### `FSidebar.raw(...)`
+<UsageSnippet usage={sidebarRawUsage} />
+
+### `FSidebarGroup(...)`
+<UsageSnippet usage={sidebarGroupUsage} />
+
+### `FSidebarItem(...)`
+<UsageSnippet usage={sidebarItemUsage} />
+
+## Examples
+
+### Sheet Sidebar
+
+Suited for devices with limited screen space.
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='navigation/sidebar' variant='sheet' height={500} />
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={sheetSnippet} />
+  </Tab>
+</Tabs>
+
+### Custom Width
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='navigation/sidebar' variant='custom-width' height={300} />
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={customWidthSnippet} />
+  </Tab>
+</Tabs>
+
+### Nested `FSidebarItem`
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='navigation/sidebar' variant='nested' height={500} />
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={nestedSnippet} />
+  </Tab>
+</Tabs>

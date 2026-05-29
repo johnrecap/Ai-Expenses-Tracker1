@@ -1,0 +1,36 @@
+---
+title: Portal
+description: A "floating" portal anchored relative to a child widget's edge.
+apiReference: https://pub.dev/documentation/forui/latest/forui.foundation/FPortal-class.html
+---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import portalDefault from '@/snippets/examples/foundation/portal/default.json';
+import portalUsage from '@/snippets/usages/foundation/portal/portal.json';
+
+<Callout type="info">
+  This widget is typically used to create other high-level widgets, e.g., [popover](../overlay/popover) or
+  [tooltip](../overlay/tooltip). You should prefer those high-level widgets unless you're creating a custom widget.
+</Callout>
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='foundation/portal' height={500}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={portalDefault} />
+  </Tab>
+</Tabs>
+
+## Usage
+
+### `FPortal(...)`
+<UsageSnippet usage={portalUsage} />
+
+## Visualization
+
+<Widget name='foundation/portal-visualization' height={600}/>

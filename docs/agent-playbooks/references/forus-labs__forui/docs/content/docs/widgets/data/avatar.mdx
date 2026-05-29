@@ -1,0 +1,68 @@
+---
+title: Avatar
+description: A circular image component that displays user profile pictures with a fallback option. The Avatar component provides a consistent way to represent users in your application, displaying profile images with fallbacks to initials or icons when images are unavailable.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.avatar/
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import defaultSnippet from '@/snippets/examples/data/avatar/default.json';
+import rawSnippet from '@/snippets/examples/data/avatar/raw.json';
+import invalidSnippet from '@/snippets/examples/data/avatar/invalid.json';
+import avatarUsage from '@/snippets/usages/data/avatar/avatar.json';
+import avatarRawUsage from '@/snippets/usages/data/avatar/raw.json';
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+      <Widget name='data/avatar'/>
+  </Tab>
+  <Tab value="Code">
+      <CodeSnippet snippet={defaultSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Avatar']}>
+    <Tab value="Avatar">
+        ```shell copy
+        dart run forui style create avatar
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `FAvatar(...)`
+<UsageSnippet usage={avatarUsage} />
+
+### `FAvatar.raw(...)`
+<UsageSnippet usage={avatarRawUsage} />
+
+## Examples
+
+### Raw
+
+<Tabs items={['Preview', 'Code']}>
+    <Tab value="Preview">
+        <Widget name='data/avatar' variant='raw'/>
+    </Tab>
+    <Tab value="Code">
+        <CodeSnippet snippet={rawSnippet} />
+    </Tab>
+</Tabs>
+
+### Fallback
+
+<Tabs items={['Preview', 'Code']}>
+    <Tab value="Preview">
+        <Widget name='data/avatar' variant='invalid'/>
+    </Tab>
+    <Tab value="Code">
+        <CodeSnippet snippet={invalidSnippet} />
+    </Tab>
+</Tabs>

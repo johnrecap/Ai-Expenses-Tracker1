@@ -1,0 +1,38 @@
+---
+title: Determinate Progress
+description: Displays a determinate linear indicator showing the completion progress of a task.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.progress/
+---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import determinateSnippet from '@/snippets/examples/feedback/progress/determinate.json';
+import determinateProgressUsage from '@/snippets/usages/feedback/progress/determinateProgress.json';
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='feedback/progress' variant='determinate'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={determinateSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Determinate Progress']}>
+    <Tab value="Determinate Progress">
+        ```shell copy
+        dart run forui style create determinate-progress
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `FDeterminateProgress(...)`
+<UsageSnippet usage={determinateProgressUsage} />

@@ -1,0 +1,119 @@
+---
+title: Item
+description: An item is typically used to group related information together.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.item/
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import defaultSnippet from '@/snippets/examples/data/item/default.json';
+import untappableSnippet from '@/snippets/examples/data/item/untappable.json';
+import disabledSnippet from '@/snippets/examples/data/item/disabled.json';
+import subtitleSnippet from '@/snippets/examples/data/item/subtitle.json';
+import detailsSnippet from '@/snippets/examples/data/item/details.json';
+import destructiveSnippet from '@/snippets/examples/data/item/destructive.json';
+import itemUsage from '@/snippets/usages/data/item/item.json';
+import itemRawUsage from '@/snippets/usages/data/item/raw.json';
+
+<Callout type="info">
+    This widget is typically used to create more complex widgets rather than being used directly.
+</Callout>
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='data/item'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={defaultSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Items', 'Item', 'Item Content']}>
+    <Tab value="Items">
+        ```shell copy
+        dart run forui style create items
+        ````
+    </Tab>
+    <Tab value="Item">
+        ```shell copy
+        dart run forui style create item
+        ````
+    </Tab>
+    <Tab value="Item Content">
+        ```shell copy
+        dart run forui style create item-content
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `FItem(...)`
+<UsageSnippet usage={itemUsage} />
+
+### `FItem.raw(...)`
+<UsageSnippet usage={itemRawUsage} />
+
+## Examples
+
+### Destructive
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='data/item' variant='destructive'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={destructiveSnippet} />
+  </Tab>
+</Tabs>
+
+### Untappable
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='data/item' variant='untappable'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={untappableSnippet} />
+  </Tab>
+</Tabs>
+
+### Disabled
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='data/item' variant='disabled'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={disabledSnippet} />
+  </Tab>
+</Tabs>
+
+### With Subtitle
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='data/item' variant='subtitle'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={subtitleSnippet} />
+  </Tab>
+</Tabs>
+
+### With Details
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='data/item' variant='details'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={detailsSnippet} />
+  </Tab>
+</Tabs>

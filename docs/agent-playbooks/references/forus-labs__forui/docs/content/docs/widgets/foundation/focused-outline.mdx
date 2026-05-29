@@ -1,0 +1,26 @@
+---
+title: Focused Outline
+description: An outline around a focused widget that does not affect its layout.
+apiReference: https://pub.dev/documentation/forui/latest/forui.foundation/FFocusedOutline-class.html
+---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import focusedOutlineDefault from '@/snippets/examples/foundation/focused-outline/default.json';
+import focusedOutlineUsage from '@/snippets/usages/foundation/focused_outline/focusedOutline.json';
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='foundation/focused-outline' height={300}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={focusedOutlineDefault} />
+  </Tab>
+</Tabs>
+
+## Usage
+
+### `FFocusedOutline(...)`
+<UsageSnippet usage={focusedOutlineUsage} />

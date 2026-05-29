@@ -1,0 +1,64 @@
+name: very_good_cli
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/very_good_cli.yaml"
+      - "bin/**"
+      - "bricks/**"
+      - "lib/**"
+      - "test/**"
+      - "pubspec.yaml"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/very_good_cli.yaml"
+      - "bin/**"
+      - "bricks/**"
+      - "lib/**"
+      - "test/**"
+      - "pubspec.yaml"
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: subosito/flutter-action@v2.8.0
+        with:
+          flutter-version: "3.41.x"
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Format
+        run: dart format --set-exit-if-changed lib test
+
+      - name: Analyze
+        run: flutter analyze lib test
+
+      - name: Verify Build
+        run: flutter pub run test --run-skipped -t pull-request-only
+
+      - name: Run Tests
+        run: |
+          flutter pub global activate coverage 1.15.0
+          flutter pub run test -j 1 -x pull-request-only -x e2e --coverage=coverage --test-randomize-ordering-seed random && dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=lib
+
+      - name: Check Code Coverage
+        uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
+        with:
+          exclude: "**/*.gen.dart"
+
+  pana:
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/pana.yml@v1
+    with:
+      pana_version: 0.22.22

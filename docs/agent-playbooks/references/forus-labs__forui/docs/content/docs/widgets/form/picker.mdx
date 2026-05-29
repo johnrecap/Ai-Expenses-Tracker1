@@ -1,0 +1,103 @@
+---
+title: Picker
+description: A generic picker that allows an item to be selected. It is composed of one or more wheels, optionally with separators between those wheels. The picker supports arrow key navigation. Recommended for touch devices.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.picker/
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import pickerUsage from '@/snippets/usages/form/picker/picker.json';
+import pickerWheelUsage from '@/snippets/usages/form/picker/pickerWheel.json';
+import pickerWheelBuilderUsage from '@/snippets/usages/form/picker/pickerWheelBuilder.json';
+import defaultSnippet from '@/snippets/examples/form/picker/default.json';
+import loopSnippet from '@/snippets/examples/form/picker/loop.json';
+import builderSnippet from '@/snippets/examples/form/picker/builder.json';
+import multipleSnippet from '@/snippets/examples/form/picker/multiple.json';
+import separatorSnippet from '@/snippets/examples/form/picker/separator.json';
+
+The picker supports arrow key navigation:
+
+- Up/Down arrows: Increment/decrement selected value
+- Left/Right arrows: Move between wheels
+
+Recommended for touch devices.
+
+<Tabs items={['Preview', 'Code']}>
+    <Tab value="Preview">
+        <Widget name='form/picker'/>
+    </Tab>
+    <Tab value="Code">
+        <CodeSnippet snippet={defaultSnippet} />
+    </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Picker']}>
+    <Tab value="Picker">
+        ```shell copy
+        dart run forui style create picker
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `FPicker(...)`
+<UsageSnippet usage={pickerUsage} />
+
+### `FPickerWheel(...)`
+<UsageSnippet usage={pickerWheelUsage} />
+
+### `FPickerWheel.builder(...)`
+<UsageSnippet usage={pickerWheelBuilderUsage} />
+
+## Examples
+
+### Loop
+
+<Tabs items={['Preview', 'Code']}>
+    <Tab value="Preview">
+        <Widget name='form/picker' variant='loop'/>
+    </Tab>
+    <Tab value="Code">
+        <CodeSnippet snippet={loopSnippet} />
+    </Tab>
+</Tabs>
+
+### Lazy
+
+<Tabs items={['Preview', 'Code']}>
+    <Tab value="Preview">
+        <Widget name='form/picker' variant='builder'/>
+    </Tab>
+    <Tab value="Code">
+        <CodeSnippet snippet={builderSnippet} />
+    </Tab>
+</Tabs>
+
+### Multiple Wheels
+
+<Tabs items={['Preview', 'Code']}>
+    <Tab value="Preview">
+        <Widget name='form/picker' variant='multiple'/>
+    </Tab>
+    <Tab value="Code">
+        <CodeSnippet snippet={multipleSnippet} />
+    </Tab>
+</Tabs>
+
+### With Separators
+
+<Tabs items={['Preview', 'Code']}>
+    <Tab value="Preview">
+        <Widget name='form/picker' variant='separator'/>
+    </Tab>
+    <Tab value="Code">
+        <CodeSnippet snippet={separatorSnippet} />
+    </Tab>
+</Tabs>

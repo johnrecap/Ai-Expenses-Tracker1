@@ -1,0 +1,51 @@
+---
+title: Circular Progress
+description: Displays an indeterminate circular indicator showing the completion progress of a task.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.progress/
+---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import circularSnippet from '@/snippets/examples/feedback/progress/circular.json';
+import circularProgressUsage from '@/snippets/usages/feedback/progress/circularProgress.json';
+import circularProgressLoaderUsage from '@/snippets/usages/feedback/progress/circularProgressLoader.json';
+import circularProgressPinwheelUsage from '@/snippets/usages/feedback/progress/circularProgressPinwheel.json';
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='feedback/progress' variant='circular'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={circularSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Circular Progress Sizes', 'Circular Progress']}>
+    <Tab value="Circular Progress Sizes">
+        ```shell copy
+        dart run forui style create circular-progress-sizes
+        ````
+    </Tab>
+    <Tab value="Circular Progress">
+        ```shell copy
+        dart run forui style create circular-progress
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `FCircularProgress(...)`
+<UsageSnippet usage={circularProgressUsage} />
+
+### `FCircularProgress.loader(...)`
+<UsageSnippet usage={circularProgressLoaderUsage} />
+
+### `FCircularProgress.pinwheel(...)`
+<UsageSnippet usage={circularProgressPinwheelUsage} />

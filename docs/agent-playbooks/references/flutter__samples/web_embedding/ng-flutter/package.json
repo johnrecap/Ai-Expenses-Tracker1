@@ -1,0 +1,42 @@
+{
+  "name": "ng-flutter",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "prebuild": "pushd flutter && flutter clean && flutter build web && popd",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "^21.1.1",
+    "@angular/cdk": "^21.1.2",
+    "@angular/common": "^21.1.1",
+    "@angular/compiler": "^21.1.0",
+    "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.1.0",
+    "@angular/material": "^21.1.1",
+    "@angular/platform-browser": "^21.2.0",
+    "@angular/platform-browser-dynamic": "^21.1.2",
+    "@angular/router": "^21.1.0",
+    "rxjs": "~7.8.1",
+    "tslib": "^2.6.2",
+    "zone.js": "~0.15.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^21.1.2",
+    "@angular/cli": "~21.1.1",
+    "@angular/compiler-cli": "^21.2.0",
+    "@types/jasmine": "~6.0.0",
+    "jasmine-core": "~6.0.0",
+    "karma": "~6.4.2",
+    "karma-chrome-launcher": "~3.2.0",
+    "karma-coverage": "~2.2.0",
+    "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "~2.1.0",
+    "typescript": "~6.0.3"
+  },
+  "sideEffects": false
+}

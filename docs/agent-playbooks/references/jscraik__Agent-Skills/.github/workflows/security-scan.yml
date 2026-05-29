@@ -1,0 +1,193 @@
+name: Security Scans
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Nightly at 02:00 UTC — catches new CVEs in dependencies without a code change
+    - cron: "0 2 * * *"
+
+permissions:
+  contents: read
+  security-events: write  # required for SARIF upload to GitHub Advanced Security
+
+jobs:
+  # ------------------------------------------------------------------
+  # Gitleaks — secrets detection
+  # L-01: no secrets-leak assertion in CI
+  # ------------------------------------------------------------------
+  gitleaks:
+    name: Gitleaks (secrets scan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0  # full history so Gitleaks can diff commits
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Fail the workflow on any finding; set to "warn" to soft-fail
+          GITLEAKS_ENABLE_COMMENTS: "true"
+
+  # ------------------------------------------------------------------
+  # Semgrep — static analysis (Python + TypeScript + shell)
+  # Covers prompt-injection patterns not caught by the string-only scan
+  # ------------------------------------------------------------------
+  semgrep:
+    name: Semgrep (SAST)
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Run Semgrep (auto ruleset + secrets)
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f semgrep.sarif
+          git config --global --add safe.directory "$PWD"
+          # Note: p/default finds 12+ findings; using p/secrets until findings addressed
+          semgrep_args=(
+            --config "p/secrets"
+            --exclude "Infrastructure/artifacts/**"
+            --exclude "artifacts/**"
+            --metrics=off
+            --sarif --output semgrep.sarif
+          )
+
+          event_name="${{ github.event_name }}"
+          if [ "${event_name}" = "pull_request" ]; then
+            base_ref="${{ github.base_ref }}"
+            git fetch origin "${base_ref}:${base_ref}" --depth=1
+
+            # Scan full repo on PR (scanning individual changed files causes exit code 7)
+            echo "Scanning repository on PR branch..."
+            semgrep scan "${semgrep_args[@]}" -- . || semgrep_status=$?
+          else
+            semgrep scan "${semgrep_args[@]}" -- . || semgrep_status=$?
+          fi
+
+          semgrep_status="${semgrep_status:-0}"
+          if [ "${semgrep_status}" -ne 0 ]; then
+            echo "::error::Semgrep failed with exit status ${semgrep_status}"
+            exit "${semgrep_status}"
+          fi
+
+          if [ ! -f semgrep.sarif ]; then
+            echo "::error::Semgrep did not produce semgrep.sarif"
+            exit 1
+          fi
+
+          findings_count="$(jq '[.runs[]?.results[]?] | length' semgrep.sarif)"
+          if [ "${findings_count}" -gt 0 ]; then
+            echo "::error::Semgrep found ${findings_count} finding(s)"
+            exit 1
+          fi
+
+      - name: Upload Semgrep SARIF to GitHub
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep
+
+  # ------------------------------------------------------------------
+  # Trivy — dependency vulnerability scan (Python lockfiles, node_modules)
+  # ------------------------------------------------------------------
+  trivy:
+    name: Trivy (dependency CVE scan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.2
+
+      - name: Run Trivy (filesystem scan)
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          format: sarif
+          output: trivy.sarif
+          limit-severities-for-sarif: true
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          ignore-unfixed: true
+
+      - name: Upload Trivy SARIF to GitHub
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy.sarif
+          category: trivy
+
+  # ------------------------------------------------------------------
+  # Canonical artifact pre-upload secrets check (L-01)
+  # Scans generated telemetry / canonical lesson artifacts for secret
+  # patterns before they are uploaded anywhere.
+  # ------------------------------------------------------------------
+  artifact-secret-check:
+    name: Artifact secrets pre-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Install Gitleaks
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+          arch="$(uname -m | tr '[:upper:]' '[:lower:]')"
+          case "$arch" in
+            x86_64|amd64) arch="x64" ;;
+            aarch64|arm64) arch="arm64" ;;
+          esac
+          asset_url="$(curl -fsSL \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
+            | jq -r --arg os "$os" --arg arch "$arch" '
+                .assets[]
+                | .browser_download_url
+                | select(endswith("_" + $os + "_" + $arch + ".tar.gz"))
+              ' \
+            | head -n 1)"
+          if [ -z "$asset_url" ]; then
+            echo "::error::Unable to resolve gitleaks release asset for os=${os} arch=${arch}"
+            exit 1
+          fi
+          curl -sSfL "$asset_url" | tar -xz -C /usr/local/bin gitleaks
+          chmod +x /usr/local/bin/gitleaks
+
+      - name: Scan artifacts directory for secrets
+        run: |
+          if [ -d "Infrastructure/artifacts" ]; then
+            gitleaks detect \
+              --source Infrastructure/artifacts/ \
+              --config .gitleaks.toml \
+              --no-git \
+              --redact \
+              --exit-code 1 \
+              --report-format json \
+              --report-path gitleaks-artifacts.json || {
+                echo "::error::Secret pattern detected in Infrastructure/artifacts/ — review gitleaks-artifacts.json"
+                exit 1
+              }
+          else
+            echo "No Infrastructure/artifacts/ directory — skipping."
+          fi
+
+      - name: Upload Gitleaks artifact report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-artifacts-report
+          path: gitleaks-artifacts.json
+          retention-days: 7

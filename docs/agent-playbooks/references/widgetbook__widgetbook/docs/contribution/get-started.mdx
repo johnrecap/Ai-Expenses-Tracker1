@@ -1,0 +1,77 @@
+# Getting Started
+
+Setting up your environment correctly is crucial. This ensures that you can
+develop features or fix bugs in an environment that mimics the actual
+development conditions, reducing inconsistencies and issues down the line.
+Here's a step-by-step guide to get you started:
+
+1. **Fork the Repository:** Before you make any changes, you'll need your copy
+   of the Widgetbook repository. You can freely experiment without affecting the
+   original project by forking the repository. To do this:
+
+   - Visit the
+     [Widgetbook repository](https://github.com/widgetbook/widgetbook).
+   - Click on the "**Fork**" button at the top right.
+   - Once forked, you'll have your copy under your GitHub account.
+
+   _Tip:_ Regularly sync your fork with the main repository to stay updated with
+   the latest changes. This helps in avoiding merge conflicts later on. Check
+   out [Synchronize Your Fork](/contribution/sync-your-fork).
+
+2. **Clone Your Fork:** With your fork ready, clone it to your local machine to
+   start development. Replace `<YOUR_USERNAME>` with your actual GitHub
+   username:
+
+   ```bash
+   git clone https://github.com/<YOUR_USERNAME>/widgetbook.git
+   ```
+
+   This command creates a local copy of your forked Widgetbook repository. You
+   can navigate, make changes, and test them on this local copy.
+
+3. **Install Melos:** `Melos` is a tool that streamlines working with
+   mono-repositories (repositories containing multiple projects/packages).
+   Widgetbook leverages `Melos` to efficiently manage its various packages:
+
+   ```bash
+   dart pub global activate melos
+   ```
+
+   By activating Melos, you're setting yourself up to easily manage
+   dependencies, run scripts, and more across all the packages in Widgetbook.
+
+4. **Bootstrap the Repository:** Setting up the repository involves multiple
+   steps, including installing dependencies, bootstrapping, and generating
+   necessary files:
+
+   - Navigate to the cloned repository:
+
+     ```bash
+     cd widgetbook
+     ```
+
+   - Fetch and install dependencies for the project:
+
+     ```bash
+     flutter pub get
+     ```
+
+   - Using Melos, bootstrap the project. This step links inter-dependent
+     packages in the repo, ensuring they work together seamlessly:
+
+     ```bash
+     melos bootstrap
+     ```
+
+   - Generate any necessary build files:
+
+     ```bash
+     melos generate
+     ```
+
+   _Note:_ If at any point you encounter issues, refer to Widgetbook's official
+   documentation or seek help from the community on platforms like Discord or
+   GitHub Discussions.
+
+5. **Contribution Workflow**: Now that you are ready, let's dive into how to
+   send a good PR. Check out [Contribution Workflow](/contribution/workflow).

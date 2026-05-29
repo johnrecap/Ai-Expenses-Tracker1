@@ -1,0 +1,405 @@
+@Tags(['golden'])
+library;
+
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:forui/forui.dart';
+import '../../test_scaffold.dart';
+
+const fruits = [
+  'Apple',
+  'Banana',
+  'Blueberry',
+  'Grapes',
+  'Lemon',
+  'Mango',
+  'Kiwi',
+  'Orange',
+  'Peach',
+  'Pear',
+  'Pineapple',
+  'Plum',
+  'Raspberry',
+  'Strawberry',
+  'Watermelon',
+];
+
+void main() {
+  const key = ValueKey('autocomplete');
+
+  group('blue screen', () {
+    testWidgets('default', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.blue(
+          child: FAutocomplete.text(
+            key: key,
+            style: TestScaffold.blueScreen.autocompleteStyle.copyWith(
+              fieldStyles: .delta([.all(const .delta(cursorColor: Color(0xFF03A9F4)))]),
+            ),
+            items: fruits,
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectBlueScreen();
+    });
+
+    testWidgets('builder', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.blue(
+          child: FAutocomplete.textBuilder(
+            key: key,
+            style: TestScaffold.blueScreen.autocompleteStyle.copyWith(
+              fieldStyles: .delta([.all(const .delta(cursorColor: Color(0xFF03A9F4)))]),
+            ),
+            filter: (_) => [],
+            contentBuilder: (_, _, _) => [for (int i = 0; i < 10; i++) FAutocompleteItem.item(value: '$i')],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pump(const Duration(seconds: 1));
+
+      await expectBlueScreen();
+    });
+
+    testWidgets('waiting', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.blue(
+          child: FAutocomplete.textBuilder(
+            key: key,
+            style: TestScaffold.blueScreen.autocompleteStyle.copyWith(
+              fieldStyles: .delta([.all(const .delta(cursorColor: Color(0xFF03A9F4)))]),
+            ),
+            filter: (_) async {
+              await Future.delayed(const Duration(seconds: 1));
+              return [];
+            },
+            contentBuilder: (_, _, _) => [for (int i = 0; i < 10; i++) FAutocompleteItem.item(value: '$i')],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectBlueScreen();
+    });
+
+    testWidgets('no completion', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.blue(
+          child: FAutocomplete.textBuilder(
+            key: key,
+            style: TestScaffold.blueScreen.autocompleteStyle.copyWith(
+              fieldStyles: .delta([.all(const .delta(cursorColor: Color(0xFF03A9F4)))]),
+            ),
+            filter: (_) => [],
+            contentBuilder: (_, _, _) => [],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectBlueScreen();
+    });
+  });
+
+  for (final theme in TestScaffold.themes) {
+    testWidgets('completion', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          child: FAutocomplete.text(
+            key: key,
+            label: const Text('Fruits'),
+            description: const Text('Select your favorite fruits'),
+            control: const .managed(initial: TextEditingValue(text: 'App')),
+            items: fruits,
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('autocomplete/${theme.name}/completion.png'));
+    });
+
+    testWidgets('no completion', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          child: FAutocomplete.text(
+            key: key,
+            control: const .managed(initial: TextEditingValue(text: 'Zebra')),
+            items: fruits,
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('autocomplete/${theme.name}/no-completion.png'));
+    });
+
+    testWidgets('loading', (tester) async {
+      final completer = Completer<void>();
+
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          child: FAutocomplete.text(
+            key: key,
+            control: const .managed(initial: TextEditingValue(text: 'App')),
+            items: fruits,
+            filter: (query) async {
+              await completer.future;
+              return [];
+            },
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('autocomplete/${theme.name}/loading.png'));
+    });
+
+    testWidgets('auto-hide enabled', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          alignment: Alignment.topCenter,
+          child: FAutocomplete.text(key: key, items: fruits),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(key), 'App');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Apple'));
+      await tester.pumpAndSettle();
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('autocomplete/${theme.name}/auto-hide.png'));
+    });
+
+    testWidgets('auto-hide disabled', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          alignment: Alignment.topCenter,
+          child: FAutocomplete.text(key: key, items: fruits, autoHide: false),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(key), 'App');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Apple'));
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+
+      await expectLater(
+        find.byType(TestScaffold),
+        matchesGoldenFile('autocomplete/${theme.name}/auto-hide-disabled.png'),
+      );
+    });
+
+    testWidgets('disabled', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          alignment: Alignment.topCenter,
+          child: FAutocomplete.text(
+            key: key,
+            items: fruits,
+            enabled: false,
+            label: const Text('Fruits'),
+            description: const Text('Select your favorite fruits'),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('autocomplete/${theme.name}/disabled.png'));
+    });
+
+    testWidgets('error', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          alignment: Alignment.topCenter,
+          child: FAutocomplete.text(
+            key: key,
+            label: const Text('Fruits'),
+            description: const Text('Select your favorite fruits'),
+            autovalidateMode: AutovalidateMode.always,
+            validator: (value) => value == 'Apple' ? null : 'Only Apple is allowed',
+            items: fruits,
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+
+      await tester.tapAt(.zero);
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('autocomplete/${theme.name}/error.png'));
+    });
+  }
+
+  testWidgets('initial suggestions', (tester) async {
+    await tester.pumpWidget(
+      TestScaffold.app(
+        alignment: Alignment.topCenter,
+        child: FAutocomplete.text(key: key, hint: 'Type to search', items: fruits),
+      ),
+    );
+
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    await expectLater(find.byType(TestScaffold), matchesGoldenFile('autocomplete/initial-suggestions.png'));
+  });
+
+  testWidgets('hint does not conflict with completion', (tester) async {
+    await tester.pumpWidget(
+      TestScaffold.app(
+        alignment: Alignment.topCenter,
+        child: FAutocomplete.text(
+          key: key,
+          hint: 'Type to search',
+          control: const .managed(initial: TextEditingValue(text: 'App')),
+          items: fruits,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(key), '');
+    await tester.pumpAndSettle();
+
+    await expectLater(find.byType(TestScaffold), matchesGoldenFile('autocomplete/hint-no-completion.png'));
+  });
+
+  testWidgets('selecting item discards completion', (tester) async {
+    await tester.pumpWidget(
+      TestScaffold.app(
+        alignment: Alignment.topCenter,
+        child: FAutocomplete.text(
+          key: key,
+          control: const .managed(initial: TextEditingValue(text: 'B')),
+          items: fruits,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Blueberry'));
+    await tester.pumpAndSettle();
+
+    await expectLater(find.byType(TestScaffold), matchesGoldenFile('autocomplete/select-discards-completion.png'));
+  });
+
+  testWidgets('selecting item then entering text causes popover to reappear', (tester) async {
+    final focus = autoDispose(FocusNode());
+    await tester.pumpWidget(
+      TestScaffold.app(
+        alignment: Alignment.topCenter,
+        child: FAutocomplete.text(key: key, focusNode: focus, retainFocus: true, items: fruits),
+      ),
+    );
+
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Blueberry'));
+    await tester.pumpAndSettle();
+
+    expect(focus.hasFocus, true);
+
+    await tester.sendKeyEvent(.backspace);
+    await tester.pumpAndSettle();
+
+    await expectLater(find.byType(TestScaffold), matchesGoldenFile('autocomplete/select-enter-text.png'));
+  });
+
+  testWidgets('selecting item then moving selection does not cause popover to reappear', (tester) async {
+    final focus = autoDispose(FocusNode());
+    await tester.pumpWidget(
+      TestScaffold.app(
+        alignment: Alignment.topCenter,
+        child: FAutocomplete.text(key: key, focusNode: focus, retainFocus: true, items: fruits),
+      ),
+    );
+
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Blueberry'));
+    await tester.pumpAndSettle();
+
+    expect(focus.hasFocus, true);
+
+    await tester.sendKeyEvent(.arrowLeft);
+    await tester.pumpAndSettle();
+
+    await expectLater(find.byType(TestScaffold), matchesGoldenFile('autocomplete/select-move-selection.png'));
+  });
+
+  testWidgets('popover builder', (tester) async {
+    await tester.pumpWidget(
+      TestScaffold.app(
+        alignment: .topCenter,
+        child: FAutocomplete.text(
+          key: key,
+          items: fruits,
+          popoverBuilder: (context, _, _, content) => SingleChildScrollView(
+            child: Column(
+              mainAxisSize: .min,
+              children: [
+                const Padding(padding: .all(8), child: Text('Before')),
+                const Divider(),
+                content,
+                const Divider(),
+                const Padding(padding: .all(8), child: Text('After')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    await expectLater(find.byType(TestScaffold), matchesGoldenFile('autocomplete/popover-builder.png'));
+  });
+}

@@ -1,0 +1,10 @@
+runtime_projection:
+  max_root_skill_sets: 10
+  max_root_description_words_total: 350
+  max_root_body_words_each: 250
+
+routing:
+  max_candidates_returned: 3
+
+workouts:
+  max_skill_context_tokens: 1500

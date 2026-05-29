@@ -1,0 +1,81 @@
+---
+title: Label
+description: Describes a form field with a label, description, and error message (if any). This widget is usually used for custom form fields. All form fields in Forui come with this widget wrapped.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.label/
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import horizontalSnippet from '@/snippets/examples/form/label/horizontal.json';
+import verticalSnippet from '@/snippets/examples/form/label/vertical.json';
+import disabledSnippet from '@/snippets/examples/form/label/disabled.json';
+import errorSnippet from '@/snippets/examples/form/label/error.json';
+import labelUsage from '@/snippets/usages/form/label/label.json';
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/label' variant='horizontal'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={horizontalSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Labels', 'Label']}>
+    <Tab value="Labels">
+        ```shell copy
+        dart run forui style create labels
+        ````
+    </Tab>
+    <Tab value="Label">
+        ```shell copy
+        dart run forui style create label
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `FLabel(...)`
+<UsageSnippet usage={labelUsage} />
+
+## Examples
+
+### Vertical
+
+<Tabs items={['Preview', 'Code']}>
+    <Tab value="Preview">
+        <Widget name='form/label' variant='vertical'/>
+    </Tab>
+    <Tab value="Code">
+        <CodeSnippet snippet={verticalSnippet} />
+    </Tab>
+</Tabs>
+
+### Disabled
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/label' variant='disabled'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={disabledSnippet} />
+  </Tab>
+</Tabs>
+
+### Error
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/label' variant='error'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={errorSnippet} />
+  </Tab>
+</Tabs>

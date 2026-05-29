@@ -1,0 +1,146 @@
+---
+title: Date Field
+description: A date field allows a date to be selected from a calendar or input field.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.date_field/
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import dateFieldUsage from '@/snippets/usages/form/date_field/dateField.json';
+import dateFieldCalendarUsage from '@/snippets/usages/form/date_field/calendar.json';
+import dateFieldInputUsage from '@/snippets/usages/form/date_field/input.json';
+import defaultSnippet from '@/snippets/examples/form/date-field/default.json';
+import calendarSnippet from '@/snippets/examples/form/date-field/calendar.json';
+import inputSnippet from '@/snippets/examples/form/date-field/input.json';
+import clearableSnippet from '@/snippets/examples/form/date-field/clearable.json';
+import popoverBuilderSnippet from '@/snippets/examples/form/date-field/popover-builder.json';
+import validatorSnippet from '@/snippets/examples/form/date-field/validator.json';
+import formSnippet from '@/snippets/examples/form/date-field/form.json';
+
+<Callout type="info">
+    It is recommended to use [FDateField.calendar](#fdatefieldcalendar) on touch devices and
+    [FDateField.new](#fdatefield)/[FDateField.input](#fdatefieldinput) on non-primarily touch devices.
+</Callout>
+
+The input field supports both arrow key navigation:
+
+- Up/Down arrows: Increment/decrement values
+- Left/Right arrows: Move between date segments
+
+The input field does not support the following locales that use non-western numerals, it will default to English:
+
+- Arabic
+- Assamese
+- Bengali
+- Persian/Farsi
+- Marathi
+- Burmese
+- Nepali
+- Pashto
+- Tamil
+
+<Tabs items={['Preview', 'Code']}>
+    <Tab value="Preview">
+        <Widget name='form/date-field' height={500}/>
+    </Tab>
+    <Tab value="Code">
+        <CodeSnippet snippet={defaultSnippet} />
+    </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Date Field']}>
+    <Tab value="Date Field">
+        ```shell copy
+        dart run forui style create date-field
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `FDateField(...)`
+<UsageSnippet usage={dateFieldUsage} />
+
+### `FDateField.calendar(...)`
+<UsageSnippet usage={dateFieldCalendarUsage} />
+
+### `FDateField.input(...)`
+<UsageSnippet usage={dateFieldInputUsage} />
+
+## Examples
+
+### Calendar Only
+
+<Tabs items={['Preview', 'Code']}>
+    <Tab value="Preview">
+        <Widget name='form/date-field' variant='calendar' height={500}/>
+    </Tab>
+    <Tab value="Code">
+        <CodeSnippet snippet={calendarSnippet} />
+    </Tab>
+</Tabs>
+
+### Input Only
+
+<Tabs items={['Preview', 'Code']}>
+    <Tab value="Preview">
+        <Widget name='form/date-field' variant='input'/>
+    </Tab>
+    <Tab value="Code">
+        <CodeSnippet snippet={inputSnippet} />
+    </Tab>
+</Tabs>
+
+### Clearable
+
+<Tabs items={['Preview', 'Code']}>
+    <Tab value="Preview">
+        <Widget name='form/date-field' variant='clearable' height={500}/>
+    </Tab>
+    <Tab value="Code">
+        <CodeSnippet snippet={clearableSnippet} />
+    </Tab>
+
+</Tabs>
+
+### Popover Builder
+
+<Tabs items={['Preview', 'Code']}>
+    <Tab value="Preview">
+        <Widget name='form/date-field' variant='popover-builder' height={500}/>
+    </Tab>
+    <Tab value="Code">
+        <CodeSnippet snippet={popoverBuilderSnippet} />
+    </Tab>
+</Tabs>
+
+### Custom Validation
+
+<Tabs items={['Preview', 'Code']}>
+    <Tab value="Preview">
+        <Widget name='form/date-field' variant='validator' height={500}/>
+    </Tab>
+    <Tab value="Code">
+        <CodeSnippet snippet={validatorSnippet} />
+    </Tab>
+
+</Tabs>
+
+### Form
+
+<Tabs items={['Preview', 'Code']}>
+    <Tab value="Preview">
+        <Widget name='form/date-field' variant='form' height={600}/>
+    </Tab>
+    <Tab value="Code">
+        <CodeSnippet snippet={formSnippet} />
+    </Tab>
+
+</Tabs>

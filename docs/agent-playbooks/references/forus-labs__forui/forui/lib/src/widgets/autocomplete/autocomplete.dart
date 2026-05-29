@@ -1,0 +1,1564 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+
+import 'package:meta/meta.dart';
+
+import 'package:forui/forui.dart';
+import 'package:forui/src/foundation/debug.dart';
+import 'package:forui/src/widgets/autocomplete/autocomplete_content.dart';
+import 'package:forui/src/widgets/autocomplete/autocomplete_controller.dart';
+import 'package:forui/src/widgets/autocomplete/skip_delegate_traversal_policy.dart';
+import 'package:forui/src/widgets/popover/popover_controller.dart';
+
+/// A builder for [FAutocomplete]'s results.
+typedef FAutocompleteContentBuilder<T> =
+    List<FAutocompleteItemMixin<T>> Function(BuildContext context, String query, Iterable<T> values);
+
+/// A builder that wraps [FAutocomplete]'s popover content.
+typedef FAutocompletePopoverBuilder =
+    Widget Function(
+      BuildContext context,
+      FAutocompleteController controller,
+      FPopoverController popoverController,
+      Widget content,
+    );
+
+/// An autocomplete provides a list of suggestions based on the user's input and shows typeahead text for the first match.
+///
+/// It is a [FormField] and therefore can be used in a [Form] widget.
+///
+/// ## Not a searchable select
+/// An autocomplete is not a searchable select. it is a text-field with suggestions. Values are not limited to one of
+/// suggestions, users can type anything. If you need a searchable select, use [FSelect.search] or [FMultiSelect.search]
+/// instead.
+///
+/// ## Note
+/// The autocomplete does not support using arrow keys to navigate the suggestions on web.
+///
+/// See:
+/// * https://forui.dev/docs/widgets/form/autocomplete for working examples.
+/// * [FAutocompleteController] for customizing the behavior of an autocomplete.
+/// * [FAutocompleteStyle] for customizing the appearance of an autocomplete.
+class FAutocomplete<T> extends StatefulWidget with FFormFieldProperties<T> {
+  /// The default empty builder that shows a localized message when there are no results.
+  static Widget defaultContentEmptyBuilder(BuildContext context, FAutocompleteContentStyle style) {
+    final localizations = FLocalizations.of(context) ?? FDefaultLocalizations();
+    return Padding(
+      padding: const .symmetric(horizontal: 8, vertical: 14),
+      child: Text(localizations.autocompleteNoResults, style: style.emptyTextStyle),
+    );
+  }
+
+  /// The default loading builder that shows a spinner when an asynchronous search is pending.
+  static Widget defaultContentLoadingBuilder(BuildContext _, FAutocompleteContentStyle style) => Padding(
+    padding: const .all(13),
+    child: FCircularProgress(style: style.progressStyle),
+  );
+
+  /// The default error builder that shows the error message when [filter] fails.
+  static Widget defaultContentErrorBuilder(
+    BuildContext context,
+    FAutocompleteContentStyle style,
+    Object? error,
+    StackTrace stackTrace,
+  ) => Padding(
+    padding: const .symmetric(horizontal: 8, vertical: 14),
+    child: Text('$error', style: style.emptyTextStyle),
+  );
+
+  /// Creates a [FAutocomplete] for `String` suggestions from the given [items], with identity [format] and [parse].
+  static FAutocomplete<String> text({
+    required List<String> items,
+    FAutocompleteControl control = const .managed(),
+    FPopoverControl popoverControl = const .managed(),
+    FTextFieldSizeVariant size = .md,
+    FAutocompleteStyleDelta style = const .context(),
+    Widget? label,
+    String? hint,
+    Widget? description,
+    TextMagnifierConfiguration? magnifierConfiguration,
+    Object groupId = EditableText,
+    FocusNode? focusNode,
+    TextInputType? keyboardType,
+    TextInputAction? textInputAction,
+    TextCapitalization textCapitalization = .none,
+    TextAlign textAlign = .start,
+    TextAlignVertical? textAlignVertical,
+    TextDirection? textDirection,
+    VoidCallback? contentOnTapHide,
+    bool autofocus = false,
+    String obscuringCharacter = '•',
+    bool obscureText = false,
+    bool autocorrect = true,
+    SmartDashesType? smartDashesType,
+    SmartQuotesType? smartQuotesType,
+    bool enableSuggestions = true,
+    int? minLines,
+    int? maxLines = 1,
+    bool expands = false,
+    bool readOnly = false,
+    bool? showCursor,
+    int? maxLength,
+    MaxLengthEnforcement? maxLengthEnforcement,
+    bool onTapAlwaysCalled = false,
+    VoidCallback? onEditingComplete,
+    ValueChanged<String>? onSubmit,
+    AppPrivateCommandCallback? onAppPrivateCommand,
+    List<TextInputFormatter>? inputFormatters,
+    bool enabled = true,
+    bool? ignorePointers,
+    bool enableInteractiveSelection = true,
+    TextSelectionControls? selectionControls,
+    DragStartBehavior dragStartBehavior = .start,
+    MouseCursor? mouseCursor,
+    FTextFieldCounterBuilder? counterBuilder,
+    ScrollPhysics? scrollPhysics,
+    ScrollController? scrollController,
+    Iterable<String>? autofillHints,
+    String? restorationId,
+    bool stylusHandwritingEnabled = true,
+    bool enableIMEPersonalizedLearning = true,
+    ContentInsertionConfiguration? contentInsertionConfiguration,
+    EditableTextContextMenuBuilder? contextMenuBuilder = FTextField.defaultContextMenuBuilder,
+    bool canRequestFocus = true,
+    UndoHistoryController? undoController,
+    SpellCheckConfiguration? spellCheckConfiguration,
+    FFieldIconBuilder<FAutocompleteStyle>? prefixBuilder,
+    FFieldIconBuilder<FAutocompleteStyle>? suffixBuilder,
+    bool Function(TextEditingValue value) clearable = FTextField.defaultClearable,
+    FAutocompletePopoverBuilder popoverBuilder = FPopover.defaultPopoverBuilder,
+    FormFieldSetter<String>? onSaved,
+    VoidCallback? onReset,
+    FormFieldValidator<String>? validator,
+    AutovalidateMode autovalidateMode = .disabled,
+    String? forceErrorText,
+    Widget Function(BuildContext context, String message) errorBuilder = FFormFieldProperties.defaultErrorBuilder,
+    AlignmentGeometry contentAnchor = .topStart,
+    AlignmentGeometry fieldAnchor = .bottomStart,
+    FPortalConstraints contentConstraints = const FAutoWidthPortalConstraints(maxHeight: 300),
+    FPortalSpacing contentSpacing = const .spacing(4),
+    FPortalOverflow contentOverflow = .flip,
+    Offset contentOffset = .zero,
+    bool contentUseViewPadding = true,
+    bool contentUseViewInsets = true,
+    FPopoverHideRegion contentHideRegion = .excludeChild,
+    Object? contentGroupId,
+    bool contentCutout = true,
+    void Function(Path path, Rect bounds) contentCutoutBuilder = FModalBarrier.defaultCutoutBuilder,
+    bool autoHide = true,
+    bool? retainFocus,
+    FFieldBuilder<FAutocompleteStyle> builder = FTextField.defaultBuilder,
+    bool rightArrowToComplete = false,
+    FutureOr<Iterable<String>> Function(String query)? filter,
+    FAutocompleteContentBuilder<String>? contentBuilder,
+    ScrollController? contentScrollController,
+    ScrollPhysics contentPhysics = const ClampingScrollPhysics(),
+    FItemDivider contentDivider = .none,
+    Widget Function(BuildContext context, FAutocompleteContentStyle style)? contentEmptyBuilder =
+        defaultContentEmptyBuilder,
+    Widget Function(BuildContext context, FAutocompleteContentStyle style)? contentLoadingBuilder =
+        defaultContentLoadingBuilder,
+    Widget Function(BuildContext context, FAutocompleteContentStyle style, Object? error, StackTrace stackTrace)?
+        contentErrorBuilder =
+        defaultContentErrorBuilder,
+    ValueChanged<String>? onItemPress,
+    Key? key,
+  }) => FAutocomplete<String>.builder(
+    filter: filter ?? (query) => items.where((item) => item.toLowerCase().startsWith(query.toLowerCase())),
+    format: (suggestion) => suggestion,
+    parse: (text) => text,
+    contentBuilder: contentBuilder ?? (context, query, values) => [for (final value in values) .item(value: value)],
+    control: control,
+    popoverControl: popoverControl,
+    size: size,
+    style: style,
+    label: label,
+    hint: hint,
+    description: description,
+    magnifierConfiguration: magnifierConfiguration,
+    groupId: groupId,
+    focusNode: focusNode,
+    keyboardType: keyboardType,
+    textInputAction: textInputAction,
+    textCapitalization: textCapitalization,
+    textAlign: textAlign,
+    textAlignVertical: textAlignVertical,
+    textDirection: textDirection,
+    contentOnTapHide: contentOnTapHide,
+    autofocus: autofocus,
+    obscuringCharacter: obscuringCharacter,
+    obscureText: obscureText,
+    autocorrect: autocorrect,
+    smartDashesType: smartDashesType,
+    smartQuotesType: smartQuotesType,
+    enableSuggestions: enableSuggestions,
+    minLines: minLines,
+    maxLines: maxLines,
+    expands: expands,
+    readOnly: readOnly,
+    showCursor: showCursor,
+    maxLength: maxLength,
+    maxLengthEnforcement: maxLengthEnforcement,
+    onTapAlwaysCalled: onTapAlwaysCalled,
+    onEditingComplete: onEditingComplete,
+    onSubmit: onSubmit,
+    onAppPrivateCommand: onAppPrivateCommand,
+    inputFormatters: inputFormatters,
+    enabled: enabled,
+    ignorePointers: ignorePointers,
+    enableInteractiveSelection: enableInteractiveSelection,
+    selectionControls: selectionControls,
+    dragStartBehavior: dragStartBehavior,
+    mouseCursor: mouseCursor,
+    counterBuilder: counterBuilder,
+    scrollPhysics: scrollPhysics,
+    scrollController: scrollController,
+    autofillHints: autofillHints,
+    restorationId: restorationId,
+    stylusHandwritingEnabled: stylusHandwritingEnabled,
+    enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
+    contentInsertionConfiguration: contentInsertionConfiguration,
+    contextMenuBuilder: contextMenuBuilder,
+    canRequestFocus: canRequestFocus,
+    undoController: undoController,
+    spellCheckConfiguration: spellCheckConfiguration,
+    prefixBuilder: prefixBuilder,
+    suffixBuilder: suffixBuilder,
+    clearable: clearable,
+    popoverBuilder: popoverBuilder,
+    onSaved: onSaved,
+    onReset: onReset,
+    validator: validator,
+    autovalidateMode: autovalidateMode,
+    forceErrorText: forceErrorText,
+    errorBuilder: errorBuilder,
+    contentAnchor: contentAnchor,
+    fieldAnchor: fieldAnchor,
+    contentConstraints: contentConstraints,
+    contentSpacing: contentSpacing,
+    contentOverflow: contentOverflow,
+    contentOffset: contentOffset,
+    contentUseViewPadding: contentUseViewPadding,
+    contentUseViewInsets: contentUseViewInsets,
+    contentHideRegion: contentHideRegion,
+    contentGroupId: contentGroupId,
+    contentCutout: contentCutout,
+    contentCutoutBuilder: contentCutoutBuilder,
+    autoHide: autoHide,
+    retainFocus: retainFocus,
+    builder: builder,
+    rightArrowToComplete: rightArrowToComplete,
+    contentScrollController: contentScrollController,
+    contentPhysics: contentPhysics,
+    contentDivider: contentDivider,
+    contentEmptyBuilder: contentEmptyBuilder,
+    contentLoadingBuilder: contentLoadingBuilder,
+    contentErrorBuilder: contentErrorBuilder,
+    onItemPress: onItemPress,
+    key: key,
+  );
+
+  /// Creates a [FAutocomplete] for `String` suggestions that uses the given [filter] and [contentBuilder], with
+  /// identity [format] and [parse].
+  static FAutocomplete<String> textBuilder({
+    required FutureOr<Iterable<String>> Function(String query) filter,
+    required FAutocompleteContentBuilder<String> contentBuilder,
+    FAutocompleteControl control = const .managed(),
+    FPopoverControl popoverControl = const .managed(),
+    FTextFieldSizeVariant size = .md,
+    FAutocompleteStyleDelta style = const .context(),
+    Widget? label,
+    String? hint,
+    Widget? description,
+    TextMagnifierConfiguration? magnifierConfiguration,
+    Object groupId = EditableText,
+    FocusNode? focusNode,
+    TextInputType? keyboardType,
+    TextInputAction? textInputAction,
+    TextCapitalization textCapitalization = .none,
+    TextAlign textAlign = .start,
+    TextAlignVertical? textAlignVertical,
+    TextDirection? textDirection,
+    VoidCallback? contentOnTapHide,
+    bool autofocus = false,
+    String obscuringCharacter = '•',
+    bool obscureText = false,
+    bool autocorrect = true,
+    SmartDashesType? smartDashesType,
+    SmartQuotesType? smartQuotesType,
+    bool enableSuggestions = true,
+    int? minLines,
+    int? maxLines = 1,
+    bool expands = false,
+    bool readOnly = false,
+    bool? showCursor,
+    int? maxLength,
+    MaxLengthEnforcement? maxLengthEnforcement,
+    bool onTapAlwaysCalled = false,
+    VoidCallback? onEditingComplete,
+    ValueChanged<String>? onSubmit,
+    AppPrivateCommandCallback? onAppPrivateCommand,
+    List<TextInputFormatter>? inputFormatters,
+    bool enabled = true,
+    bool? ignorePointers,
+    bool enableInteractiveSelection = true,
+    TextSelectionControls? selectionControls,
+    DragStartBehavior dragStartBehavior = .start,
+    MouseCursor? mouseCursor,
+    FTextFieldCounterBuilder? counterBuilder,
+    ScrollPhysics? scrollPhysics,
+    ScrollController? scrollController,
+    Iterable<String>? autofillHints,
+    String? restorationId,
+    bool stylusHandwritingEnabled = true,
+    bool enableIMEPersonalizedLearning = true,
+    ContentInsertionConfiguration? contentInsertionConfiguration,
+    EditableTextContextMenuBuilder? contextMenuBuilder = FTextField.defaultContextMenuBuilder,
+    bool canRequestFocus = true,
+    UndoHistoryController? undoController,
+    SpellCheckConfiguration? spellCheckConfiguration,
+    FFieldIconBuilder<FAutocompleteStyle>? prefixBuilder,
+    FFieldIconBuilder<FAutocompleteStyle>? suffixBuilder,
+    bool Function(TextEditingValue value) clearable = FTextField.defaultClearable,
+    FAutocompletePopoverBuilder popoverBuilder = FPopover.defaultPopoverBuilder,
+    FormFieldSetter<String>? onSaved,
+    VoidCallback? onReset,
+    FormFieldValidator<String>? validator,
+    AutovalidateMode autovalidateMode = .disabled,
+    String? forceErrorText,
+    Widget Function(BuildContext context, String message) errorBuilder = FFormFieldProperties.defaultErrorBuilder,
+    AlignmentGeometry contentAnchor = .topStart,
+    AlignmentGeometry fieldAnchor = .bottomStart,
+    FPortalConstraints contentConstraints = const FAutoWidthPortalConstraints(maxHeight: 300),
+    FPortalSpacing contentSpacing = const .spacing(4),
+    FPortalOverflow contentOverflow = .flip,
+    Offset contentOffset = .zero,
+    bool contentUseViewPadding = true,
+    bool contentUseViewInsets = true,
+    FPopoverHideRegion contentHideRegion = .excludeChild,
+    Object? contentGroupId,
+    bool contentCutout = true,
+    void Function(Path path, Rect bounds) contentCutoutBuilder = FModalBarrier.defaultCutoutBuilder,
+    bool autoHide = true,
+    bool? retainFocus,
+    FFieldBuilder<FAutocompleteStyle> builder = FTextField.defaultBuilder,
+    bool rightArrowToComplete = false,
+    ScrollController? contentScrollController,
+    ScrollPhysics contentPhysics = const ClampingScrollPhysics(),
+    FItemDivider contentDivider = .none,
+    Widget Function(BuildContext context, FAutocompleteContentStyle style)? contentEmptyBuilder =
+        defaultContentEmptyBuilder,
+    Widget Function(BuildContext context, FAutocompleteContentStyle style)? contentLoadingBuilder =
+        defaultContentLoadingBuilder,
+    Widget Function(BuildContext context, FAutocompleteContentStyle style, Object? error, StackTrace stackTrace)?
+        contentErrorBuilder =
+        defaultContentErrorBuilder,
+    ValueChanged<String>? onItemPress,
+    Key? key,
+  }) => FAutocomplete<String>.builder(
+    filter: filter,
+    format: (suggestion) => suggestion,
+    parse: (text) => text,
+    contentBuilder: contentBuilder,
+    control: control,
+    popoverControl: popoverControl,
+    size: size,
+    style: style,
+    label: label,
+    hint: hint,
+    description: description,
+    magnifierConfiguration: magnifierConfiguration,
+    groupId: groupId,
+    focusNode: focusNode,
+    keyboardType: keyboardType,
+    textInputAction: textInputAction,
+    textCapitalization: textCapitalization,
+    textAlign: textAlign,
+    textAlignVertical: textAlignVertical,
+    textDirection: textDirection,
+    contentOnTapHide: contentOnTapHide,
+    autofocus: autofocus,
+    obscuringCharacter: obscuringCharacter,
+    obscureText: obscureText,
+    autocorrect: autocorrect,
+    smartDashesType: smartDashesType,
+    smartQuotesType: smartQuotesType,
+    enableSuggestions: enableSuggestions,
+    minLines: minLines,
+    maxLines: maxLines,
+    expands: expands,
+    readOnly: readOnly,
+    showCursor: showCursor,
+    maxLength: maxLength,
+    maxLengthEnforcement: maxLengthEnforcement,
+    onTapAlwaysCalled: onTapAlwaysCalled,
+    onEditingComplete: onEditingComplete,
+    onSubmit: onSubmit,
+    onAppPrivateCommand: onAppPrivateCommand,
+    inputFormatters: inputFormatters,
+    enabled: enabled,
+    ignorePointers: ignorePointers,
+    enableInteractiveSelection: enableInteractiveSelection,
+    selectionControls: selectionControls,
+    dragStartBehavior: dragStartBehavior,
+    mouseCursor: mouseCursor,
+    counterBuilder: counterBuilder,
+    scrollPhysics: scrollPhysics,
+    scrollController: scrollController,
+    autofillHints: autofillHints,
+    restorationId: restorationId,
+    stylusHandwritingEnabled: stylusHandwritingEnabled,
+    enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
+    contentInsertionConfiguration: contentInsertionConfiguration,
+    contextMenuBuilder: contextMenuBuilder,
+    canRequestFocus: canRequestFocus,
+    undoController: undoController,
+    spellCheckConfiguration: spellCheckConfiguration,
+    prefixBuilder: prefixBuilder,
+    suffixBuilder: suffixBuilder,
+    clearable: clearable,
+    popoverBuilder: popoverBuilder,
+    onSaved: onSaved,
+    onReset: onReset,
+    validator: validator,
+    autovalidateMode: autovalidateMode,
+    forceErrorText: forceErrorText,
+    errorBuilder: errorBuilder,
+    contentAnchor: contentAnchor,
+    fieldAnchor: fieldAnchor,
+    contentConstraints: contentConstraints,
+    contentSpacing: contentSpacing,
+    contentOverflow: contentOverflow,
+    contentOffset: contentOffset,
+    contentUseViewPadding: contentUseViewPadding,
+    contentUseViewInsets: contentUseViewInsets,
+    contentHideRegion: contentHideRegion,
+    contentGroupId: contentGroupId,
+    contentCutout: contentCutout,
+    contentCutoutBuilder: contentCutoutBuilder,
+    autoHide: autoHide,
+    retainFocus: retainFocus,
+    builder: builder,
+    rightArrowToComplete: rightArrowToComplete,
+    contentScrollController: contentScrollController,
+    contentPhysics: contentPhysics,
+    contentDivider: contentDivider,
+    contentEmptyBuilder: contentEmptyBuilder,
+    contentLoadingBuilder: contentLoadingBuilder,
+    contentErrorBuilder: contentErrorBuilder,
+    onItemPress: onItemPress,
+    key: key,
+  );
+
+  /// Defines how the autocomplete's state is controlled.
+  ///
+  /// Defaults to [FAutocompleteControl.managed].
+  final FAutocompleteControl control;
+
+  /// Defines how the autocomplete's popover content is controlled.
+  ///
+  /// Defaults to [FPopoverControl.managed].
+  final FPopoverControl popoverControl;
+
+  /// {@macro forui.text_field.size}
+  final FTextFieldSizeVariant size;
+
+  /// The style.
+  ///
+  /// To modify the current style:
+  /// ```dart
+  /// style: .delta(...)
+  /// ```
+  ///
+  /// To replace the style:
+  /// ```dart
+  /// style: FAutocompleteStyle(...)
+  /// ```
+  ///
+  /// ## CLI
+  /// To generate and customize this style:
+  ///
+  /// ```shell
+  /// dart run forui style create autocomplete
+  /// ```
+  final FAutocompleteStyleDelta style;
+
+  /// {@macro forui.text_field.label}
+  @override
+  final Widget? label;
+
+  /// {@macro forui.text_field.hint}
+  final String? hint;
+
+  /// {@macro forui.text_field.description}
+  @override
+  final Widget? description;
+
+  /// {@macro forui.text_field.magnifier_configuration}
+  final TextMagnifierConfiguration? magnifierConfiguration;
+
+  /// {@macro forui.text_field_groupId}
+  final Object groupId;
+
+  /// {@macro forui.text_field.keyboardType}
+  final TextInputType? keyboardType;
+
+  /// {@macro forui.text_field.textInputAction}
+  final TextInputAction? textInputAction;
+
+  /// {@macro forui.text_field.textCapitalization}
+  final TextCapitalization textCapitalization;
+
+  /// {@macro forui.text_field.textAlign}
+  final TextAlign textAlign;
+
+  /// {@macro forui.text_field.textAlignVertical}
+  final TextAlignVertical? textAlignVertical;
+
+  /// {@macro forui.text_field.textDirection}
+  final TextDirection? textDirection;
+
+  /// {@macro forui.text_field.autofocus}
+  final bool autofocus;
+
+  /// {@macro forui.text_field.focusNode}
+  final FocusNode? focusNode;
+
+  /// {@macro forui.text_field.obscuringCharacter}
+  final String obscuringCharacter;
+
+  /// {@macro forui.text_field.obscureText}
+  final bool obscureText;
+
+  /// {@macro forui.text_field.autocorrect}
+  final bool autocorrect;
+
+  /// {@macro forui.text_field.smartDashesType}
+  final SmartDashesType? smartDashesType;
+
+  /// {@macro forui.text_field.smartQuotesType}
+  final SmartQuotesType? smartQuotesType;
+
+  /// {@macro forui.text_field.enableSuggestions}
+  final bool enableSuggestions;
+
+  /// {@macro forui.text_field.minLines}
+  final int? minLines;
+
+  /// {@macro forui.text_field.maxLines}
+  final int? maxLines;
+
+  /// {@macro forui.text_field.expands}
+  final bool expands;
+
+  /// {@macro forui.text_field.readOnly}
+  final bool readOnly;
+
+  /// {@macro forui.text_field.showCursor}
+  final bool? showCursor;
+
+  /// {@macro forui.text_field.maxLength}
+  final int? maxLength;
+
+  /// {@macro forui.text_field.maxLengthEnforcement}
+  final MaxLengthEnforcement? maxLengthEnforcement;
+
+  /// {@macro forui.text_field.onTap}
+  final bool onTapAlwaysCalled;
+
+  /// {@macro forui.text_field.onEditingComplete}
+  final VoidCallback? onEditingComplete;
+
+  /// {@macro forui.text_field.onSubmit}
+  final ValueChanged<String>? onSubmit;
+
+  /// {@macro forui.text_field.onAppPrivateCommand}
+  final AppPrivateCommandCallback? onAppPrivateCommand;
+
+  /// {@macro forui.text_field.inputFormatters}
+  final List<TextInputFormatter>? inputFormatters;
+
+  /// {@macro forui.text_field.enabled}
+  @override
+  final bool enabled;
+
+  /// {@macro forui.text_field.ignorePointers}
+  final bool? ignorePointers;
+
+  /// {@macro forui.text_field.enableInteractiveSelection}
+  final bool enableInteractiveSelection;
+
+  /// {@macro forui.text_field.selectionControls}
+  final TextSelectionControls? selectionControls;
+
+  /// {@macro forui.text_field.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
+
+  /// {@macro forui.text_field.mouseCursor}
+  final MouseCursor? mouseCursor;
+
+  /// {@macro forui.text_field.counterBuilder}
+  final FTextFieldCounterBuilder? counterBuilder;
+
+  /// {@macro forui.text_field.scrollPhysics}
+  final ScrollPhysics? scrollPhysics;
+
+  /// {@macro forui.text_field.scrollController}
+  final ScrollController? scrollController;
+
+  /// {@macro forui.text_field.autofillHints}
+  final Iterable<String>? autofillHints;
+
+  /// {@macro forui.text_field.restorationId}
+  final String? restorationId;
+
+  /// {@macro forui.text_field.stylusHandwritingEnabled}
+  final bool stylusHandwritingEnabled;
+
+  /// {@macro forui.text_field.enableIMEPersonalizedLearning}
+  final bool enableIMEPersonalizedLearning;
+
+  /// {@macro forui.text_field.contentInsertionConfiguration}
+  final ContentInsertionConfiguration? contentInsertionConfiguration;
+
+  /// {@macro forui.text_field.contextMenuBuilder}
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+
+  /// {@macro forui.text_field.canRequestFocus}
+  final bool canRequestFocus;
+
+  /// {@macro forui.text_field.undoController}
+  final UndoHistoryController? undoController;
+
+  /// {@macro forui.text_field.spellCheckConfiguration}
+  final SpellCheckConfiguration? spellCheckConfiguration;
+
+  /// {@macro forui.text_field.prefixBuilder}
+  final FFieldIconBuilder<FAutocompleteStyle>? prefixBuilder;
+
+  /// {@macro forui.text_field.suffixBuilder}
+  final FFieldIconBuilder<FAutocompleteStyle>? suffixBuilder;
+
+  /// {@macro forui.text_field.clearable}
+  final bool Function(TextEditingValue value) clearable;
+
+  /// A builder that wraps the entire popover content with arbitrary widgets.
+  ///
+  /// Defaults to returning the content as-is.
+  final FAutocompletePopoverBuilder popoverBuilder;
+
+  @override
+  final FormFieldSetter<T>? onSaved;
+
+  @override
+  final VoidCallback? onReset;
+
+  @override
+  final FormFieldValidator<T>? validator;
+
+  @override
+  final AutovalidateMode autovalidateMode;
+
+  @override
+  final String? forceErrorText;
+
+  @override
+  final Widget Function(BuildContext context, String message) errorBuilder;
+
+  /// The alignment point on the content popover. Defaults to [AlignmentGeometry.topStart].
+  final AlignmentGeometry contentAnchor;
+
+  /// The alignment point on the select's field. Defaults to [AlignmentGeometry.bottomStart].
+  final AlignmentGeometry fieldAnchor;
+
+  /// The constraints to apply to the content popover. Defaults to `const FAutoWidthPortalConstraints(maxHeight: 300)`.
+  final FPortalConstraints contentConstraints;
+
+  /// {@macro forui.widgets.FPopover.spacing}
+  final FPortalSpacing contentSpacing;
+
+  /// {@macro forui.widgets.FPopover.overflow}
+  final FPortalOverflow contentOverflow;
+
+  /// {@macro forui.widgets.FPopover.offset}
+  final Offset contentOffset;
+
+  /// {@macro forui.foundation.FPortal.useViewPadding}
+  ///
+  /// Defaults to true.
+  final bool contentUseViewPadding;
+
+  /// {@macro forui.foundation.FPortal.useViewInsets}
+  ///
+  /// Defaults to true.
+  final bool contentUseViewInsets;
+
+  /// {@macro forui.widgets.FPopover.hideRegion}
+  final FPopoverHideRegion contentHideRegion;
+
+  /// {@macro forui.widgets.FPopover.groupId}
+  final Object? contentGroupId;
+
+  /// {@macro forui.widgets.FPopover.onTapHide}
+  final VoidCallback? contentOnTapHide;
+
+  /// {@macro forui.widgets.FPopover.cutout}
+  final bool contentCutout;
+
+  /// {@macro forui.widgets.FPopover.cutoutBuilder}
+  final void Function(Path path, Rect bounds) contentCutoutBuilder;
+
+  /// True if the content should be automatically hidden after an item is selected. Defaults to false.
+  final bool autoHide;
+
+  /// The builder used to decorate the autocomplete. It should always use the given child.
+  ///
+  /// Defaults to returning the given child.
+  final FFieldBuilder<FAutocompleteStyle> builder;
+
+  /// Whether the field should retain focus after a suggestion is tapped.
+  ///
+  /// Defaults to true on desktop and false on touch.
+  final bool? retainFocus;
+
+  /// Whether the autocomplete should complete the text when a completion is available and the user presses right arrow.
+  /// Defaults to false.
+  final bool rightArrowToComplete;
+
+  /// A callback that produces a list of items based on the query either synchronously or asynchronously.
+  final FutureOr<Iterable<T>> Function(String text) filter;
+
+  /// Converts a value into a full inline completion.
+  ///
+  /// For example, if the user typed "App", to show "le" as the inline completion, [format] should return "Apple".
+  final String Function(T suggestion) format;
+
+  /// Converts the current text into a [T].
+  final T? Function(String? text) parse;
+
+  /// The builder that is called when the select is empty. Defaults to [defaultContentEmptyBuilder].
+  ///
+  /// Pass `null` to hide the popover entirely when there are no results.
+  final Widget Function(BuildContext context, FAutocompleteContentStyle style)? contentEmptyBuilder;
+
+  /// The content's scroll controller.
+  final ScrollController? contentScrollController;
+
+  /// The content's scroll physics. Defaults to [ClampingScrollPhysics].
+  final ScrollPhysics contentPhysics;
+
+  /// The divider used to separate the content items. Defaults to [FItemDivider.none].
+  final FItemDivider contentDivider;
+
+  /// A callback builds the list of items based on search results returned by [filter].
+  final FAutocompleteContentBuilder<T> contentBuilder;
+
+  /// A callback that is used to show a loading indicator while the results is processed.
+  ///
+  /// Pass `null` to hide the popover entirely while loading.
+  final Widget Function(BuildContext context, FAutocompleteContentStyle style)? contentLoadingBuilder;
+
+  /// A callback that is used to show an error message when [filter] is asynchronous and fails. Defaults to
+  /// [defaultContentErrorBuilder].
+  ///
+  /// Pass `null` to hide the popover entirely when there is an error.
+  final Widget Function(BuildContext context, FAutocompleteContentStyle style, Object? error, StackTrace stackTrace)?
+  contentErrorBuilder;
+
+  /// Called when the user selects an item from the popover suggestions.
+  final ValueChanged<T>? onItemPress;
+
+  /// Creates a [FAutocomplete] from the given [items].
+  ///
+  /// See:
+  /// * [FAutocomplete.builder] for more control over the appearance of items.
+  /// * [FAutocomplete.text] for a simpler autocomplete for `String` suggestions.
+  FAutocomplete({
+    required Map<String, T> items,
+    String Function(T suggestion)? format,
+    T? Function(String? text)? parse,
+    FAutocompleteControl control = const .managed(),
+    FPopoverControl popoverControl = const .managed(),
+    FTextFieldSizeVariant size = .md,
+    FAutocompleteStyleDelta style = const .context(),
+    Widget? label,
+    String? hint,
+    Widget? description,
+    TextMagnifierConfiguration? magnifierConfiguration,
+    Object groupId = EditableText,
+    FocusNode? focusNode,
+    TextInputType? keyboardType,
+    TextInputAction? textInputAction,
+    TextCapitalization textCapitalization = .none,
+    TextAlign textAlign = .start,
+    TextAlignVertical? textAlignVertical,
+    TextDirection? textDirection,
+    VoidCallback? contentOnTapHide,
+    bool autofocus = false,
+    String obscuringCharacter = '•',
+    bool obscureText = false,
+    bool autocorrect = true,
+    SmartDashesType? smartDashesType,
+    SmartQuotesType? smartQuotesType,
+    bool enableSuggestions = true,
+    int? minLines,
+    int? maxLines = 1,
+    bool expands = false,
+    bool readOnly = false,
+    bool? showCursor,
+    int? maxLength,
+    MaxLengthEnforcement? maxLengthEnforcement,
+    bool onTapAlwaysCalled = false,
+    VoidCallback? onEditingComplete,
+    ValueChanged<String>? onSubmit,
+    AppPrivateCommandCallback? onAppPrivateCommand,
+    List<TextInputFormatter>? inputFormatters,
+    bool enabled = true,
+    bool? ignorePointers,
+    bool enableInteractiveSelection = true,
+    TextSelectionControls? selectionControls,
+    DragStartBehavior dragStartBehavior = .start,
+    MouseCursor? mouseCursor,
+    FTextFieldCounterBuilder? counterBuilder,
+    ScrollPhysics? scrollPhysics,
+    ScrollController? scrollController,
+    Iterable<String>? autofillHints,
+    String? restorationId,
+    bool stylusHandwritingEnabled = true,
+    bool enableIMEPersonalizedLearning = true,
+    ContentInsertionConfiguration? contentInsertionConfiguration,
+    EditableTextContextMenuBuilder? contextMenuBuilder = FTextField.defaultContextMenuBuilder,
+    bool canRequestFocus = true,
+    UndoHistoryController? undoController,
+    SpellCheckConfiguration? spellCheckConfiguration,
+    FFieldIconBuilder<FAutocompleteStyle>? prefixBuilder,
+    FFieldIconBuilder<FAutocompleteStyle>? suffixBuilder,
+    bool Function(TextEditingValue value) clearable = FTextField.defaultClearable,
+    FAutocompletePopoverBuilder popoverBuilder = FPopover.defaultPopoverBuilder,
+    FormFieldSetter<T>? onSaved,
+    VoidCallback? onReset,
+    FormFieldValidator<T>? validator,
+    AutovalidateMode autovalidateMode = .disabled,
+    String? forceErrorText,
+    Widget Function(BuildContext context, String message) errorBuilder = FFormFieldProperties.defaultErrorBuilder,
+    AlignmentGeometry contentAnchor = .topStart,
+    AlignmentGeometry fieldAnchor = .bottomStart,
+    FPortalConstraints contentConstraints = const FAutoWidthPortalConstraints(maxHeight: 300),
+    FPortalSpacing contentSpacing = const .spacing(4),
+    FPortalOverflow contentOverflow = .flip,
+    Offset contentOffset = .zero,
+    bool contentUseViewPadding = true,
+    bool contentUseViewInsets = true,
+    FPopoverHideRegion contentHideRegion = .excludeChild,
+    Object? contentGroupId,
+    bool contentCutout = true,
+    void Function(Path path, Rect bounds) contentCutoutBuilder = FModalBarrier.defaultCutoutBuilder,
+    bool autoHide = true,
+    bool? retainFocus,
+    FFieldBuilder<FAutocompleteStyle> builder = FTextField.defaultBuilder,
+    bool rightArrowToComplete = false,
+    FutureOr<Iterable<T>> Function(String query)? filter,
+    FAutocompleteContentBuilder<T>? contentBuilder,
+    ScrollController? contentScrollController,
+    ScrollPhysics contentPhysics = const ClampingScrollPhysics(),
+    FItemDivider contentDivider = .none,
+    Widget Function(BuildContext context, FAutocompleteContentStyle style)? contentEmptyBuilder =
+        defaultContentEmptyBuilder,
+    Widget Function(BuildContext context, FAutocompleteContentStyle style)? contentLoadingBuilder =
+        defaultContentLoadingBuilder,
+    Widget Function(BuildContext context, FAutocompleteContentStyle style, Object? error, StackTrace stackTrace)?
+        contentErrorBuilder =
+        defaultContentErrorBuilder,
+    ValueChanged<T>? onItemPress,
+    Key? key,
+  }) : this.builder(
+         filter:
+             filter ??
+             (query) => items.entries
+                 .where((entry) => entry.key.toLowerCase().startsWith(query.toLowerCase()))
+                 .map((entry) => entry.value),
+         format: format ?? (suggestion) => items.entries.firstWhere((entry) => entry.value == suggestion).key,
+         parse: parse ?? (text) => items[text],
+         contentBuilder:
+             contentBuilder ?? (context, query, values) => [for (final value in values) .item(value: value)],
+         control: control,
+         popoverControl: popoverControl,
+         size: size,
+         style: style,
+         label: label,
+         hint: hint,
+         description: description,
+         magnifierConfiguration: magnifierConfiguration,
+         groupId: groupId,
+         focusNode: focusNode,
+         keyboardType: keyboardType,
+         textInputAction: textInputAction,
+         textCapitalization: textCapitalization,
+         textAlign: textAlign,
+         textAlignVertical: textAlignVertical,
+         textDirection: textDirection,
+         contentOnTapHide: contentOnTapHide,
+         autofocus: autofocus,
+         obscuringCharacter: obscuringCharacter,
+         obscureText: obscureText,
+         autocorrect: autocorrect,
+         smartDashesType: smartDashesType,
+         smartQuotesType: smartQuotesType,
+         enableSuggestions: enableSuggestions,
+         minLines: minLines,
+         maxLines: maxLines,
+         expands: expands,
+         readOnly: readOnly,
+         showCursor: showCursor,
+         maxLength: maxLength,
+         maxLengthEnforcement: maxLengthEnforcement,
+         onTapAlwaysCalled: onTapAlwaysCalled,
+         onEditingComplete: onEditingComplete,
+         onSubmit: onSubmit,
+         onAppPrivateCommand: onAppPrivateCommand,
+         inputFormatters: inputFormatters,
+         enabled: enabled,
+         ignorePointers: ignorePointers,
+         enableInteractiveSelection: enableInteractiveSelection,
+         selectionControls: selectionControls,
+         dragStartBehavior: dragStartBehavior,
+         mouseCursor: mouseCursor,
+         counterBuilder: counterBuilder,
+         scrollPhysics: scrollPhysics,
+         scrollController: scrollController,
+         autofillHints: autofillHints,
+         restorationId: restorationId,
+         stylusHandwritingEnabled: stylusHandwritingEnabled,
+         enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
+         contentInsertionConfiguration: contentInsertionConfiguration,
+         contextMenuBuilder: contextMenuBuilder,
+         canRequestFocus: canRequestFocus,
+         undoController: undoController,
+         spellCheckConfiguration: spellCheckConfiguration,
+         prefixBuilder: prefixBuilder,
+         suffixBuilder: suffixBuilder,
+         clearable: clearable,
+         popoverBuilder: popoverBuilder,
+         onSaved: onSaved,
+         onReset: onReset,
+         validator: validator,
+         autovalidateMode: autovalidateMode,
+         forceErrorText: forceErrorText,
+         errorBuilder: errorBuilder,
+         contentAnchor: contentAnchor,
+         fieldAnchor: fieldAnchor,
+         contentConstraints: contentConstraints,
+         contentSpacing: contentSpacing,
+         contentOverflow: contentOverflow,
+         contentOffset: contentOffset,
+         contentUseViewPadding: contentUseViewPadding,
+         contentUseViewInsets: contentUseViewInsets,
+         contentHideRegion: contentHideRegion,
+         contentGroupId: contentGroupId,
+         contentCutout: contentCutout,
+         contentCutoutBuilder: contentCutoutBuilder,
+         autoHide: autoHide,
+         retainFocus: retainFocus,
+         builder: builder,
+         rightArrowToComplete: rightArrowToComplete,
+         contentScrollController: contentScrollController,
+         contentPhysics: contentPhysics,
+         contentDivider: contentDivider,
+         contentEmptyBuilder: contentEmptyBuilder,
+         contentLoadingBuilder: contentLoadingBuilder,
+         contentErrorBuilder: contentErrorBuilder,
+         onItemPress: onItemPress,
+         key: key,
+       );
+
+  /// Creates a [FAutocomplete] that uses the given [filter] to determine the results and the [contentBuilder] to build
+  /// the content.
+  ///
+  /// See:
+  /// * [FAutocomplete.textBuilder] for a simpler autocomplete for `String` suggestions.
+  const FAutocomplete.builder({
+    required this.filter,
+    required this.format,
+    required this.parse,
+    required this.contentBuilder,
+    this.control = const .managed(),
+    this.popoverControl = const .managed(),
+    this.size = .md,
+    this.style = const .context(),
+    this.label,
+    this.hint,
+    this.description,
+    this.magnifierConfiguration,
+    this.groupId = EditableText,
+    this.focusNode,
+    this.keyboardType,
+    this.textInputAction,
+    this.textCapitalization = .none,
+    this.textAlign = .start,
+    this.textAlignVertical,
+    this.textDirection,
+    this.contentOnTapHide,
+    this.autofocus = false,
+    this.obscuringCharacter = '•',
+    this.obscureText = false,
+    this.autocorrect = true,
+    this.smartDashesType,
+    this.smartQuotesType,
+    this.enableSuggestions = true,
+    this.minLines,
+    this.maxLines = 1,
+    this.expands = false,
+    this.readOnly = false,
+    this.showCursor,
+    this.maxLength,
+    this.maxLengthEnforcement,
+    this.onTapAlwaysCalled = false,
+    this.onEditingComplete,
+    this.onSubmit,
+    this.onAppPrivateCommand,
+    this.inputFormatters,
+    this.enabled = true,
+    this.ignorePointers,
+    this.enableInteractiveSelection = true,
+    this.selectionControls,
+    this.dragStartBehavior = .start,
+    this.mouseCursor,
+    this.counterBuilder,
+    this.scrollPhysics,
+    this.scrollController,
+    this.autofillHints,
+    this.restorationId,
+    this.stylusHandwritingEnabled = true,
+    this.enableIMEPersonalizedLearning = true,
+    this.contentInsertionConfiguration,
+    this.contextMenuBuilder = FTextField.defaultContextMenuBuilder,
+    this.canRequestFocus = true,
+    this.undoController,
+    this.spellCheckConfiguration,
+    this.prefixBuilder,
+    this.suffixBuilder,
+    this.clearable = FTextField.defaultClearable,
+    this.popoverBuilder = FPopover.defaultPopoverBuilder,
+    this.onSaved,
+    this.onReset,
+    this.validator,
+    this.autovalidateMode = .disabled,
+    this.forceErrorText,
+    this.errorBuilder = FFormFieldProperties.defaultErrorBuilder,
+    this.contentAnchor = .topStart,
+    this.fieldAnchor = .bottomStart,
+    this.contentConstraints = const FAutoWidthPortalConstraints(maxHeight: 300),
+    this.contentSpacing = const .spacing(4),
+    this.contentOverflow = .flip,
+    this.contentOffset = .zero,
+    this.contentUseViewPadding = true,
+    this.contentUseViewInsets = true,
+    this.contentHideRegion = .excludeChild,
+    this.contentGroupId,
+    this.contentCutout = true,
+    this.contentCutoutBuilder = FModalBarrier.defaultCutoutBuilder,
+    this.autoHide = true,
+    this.retainFocus,
+    this.builder = FTextField.defaultBuilder,
+    this.rightArrowToComplete = false,
+    this.contentScrollController,
+    this.contentPhysics = const ClampingScrollPhysics(),
+    this.contentDivider = .none,
+    this.contentEmptyBuilder = defaultContentEmptyBuilder,
+    this.contentLoadingBuilder = defaultContentLoadingBuilder,
+    this.contentErrorBuilder = defaultContentErrorBuilder,
+    this.onItemPress,
+    super.key,
+  });
+
+  @override
+  State<FAutocomplete<T>> createState() => _State<T>();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('control', control))
+      ..add(DiagnosticsProperty('popoverControl', popoverControl))
+      ..add(DiagnosticsProperty('size', size))
+      ..add(DiagnosticsProperty('style', style))
+      ..add(StringProperty('hint', hint))
+      ..add(DiagnosticsProperty('magnifierConfiguration', magnifierConfiguration))
+      ..add(DiagnosticsProperty('groupId', groupId))
+      ..add(DiagnosticsProperty('keyboardType', keyboardType))
+      ..add(EnumProperty('textInputAction', textInputAction))
+      ..add(EnumProperty('textCapitalization', textCapitalization))
+      ..add(EnumProperty('textAlign', textAlign))
+      ..add(DiagnosticsProperty('textAlignVertical', textAlignVertical))
+      ..add(EnumProperty('textDirection', textDirection))
+      ..add(FlagProperty('autofocus', value: autofocus, ifTrue: 'autofocus'))
+      ..add(DiagnosticsProperty('focusNode', focusNode))
+      ..add(StringProperty('obscuringCharacter', obscuringCharacter))
+      ..add(FlagProperty('obscureText', value: obscureText, ifTrue: 'obscureText'))
+      ..add(FlagProperty('autocorrect', value: autocorrect, ifTrue: 'autocorrect'))
+      ..add(EnumProperty('smartDashesType', smartDashesType))
+      ..add(EnumProperty('smartQuotesType', smartQuotesType))
+      ..add(FlagProperty('enableSuggestions', value: enableSuggestions, ifTrue: 'enableSuggestions'))
+      ..add(IntProperty('minLines', minLines))
+      ..add(IntProperty('maxLines', maxLines))
+      ..add(FlagProperty('expands', value: expands, ifTrue: 'expands'))
+      ..add(FlagProperty('readOnly', value: readOnly, ifTrue: 'readOnly'))
+      ..add(FlagProperty('showCursor', value: showCursor, ifTrue: 'showCursor'))
+      ..add(IntProperty('maxLength', maxLength))
+      ..add(EnumProperty('maxLengthEnforcement', maxLengthEnforcement))
+      ..add(FlagProperty('onTapAlwaysCalled', value: onTapAlwaysCalled, ifTrue: 'onTapAlwaysCalled'))
+      ..add(ObjectFlagProperty.has('onEditingComplete', onEditingComplete))
+      ..add(ObjectFlagProperty.has('onSubmit', onSubmit))
+      ..add(ObjectFlagProperty.has('onAppPrivateCommand', onAppPrivateCommand))
+      ..add(IterableProperty('inputFormatters', inputFormatters))
+      ..add(FlagProperty('enabled', value: enabled, ifTrue: 'enabled'))
+      ..add(FlagProperty('ignorePointers', value: ignorePointers, ifTrue: 'ignorePointers'))
+      ..add(
+        FlagProperty('enableInteractSelection', value: enableInteractiveSelection, ifTrue: 'enableInteractSelection'),
+      )
+      ..add(DiagnosticsProperty('selectionControls', selectionControls))
+      ..add(EnumProperty('dragStartBehavior', dragStartBehavior))
+      ..add(DiagnosticsProperty('mouseCursor', mouseCursor))
+      ..add(ObjectFlagProperty.has('counterBuilder', counterBuilder))
+      ..add(DiagnosticsProperty('scrollPhysics', scrollPhysics))
+      ..add(DiagnosticsProperty('scrollController', scrollController))
+      ..add(IterableProperty('autofillHints', autofillHints))
+      ..add(StringProperty('restorationId', restorationId))
+      ..add(
+        FlagProperty('stylusHandwritingEnabled', value: stylusHandwritingEnabled, ifTrue: 'stylusHandwritingEnabled'),
+      )
+      ..add(
+        FlagProperty(
+          'enableIMEPersonalizedLearning',
+          value: enableIMEPersonalizedLearning,
+          ifTrue: 'enableIMEPersonalizedLearning',
+        ),
+      )
+      ..add(DiagnosticsProperty('contentInsertionConfiguration', contentInsertionConfiguration))
+      ..add(ObjectFlagProperty.has('contextMenuBuilder', contextMenuBuilder))
+      ..add(FlagProperty('canRequestFocus', value: canRequestFocus, ifTrue: 'canRequestFocus'))
+      ..add(DiagnosticsProperty('undoController', undoController))
+      ..add(DiagnosticsProperty('spellCheckConfiguration', spellCheckConfiguration))
+      ..add(ObjectFlagProperty.has('prefixBuilder', prefixBuilder))
+      ..add(ObjectFlagProperty.has('suffixBuilder', suffixBuilder))
+      ..add(ObjectFlagProperty.has('clearable', clearable))
+      ..add(ObjectFlagProperty.has('popoverBuilder', popoverBuilder))
+      ..add(ObjectFlagProperty.has('onSaved', onSaved))
+      ..add(ObjectFlagProperty.has('onReset', onReset))
+      ..add(ObjectFlagProperty.has('validator', validator))
+      ..add(EnumProperty('autovalidateMode', autovalidateMode))
+      ..add(StringProperty('forceErrorText', forceErrorText))
+      ..add(ObjectFlagProperty.has('errorBuilder', errorBuilder))
+      ..add(DiagnosticsProperty('contentAnchor', contentAnchor))
+      ..add(DiagnosticsProperty('fieldAnchor', fieldAnchor))
+      ..add(DiagnosticsProperty('contentConstraints', contentConstraints))
+      ..add(DiagnosticsProperty('contentSpacing', contentSpacing))
+      ..add(ObjectFlagProperty.has('contentOverflow', contentOverflow))
+      ..add(DiagnosticsProperty('contentOffset', contentOffset))
+      ..add(FlagProperty('contentUseViewPadding', value: contentUseViewPadding, ifTrue: 'using view padding'))
+      ..add(FlagProperty('contentUseViewInsets', value: contentUseViewInsets, ifTrue: 'using view insets'))
+      ..add(EnumProperty('contentHideRegion', contentHideRegion))
+      ..add(DiagnosticsProperty('contentGroupId', contentGroupId))
+      ..add(FlagProperty('contentCutout', value: contentCutout, ifTrue: 'cutout'))
+      ..add(ObjectFlagProperty.has('contentCutoutBuilder', contentCutoutBuilder))
+      ..add(ObjectFlagProperty.has('contentOnTapHide', contentOnTapHide))
+      ..add(FlagProperty('autoHide', value: autoHide, ifTrue: 'autoHide'))
+      ..add(FlagProperty('retainFocus', value: retainFocus, ifTrue: 'retainFocus'))
+      ..add(ObjectFlagProperty.has('builder', builder))
+      ..add(FlagProperty('rightArrowToComplete', value: rightArrowToComplete, ifTrue: 'rightArrowToComplete'))
+      ..add(ObjectFlagProperty.has('filter', filter))
+      ..add(ObjectFlagProperty.has('format', format))
+      ..add(ObjectFlagProperty.has('parse', parse))
+      ..add(ObjectFlagProperty.has('contentEmptyBuilder', contentEmptyBuilder))
+      ..add(DiagnosticsProperty('contentScrollController', contentScrollController))
+      ..add(DiagnosticsProperty('contentPhysics', contentPhysics))
+      ..add(EnumProperty('contentDivider', contentDivider))
+      ..add(ObjectFlagProperty.has('contentBuilder', contentBuilder))
+      ..add(ObjectFlagProperty.has('contentLoadingBuilder', contentLoadingBuilder))
+      ..add(ObjectFlagProperty.has('contentErrorBuilder', contentErrorBuilder))
+      ..add(ObjectFlagProperty.has('onItemPress', onItemPress));
+  }
+}
+
+class _State<T> extends State<FAutocomplete<T>> with TickerProviderStateMixin {
+  late FAutocompleteController _controller;
+  late FPopoverController _popoverController;
+  late FutureOr<Iterable<T>> _data;
+  late FocusNode _fieldFocus;
+  late FocusScopeNode _popoverFocus;
+  bool _tapFocus = false;
+  bool _mutating = false;
+  bool _itemTap = false;
+  String? _previous;
+  int _monotonic = 0;
+
+  /// The original text used to restore the textfield when navigating but not selecting any completion using a keyboard.
+  String? _restore;
+
+  @override
+  void initState() {
+    super.initState();
+    _fieldFocus = widget.focusNode ?? .new(debugLabel: 'FAutocomplete field');
+    _fieldFocus.addListener(_focus);
+    _popoverFocus = FocusScopeNode(debugLabel: 'FAutocomplete popover');
+    _popoverController = widget.popoverControl.create(_handleOnPopoverChange, this);
+    _controller = widget.control.create(_update);
+    _controller.loadSuggestions(_format(_data = widget.filter(_controller.text))).ignore();
+  }
+
+  @override
+  void didUpdateWidget(covariant FAutocomplete<T> old) {
+    super.didUpdateWidget(old);
+    // DO NOT REORDER
+    if (widget.focusNode != old.focusNode) {
+      if (old.focusNode == null) {
+        _fieldFocus.dispose();
+      }
+      _fieldFocus = widget.focusNode ?? .new(debugLabel: 'FAutocomplete field');
+    }
+
+    final (controller, updated) = widget.control.update(old.control, _controller, _update);
+    if (updated) {
+      _controller = controller;
+      _controller.loadSuggestions(_format(_data = widget.filter(_controller.text))).ignore();
+    }
+    _popoverController = widget.popoverControl
+        .update(old.popoverControl, _popoverController, _handleOnPopoverChange, this)
+        .$1;
+  }
+
+  @override
+  void dispose() {
+    _popoverFocus.dispose();
+
+    if (widget.focusNode == null) {
+      _fieldFocus.dispose();
+    }
+
+    widget.popoverControl.dispose(_popoverController, _handleOnPopoverChange);
+    widget.control.dispose(_controller, _update);
+    super.dispose();
+  }
+
+  void _update() {
+    if (_previous == _controller.text) {
+      return;
+    }
+
+    _previous = _controller.text;
+    if (widget.control case FAutocompleteManagedControl(:final onChange?)) {
+      onChange(_controller.value);
+    }
+
+    if (!_mutating) {
+      setState(() {
+        _controller.loadSuggestions(_format(_data = widget.filter(_controller.text))).ignore();
+      });
+
+      // Skip if text changed programmatically while the field isn't focused.
+      if (_fieldFocus.hasFocus) {
+        _toggle();
+      }
+    }
+  }
+
+  FutureOr<Iterable<String>> _format(FutureOr<Iterable<T>> result) => switch (result) {
+    final Iterable<T> values => [for (final v in values) widget.format(v)],
+    final Future<Iterable<T>> future => future.then((values) => [for (final v in values) widget.format(v)]),
+  };
+
+  void _focus() {
+    // Check if the field gained focus because of the user tapping/tabbing into the autocomplete while completions are
+    // hidden.
+    if (_fieldFocus.hasFocus && _restore == null) {
+      if (!_tapFocus) {
+        _controller.selection = TextSelection(baseOffset: 0, extentOffset: _controller.text.length);
+      }
+      _tapFocus = false;
+      _toggle();
+      // Hide the popover when focus leaves the autocomplete entirely (field and popover both unfocused). Keeps the
+      // popover open while the user is keyboard-navigating items (popover has focus), or while an item tap is
+      // unfocusing the field (handled by onPress's autoHide flag instead).
+    } else if (!_fieldFocus.hasFocus && !_popoverFocus.hasFocus && !_itemTap) {
+      _popoverController.hide();
+    }
+
+    _itemTap = false;
+    _restore = null;
+  }
+
+  void _toggle() {
+    final token = ++_monotonic;
+    final data = _data;
+
+    _apply(token, _content(data));
+    if (data is Future<Iterable<T>>) {
+      data.then(
+        (values) => _apply(token, _content(values)),
+        onError: (_, _) => _apply(token, widget.contentErrorBuilder != null),
+      );
+    }
+  }
+
+  bool _content(FutureOr<Iterable<T>> data) => switch (data) {
+    final Iterable<T> values => values.isNotEmpty || widget.contentEmptyBuilder != null,
+    Future<Iterable<T>>() => widget.contentLoadingBuilder != null,
+  };
+
+  void _apply(int token, bool show) {
+    if (!mounted || token != _monotonic) {
+      return;
+    }
+
+    // Don't re-show after unfocus: a pending async filter completing must not reopen the popover.
+    if (show && !_fieldFocus.hasFocus) {
+      return;
+    }
+
+    if (show) {
+      _popoverController.show();
+    } else {
+      _popoverController.hide();
+    }
+  }
+
+  void _handleOnPopoverChange() {
+    if (_popoverController case FPopoverManagedControl(:final onChange?)) {
+      onChange(_popoverController.status.isForwardOrCompleted);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final style = widget.style(context.theme.autocompleteStyle);
+    final fieldStyle = style.fieldStyles.resolve({widget.size, context.platformVariant});
+
+    // On desktop, the textfield selects the entire text when focused (except when tapped). However, refocusing on the
+    // textfield after keyboard navigation of completions should NOT select the entire text.
+    //
+    // To work around this, we disable the default behavior by setting selectAllOnFocus to false and manage the focus
+    // behavior ourselves.
+    //
+    // Focus gained by taps are tracked using this Listener. We cannot use FTextField's onTap method since it is called
+    // AFTER its focus change callback. Subsequently the entire text is selected in the focus change callback only if
+    // it is not caused by a tap.
+    return Listener(
+      onPointerDown: (_) {
+        if (!_fieldFocus.hasFocus) {
+          _tapFocus = true;
+        }
+      },
+      child: FTextFormField(
+        control: .managed(controller: _controller),
+        size: widget.size,
+        style: fieldStyle,
+        label: widget.label,
+        hint: widget.hint,
+        description: widget.description,
+        magnifierConfiguration: widget.magnifierConfiguration,
+        groupId: widget.groupId,
+        focusNode: _fieldFocus,
+        keyboardType: widget.keyboardType,
+        textInputAction: widget.textInputAction,
+        textCapitalization: widget.textCapitalization,
+        textAlign: widget.textAlign,
+        textAlignVertical: widget.textAlignVertical,
+        textDirection: widget.textDirection,
+        autofocus: widget.autofocus,
+        obscuringCharacter: widget.obscuringCharacter,
+        obscureText: widget.obscureText,
+        autocorrect: widget.autocorrect,
+        smartDashesType: widget.smartDashesType,
+        smartQuotesType: widget.smartQuotesType,
+        enableSuggestions: widget.enableSuggestions,
+        minLines: widget.minLines,
+        maxLines: widget.maxLines,
+        expands: widget.expands,
+        readOnly: widget.readOnly,
+        showCursor: widget.showCursor,
+        maxLength: widget.maxLength,
+        maxLengthEnforcement: widget.maxLengthEnforcement,
+        onTap: _toggle,
+        onTapAlwaysCalled: true,
+        onEditingComplete: widget.onEditingComplete,
+        onSubmit: (value) {
+          _popoverController.hide();
+          widget.onSubmit?.call(value);
+        },
+        onAppPrivateCommand: widget.onAppPrivateCommand,
+        inputFormatters: widget.inputFormatters,
+        enabled: widget.enabled,
+        ignorePointers: widget.ignorePointers,
+        enableInteractiveSelection: widget.enableInteractiveSelection,
+        selectAllOnFocus: false,
+        selectionControls: widget.selectionControls,
+        dragStartBehavior: widget.dragStartBehavior,
+        mouseCursor: widget.mouseCursor,
+        counterBuilder: widget.counterBuilder,
+        scrollPhysics: widget.scrollPhysics,
+        scrollController: widget.scrollController,
+        autofillHints: widget.autofillHints,
+        restorationId: widget.restorationId,
+        stylusHandwritingEnabled: widget.stylusHandwritingEnabled,
+        enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+        contentInsertionConfiguration: widget.contentInsertionConfiguration,
+        contextMenuBuilder: widget.contextMenuBuilder,
+        canRequestFocus: widget.canRequestFocus,
+        undoController: widget.undoController,
+        spellCheckConfiguration: widget.spellCheckConfiguration,
+        prefixBuilder: widget.prefixBuilder == null
+            ? null
+            : (context, _, variants) => widget.prefixBuilder!(context, style, variants),
+        suffixBuilder: widget.suffixBuilder == null
+            ? null
+            : (context, _, variants) => widget.suffixBuilder!(context, style, variants),
+        clearable: widget.clearable,
+        onSaved: widget.onSaved == null ? null : (text) => widget.onSaved!(widget.parse(text)),
+        onReset: widget.onReset,
+        validator: widget.validator == null ? null : (text) => widget.validator!(widget.parse(text)),
+        autovalidateMode: widget.autovalidateMode,
+        forceErrorText: widget.forceErrorText,
+        errorBuilder: widget.errorBuilder,
+        builder: (context, _, variants, field) => FocusTraversalGroup(
+          policy: SkipDelegateTraversalPolicy(
+            FocusTraversalGroup.maybeOf(context) ?? ReadingOrderTraversalPolicy(),
+            _popoverFocus,
+          ),
+          child: FPopover(
+            control: .managed(controller: _popoverController),
+            style: style.contentStyle,
+            constraints: widget.contentConstraints,
+            popoverAnchor: widget.contentAnchor,
+            childAnchor: widget.fieldAnchor,
+            spacing: widget.contentSpacing,
+            overflow: widget.contentOverflow,
+            useViewPadding: widget.contentUseViewPadding,
+            useViewInsets: widget.contentUseViewInsets,
+            offset: widget.contentOffset,
+            hideRegion: widget.contentHideRegion,
+            groupId: widget.contentGroupId,
+            cutout: widget.contentCutout,
+            cutoutBuilder: widget.contentCutoutBuilder,
+            onTapHide: () {
+              if (_restore case final restore?) {
+                _mutating = true;
+                _controller.text = restore;
+                _mutating = false;
+              }
+              widget.contentOnTapHide?.call();
+            },
+            focusNode: _popoverFocus,
+            popoverBuilder: (_, popoverController) => TextFieldTapRegion(
+              child: InheritedAutocompleteController<T>(
+                popover: popoverController,
+                format: widget.format,
+                onPress: (value) {
+                  final retainFocus =
+                      widget.retainFocus ??
+                      switch (defaultTargetPlatform) {
+                        .macOS || .windows || .linux => true,
+                        _ => false,
+                      };
+
+                  if (!retainFocus) {
+                    _itemTap = true;
+                    _fieldFocus.unfocus(); // Hides on-screen keyboard.
+                  }
+
+                  if (widget.autoHide) {
+                    _popoverController.hide();
+                  }
+
+                  _mutating = true;
+                  _controller.text = widget.format(value);
+                  _mutating = false;
+
+                  widget.onItemPress?.call(value);
+                },
+                onFocus: (value) {
+                  _restore ??= _controller.text;
+                  _mutating = true;
+                  _controller.text = widget.format(value);
+                  _mutating = false;
+                },
+                child: widget.popoverBuilder(
+                  context,
+                  _controller,
+                  _popoverController,
+                  Content<T>(
+                    controller: _controller,
+                    style: style.contentStyle,
+                    enabled: widget.enabled,
+                    scrollController: widget.contentScrollController,
+                    physics: widget.contentPhysics,
+                    divider: widget.contentDivider,
+                    data: _data,
+                    loadingBuilder: widget.contentLoadingBuilder ?? (_, _) => const SizedBox.shrink(),
+                    builder: widget.contentBuilder,
+                    emptyBuilder: widget.contentEmptyBuilder ?? (_, _) => const SizedBox.shrink(),
+                    errorBuilder: widget.contentErrorBuilder ?? (_, _, _, _) => const SizedBox.shrink(),
+                  ),
+                ),
+              ),
+            ),
+            child: AutocompleteFieldScope(
+              style: fieldStyle,
+              variants: variants,
+              child: CallbackShortcuts(
+                bindings: {
+                  const SingleActivator(.escape): _popoverController.hide,
+                  const SingleActivator(.arrowDown): () => _popoverFocus.descendants.firstOrNull?.requestFocus(),
+                  if (_controller.current != null) const SingleActivator(.tab): _complete,
+                  if (_controller.current != null && widget.rightArrowToComplete)
+                    const SingleActivator(.arrowRight): _complete,
+                },
+                child: widget.builder(context, style, variants, field),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _complete() {
+    if (widget.autoHide) {
+      _popoverController.hide();
+    }
+    _mutating = true;
+    _controller.complete();
+    _mutating = false;
+  }
+}
+
+@internal
+final class AutocompleteFieldScope extends InheritedWidget {
+  @useResult
+  static AutocompleteFieldScope of(BuildContext context) {
+    assert(debugCheckHasAncestor<AutocompleteFieldScope>('FAutocomplete', context));
+    return context.dependOnInheritedWidgetOfExactType<AutocompleteFieldScope>()!;
+  }
+
+  /// The autocomplete field style.
+  final FAutocompleteFieldStyle style;
+
+  /// The current widget variants.
+  final Set<FTextFieldVariant> variants;
+
+  const AutocompleteFieldScope({required this.style, required this.variants, required super.child, super.key});
+
+  @override
+  bool updateShouldNotify(AutocompleteFieldScope old) => style != old.style || variants != old.variants;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DiagnosticsProperty('style', style))
+      ..add(DiagnosticsProperty('variants', variants));
+  }
+}

@@ -1,0 +1,88 @@
+---
+title: Pagination
+description: Display the current active page and enable navigation between multiple pages.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.pagination/
+---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import defaultSnippet from '@/snippets/examples/navigation/pagination/default.json';
+import siblingsSnippet from '@/snippets/examples/navigation/pagination/siblings.json';
+import hideEdgesSnippet from '@/snippets/examples/navigation/pagination/hide-edges.json';
+import pageViewSnippet from '@/snippets/examples/navigation/pagination/page-view.json';
+import customIconSnippet from '@/snippets/examples/navigation/pagination/custom-icon.json';
+import paginationUsage from '@/snippets/usages/navigation/pagination/pagination.json';
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='navigation/pagination' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={defaultSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Pagination']}>
+    <Tab value="Pagination">
+        ```shell copy
+        dart run forui style create pagination
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `FPagination(...)`
+<UsageSnippet usage={paginationUsage} />
+
+## Examples
+
+### Siblings
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='navigation/pagination' variant='siblings' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={siblingsSnippet} />
+  </Tab>
+</Tabs>
+
+### Hide Edges
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='navigation/pagination' variant='hide-edges' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={hideEdgesSnippet} />
+  </Tab>
+</Tabs>
+
+### Custom Icons
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='navigation/pagination' variant='custom-icon' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={customIconSnippet} />
+  </Tab>
+</Tabs>
+
+### With a `PageView`
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='navigation/pagination' variant='page-view' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={pageViewSnippet} />
+  </Tab>
+</Tabs>

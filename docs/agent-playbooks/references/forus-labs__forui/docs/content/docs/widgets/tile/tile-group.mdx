@@ -1,0 +1,131 @@
+---
+title: Tile Group
+description: A tile group that typically groups related information together.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.tile/
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import tileGroupDefault from '@/snippets/examples/tile/tile-group/default.json';
+import tileGroupUsage from '@/snippets/usages/tile/tile_group/tileGroup.json';
+import tileGroupBuilderUsage from '@/snippets/usages/tile/tile_group/tileGroupBuilder.json';
+import tileGroupMergeUsage from '@/snippets/usages/tile/tile_group/tileGroupMerge.json';
+import tileGroupLazy from '@/snippets/examples/tile/tile-group/lazy.json';
+import tileGroupMerge from '@/snippets/examples/tile/tile-group/merge.json';
+import tileGroupScrollable from '@/snippets/examples/tile/tile-group/scrollable.json';
+import tileGroupFullDivider from '@/snippets/examples/tile/tile-group/full-divider.json';
+import tileGroupNoDivider from '@/snippets/examples/tile/tile-group/no-divider.json';
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='tile/tile-group'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={tileGroupDefault} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Tile Group', 'Tiles', 'Tile', 'Tile Content']}>
+    <Tab value="Tile Group">
+        ```shell copy
+        dart run forui style create tile-group
+        ````
+    </Tab>
+    <Tab value="Tiles">
+        ```shell copy
+        dart run forui style create tiles
+        ````
+    </Tab>
+    <Tab value="Tile">
+        ```shell copy
+        dart run forui style create tile
+        ````
+    </Tab>
+    <Tab value="Tile Content">
+        ```shell copy
+        dart run forui style create tile-content
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `FTileGroup(...)`
+<UsageSnippet usage={tileGroupUsage} />
+
+### `FTileGroup.builder(...)`
+<UsageSnippet usage={tileGroupBuilderUsage} />
+
+### `FTileGroup.merge(...)`
+<UsageSnippet usage={tileGroupMergeUsage} />
+
+## Examples
+
+### Behavior
+
+#### Scrollable
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='tile/tile-group' variant='scrollable' height={300}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={tileGroupScrollable} />
+  </Tab>
+</Tabs>
+
+#### Lazy Scrollable
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='tile/tile-group' variant='lazy' height={300}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={tileGroupLazy} />
+  </Tab>
+</Tabs>
+
+#### Merge Multiple Groups
+
+This function merges multiple `FTileGroupMixin`s into a single group. It is useful for representing a group with
+several sections.
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='tile/tile-group' variant='merge' height={300}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={tileGroupMerge} />
+  </Tab>
+</Tabs>
+
+### Appearance
+
+#### Full Divider
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='tile/tile-group' variant='full-divider'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={tileGroupFullDivider} />
+  </Tab>
+</Tabs>
+
+#### No Divider
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='tile/tile-group' variant='no-divider'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={tileGroupNoDivider} />
+  </Tab>
+</Tabs>

@@ -1,0 +1,53 @@
+{
+  "interface": {
+    "displayName": "Local Plugins"
+  },
+  "name": "agent-skills-local",
+  "plugins": [
+    {
+      "category": "Coding",
+      "name": "harness-engineering",
+      "policy": {
+        "authentication": "ON_INSTALL",
+        "installation": "AVAILABLE",
+        "products": [
+          "CODEX"
+        ]
+      },
+      "source": {
+        "path": "./Plugins/harness-engineering",
+        "source": "local"
+      }
+    },
+    {
+      "category": "Productivity",
+      "name": "plugin-factory",
+      "policy": {
+        "authentication": "ON_INSTALL",
+        "installation": "AVAILABLE",
+        "products": [
+          "CODEX"
+        ]
+      },
+      "source": {
+        "path": "./Plugins/plugin-factory",
+        "source": "local"
+      }
+    },
+    {
+      "category": "Productivity",
+      "name": "skill-factory",
+      "policy": {
+        "authentication": "ON_INSTALL",
+        "installation": "AVAILABLE",
+        "products": [
+          "CODEX"
+        ]
+      },
+      "source": {
+        "path": "./Plugins/skill-factory",
+        "source": "local"
+      }
+    }
+  ]
+}

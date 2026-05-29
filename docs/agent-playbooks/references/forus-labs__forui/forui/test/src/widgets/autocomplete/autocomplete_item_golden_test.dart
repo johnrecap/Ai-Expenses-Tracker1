@@ -1,0 +1,192 @@
+@Tags(['golden'])
+library;
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:forui/forui.dart';
+import '../../test_scaffold.dart';
+
+const fruits = [
+  'Apple',
+  'Banana',
+  'Blueberry',
+  'Grapes',
+  'Lemon',
+  'Mango',
+  'Kiwi',
+  'Orange',
+  'Peach',
+  'Pear',
+  'Pineapple',
+  'Plum',
+  'Raspberry',
+  'Strawberry',
+  'Watermelon',
+];
+
+void main() {
+  const key = ValueKey('autocomplete');
+
+  group('blue screen', () {
+    testWidgets('items & sections', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.blue(
+          child: FAutocomplete.textBuilder(
+            key: key,
+            style: TestScaffold.blueScreen.autocompleteStyle.copyWith(
+              fieldStyles: .delta([.all(const .delta(cursorColor: Color(0xFF03A9F4)))]),
+            ),
+            filter: (query) => fruits.where((f) => f.toLowerCase().startsWith(query.toLowerCase())),
+            contentBuilder: (context, query, items) => [
+              .section(label: const Text('Most popular'), items: const ['Apple', 'Kiwi']),
+              .section(label: const Text('Others'), items: const ['Banana', 'Blueberry']),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectBlueScreen();
+    });
+  });
+
+  for (final theme in TestScaffold.themes) {
+    testWidgets('sections', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          child: FAutocomplete.textBuilder(
+            key: key,
+            label: const Text('Fruits'),
+            description: const Text('Select your favorite fruits'),
+            control: const .managed(initial: TextEditingValue(text: 'App')),
+            filter: (query) => fruits.where((f) => f.toLowerCase().startsWith(query.toLowerCase())),
+            contentBuilder: (context, query, items) => [
+              .section(label: const Text('Most popular'), items: const ['Apple', 'Kiwi']),
+              .section(label: const Text('Others'), items: const ['Banana', 'Blueberry']),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('autocomplete/item/${theme.name}/sections.png'));
+    });
+
+    testWidgets('dividers', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          child: FAutocomplete.textBuilder(
+            key: key,
+            label: const Text('Fruits'),
+            description: const Text('Select your favorite fruits'),
+            control: const .managed(initial: TextEditingValue(text: 'App')),
+            filter: (query) => fruits.where((f) => f.toLowerCase().startsWith(query.toLowerCase())),
+            contentDivider: .full,
+            contentBuilder: (context, query, items) => [
+              .section(divider: .indented, label: const Text('Most popular'), items: const ['Apple', 'Kiwi']),
+              .section(label: const Text('Others'), items: const ['Banana', 'Blueberry']),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('autocomplete/item/${theme.name}/dividers.png'));
+    });
+
+    testWidgets('hover effect', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          alignment: .topCenter,
+          child: FAutocomplete.text(key: key, items: const ['item']),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      final gesture = await tester.createPointerGesture();
+
+      await gesture.moveTo(tester.getCenter(find.text('item')));
+      await tester.pump();
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('autocomplete/item/${theme.name}/hover.png'));
+    });
+
+    testWidgets('press effect on mobile', (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          alignment: .topCenter,
+          child: FAutocomplete.text(key: key, items: const ['item']),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      final gesture = await tester.createPointerGesture(kind: .touch);
+      await gesture.down(tester.getCenter(find.text('item')));
+      await tester.pumpAndSettle();
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('autocomplete/item/${theme.name}/press.png'));
+
+      debugDefaultTargetPlatformOverride = null;
+    });
+
+    testWidgets('raw', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          alignment: .topCenter,
+          child: FAutocomplete.textBuilder(
+            key: key,
+            filter: (query) => ['v'],
+            contentBuilder: (_, _, _) => [
+              FAutocompleteItem.item(prefix: const Icon(FLucideIcons.circle), title: const Text('Title'), value: 'v'),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('autocomplete/${theme.name}/item/raw.png'));
+    });
+  }
+
+  testWidgets('desktop hovered', (tester) async {
+    await tester.pumpWidget(
+      TestScaffold.app(
+        theme: FThemes.neutral.light.desktop,
+        alignment: .topCenter,
+        child: FAutocomplete.text(key: key, items: const ['Apple', 'Banana']),
+      ),
+    );
+
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    final gesture = await tester.createPointerGesture();
+
+    await gesture.moveTo(tester.getCenter(find.text('Apple')));
+    await tester.pump();
+
+    await expectLater(find.byType(TestScaffold), matchesGoldenFile('autocomplete/item/desktop/hover.png'));
+  });
+}

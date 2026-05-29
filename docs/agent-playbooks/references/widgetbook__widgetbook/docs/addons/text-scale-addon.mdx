@@ -1,0 +1,85 @@
+# Text Scale Addon
+
+The `TextScaleAddon` allows developers to adjust the `MediaQuery.textScaler` value to visualize how text scale changes impact layout and rendering.
+
+<Tabs
+  values={[
+    { label: "x1.5", value: "1.5" },
+    { label: "x1", value: "1" },
+  ]}
+>
+  <TabItem value="1.5">
+    <iframe
+      src="https://demo.widgetbook.io/#/?path=features/basket/basketscreen/default&text-scale={factor:1.5}&device={name:None}&preview"
+      width="100%"
+      height="560px"
+    />
+  </TabItem>
+  <TabItem value="1">
+    <iframe
+      src="https://demo.widgetbook.io/#/?path=features/basket/basketscreen/default&text-scale={factor:1}&device={name:None}&preview"
+      width="100%"
+      height="560px"
+    />
+  </TabItem>
+</Tabs>
+
+## Usage
+
+```dart title=widgetbook/lib/main.dart
+class WidgetbookApp extends StatelessWidget {
+  const WidgetbookApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Widgetbook(
+      // ...
+      addons: [
+        TextScaleAddon(), // [!code highlight]
+      ],
+    );
+  }
+}
+```
+
+## Order
+
+Since the [order of addons](/addons/overview#order-of-addons) matters, here are some guidelines to follow when using the `TextScaleAddon`:
+
+Addons that should come before the `TextScaleAddon`:
+
+- `ViewportAddon`
+- `DeviceFrameAddon`
+
+## Multi-snapshot Support
+
+The `TextScaleAddon` is supported in the [Multi Snapshot Reviews](/cloud/snapshots/multi-snapshot) via the `TextScaleAddonConfig`. Here's how to configure it:
+
+```dart title=widgetbook/lib/main.dart
+import 'package:widgetbook/widgetbook.dart';
+import 'package:widgetbook_annotation/widgetbook_annotation.dart';
+
+@App(
+  cloudAddonsConfigs: {
+    'x1': [
+      TextScaleAddonConfig(1), // [!code highlight]
+    ],
+    'x1.5': [
+      TextScaleAddonConfig(1.5), // [!code highlight]
+    ],
+  },
+)
+class WidgetbookApp extends StatelessWidget {
+  const WidgetbookApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Widgetbook(
+      // ...
+      addons: [
+        TextScaleAddon(), // [!code highlight]
+      ],
+    );
+  }
+}
+```

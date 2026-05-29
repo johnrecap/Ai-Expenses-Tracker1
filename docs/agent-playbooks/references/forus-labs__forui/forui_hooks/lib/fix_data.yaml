@@ -1,0 +1,19 @@
+version: 1
+transforms:
+  - title: 'Remove useFPopoverController(motion: ...)'
+    date: 2026-04-06
+    element:
+      uris: [ 'package:forui_hooks/forui_hooks.dart' ]
+      function: useFPopoverController
+    changes:
+      - kind: removeParameter
+        name: 'motion'
+
+  - title: 'Remove useFTooltipController(motion: ...)'
+    date: 2026-04-06
+    element:
+      uris: [ 'package:forui_hooks/forui_hooks.dart' ]
+      function: useFTooltipController
+    changes:
+      - kind: removeParameter
+        name: 'motion'

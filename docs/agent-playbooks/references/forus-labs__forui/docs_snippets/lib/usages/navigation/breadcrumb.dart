@@ -1,0 +1,146 @@
+// ignore_for_file: avoid_redundant_argument_values, sort_child_properties_last
+
+import 'package:flutter/widgets.dart';
+
+import 'package:forui/forui.dart';
+
+const breadcrumb = FBreadcrumb(
+  // {@category "Core"}
+  style: .delta(padding: .value(.zero)),
+  divider: Icon(FLucideIcons.chevronRight),
+  children: [
+    FBreadcrumbItem(child: Text('Home'), onPress: null),
+    FBreadcrumbItem(child: Text('Products'), onPress: null),
+  ],
+  // {@endcategory}
+);
+
+final breadcrumbItem = FBreadcrumbItem(
+  // {@category "Accessibility"}
+  autofocus: false,
+  focusNode: null,
+  onFocusChange: (focused) {},
+  // {@endcategory}
+  // {@category "Callbacks"}
+  onHoverChange: (hovered) {},
+  onVariantChange: (previous, current) {},
+  // {@endcategory}
+  // {@category "Core"}
+  current: false,
+  onPress: () {},
+  child: const Text('Home'),
+  // {@endcategory}
+);
+
+final breadcrumbItemCollapsed = FBreadcrumbItem.collapsed(
+  // {@category "Popover Control"}
+  popoverControl: const .managed(),
+  // {@endcategory}
+  // {@category "Layout"}
+  menuAnchor: .topLeft,
+  childAnchor: .bottomLeft,
+  spacing: const .spacing(4),
+  overflow: .flip,
+  offset: .zero,
+  hideRegion: .excludeChild,
+  onTapHide: () {},
+  cutout: true,
+  cutoutBuilder: FModalBarrier.defaultCutoutBuilder,
+  intrinsicWidth: true,
+  // {@endcategory}
+  // {@category "Scroll"}
+  scrollController: null,
+  scrollCacheExtent: null,
+  maxHeight: .infinity,
+  dragStartBehavior: .start,
+  // {@endcategory}
+  // {@category "Accessibility"}
+  autofocus: false,
+  focusNode: null,
+  onFocusChange: (focused) {},
+  traversalEdgeBehavior: .closedLoop,
+  semanticsLabel: 'More pages',
+  // {@endcategory}
+  // {@category "Callbacks"}
+  onHoverChange: (hovered) {},
+  onVariantChange: (previous, current) {},
+  // {@endcategory}
+  // {@category "Core"}
+  icon: const Icon(FLucideIcons.ellipsis),
+  divider: .full,
+  menu: [
+    FItemGroup(
+      children: [
+        FItem(title: const Text('Page 1'), onPress: () {}),
+        FItem(title: const Text('Page 2'), onPress: () {}),
+      ],
+    ),
+  ],
+  popoverMenuStyle: const .delta(maxWidth: 200),
+  // {@endcategory}
+);
+
+final breadcrumbItemCollapsedTiles = FBreadcrumbItem.collapsedTiles(
+  // {@category "Popover Control"}
+  popoverControl: const .managed(),
+  // {@endcategory}
+  // {@category "Layout"}
+  menuAnchor: .topLeft,
+  childAnchor: .bottomLeft,
+  spacing: const .spacing(4),
+  overflow: .flip,
+  offset: .zero,
+  hideRegion: .excludeChild,
+  cutout: true,
+  cutoutBuilder: FModalBarrier.defaultCutoutBuilder,
+  intrinsicWidth: true,
+  // {@endcategory}
+  // {@category "Scroll"}
+  scrollController: null,
+  scrollCacheExtent: null,
+  maxHeight: .infinity,
+  dragStartBehavior: .start,
+  // {@endcategory}
+  // {@category "Accessibility"}
+  autofocus: false,
+  focusNode: null,
+  onFocusChange: (focused) {},
+  traversalEdgeBehavior: .closedLoop,
+  semanticsLabel: 'More pages',
+  // {@endcategory}
+  // {@category "Callbacks"}
+  onHoverChange: (hovered) {},
+  onVariantChange: (previous, current) {},
+  // {@endcategory}
+  // {@category "Core"}
+  icon: const Icon(FLucideIcons.ellipsis),
+  divider: .full,
+  menu: [
+    FTileGroup(
+      children: [
+        FTile(title: const Text('Page 1'), onPress: () {}),
+        FTile(title: const Text('Page 2'), onPress: () {}),
+      ],
+    ),
+  ],
+  popoverMenuStyle: const .delta(maxWidth: 200),
+  // {@endcategory}
+);
+
+// {@category "Popover Control" "`.lifted()`"}
+/// Externally controls the popover's visibility.
+final FPopoverControl popoverLifted = .lifted(shown: false, onChange: (shown) {});
+
+// {@category "Popover Control" "`.managed()` with internal controller"}
+/// Manages the popover's visibility internally.
+final FPopoverControl popoverInternal = .managed(initial: true, onChange: (shown) {});
+
+// {@category "Popover Control" "`.managed()` with external controller"}
+/// Uses an external `FPopoverController` to control the popover's visibility.
+final FPopoverControl popoverExternal = .managed(
+  // Don't create a controller inline. Store it in a State instead.
+  controller: FPopoverController(vsync: vsync, shown: true),
+  onChange: (shown) {},
+);
+
+TickerProvider get vsync => throw UnimplementedError();

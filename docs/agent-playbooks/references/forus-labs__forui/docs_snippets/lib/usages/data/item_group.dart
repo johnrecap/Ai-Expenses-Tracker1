@@ -1,0 +1,75 @@
+// ignore_for_file: avoid_redundant_argument_values
+
+import 'package:flutter/widgets.dart';
+
+import 'package:forui/forui.dart';
+
+final itemGroup = FItemGroup(
+  // {@category "Scroll"}
+  scrollController: null,
+  scrollCacheExtent: null,
+  maxHeight: .infinity,
+  dragStartBehavior: .start,
+  physics: const ClampingScrollPhysics(),
+  // {@endcategory}
+  // {@category "Accessibility"}
+  semanticsLabel: 'Item group',
+  // {@endcategory}
+  // {@category "Core"}
+  style: const .delta(spacing: 4),
+  enabled: true,
+  intrinsicWidth: null,
+  divider: .none,
+  children: [
+    .item(title: const Text('Item 1'), onPress: () {}),
+    .item(title: const Text('Item 2'), onPress: () {}),
+  ],
+  // {@endcategory}
+);
+
+final builder = FItemGroup.builder(
+  // {@category "Scroll"}
+  scrollController: null,
+  scrollCacheExtent: null,
+  maxHeight: .infinity,
+  dragStartBehavior: .start,
+  physics: const ClampingScrollPhysics(),
+  // {@endcategory}
+  // {@category "Accessibility"}
+  semanticsLabel: 'Item group',
+  // {@endcategory}
+  // {@category "Core"}
+  style: const .delta(spacing: 4),
+  enabled: true,
+  divider: .none,
+  itemBuilder: (context, index) => FItem(title: Text('Item $index'), onPress: () {}),
+  count: 10,
+  // {@endcategory}
+);
+
+final merge = FItemGroup.merge(
+  // {@category "Scroll"}
+  scrollController: null,
+  scrollCacheExtent: null,
+  maxHeight: .infinity,
+  dragStartBehavior: .start,
+  physics: const ClampingScrollPhysics(),
+  // {@endcategory}
+  // {@category "Accessibility"}
+  semanticsLabel: 'Item group',
+  // {@endcategory}
+  // {@category "Core"}
+  style: const .delta(spacing: 4),
+  enabled: true,
+  intrinsicWidth: null,
+  divider: .full,
+  children: [
+    .group(
+      children: [.item(title: const Text('Group 1 Item'), onPress: () {})],
+    ),
+    .group(
+      children: [.item(title: const Text('Group 2 Item'), onPress: () {})],
+    ),
+  ],
+  // {@endcategory}
+);

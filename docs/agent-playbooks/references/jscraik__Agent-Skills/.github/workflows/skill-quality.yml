@@ -1,0 +1,163 @@
+name: skill-quality
+
+on:
+  pull_request:
+    paths:
+      - "**/SKILL.md"
+      - "**/Infrastructure/references/evals.yaml"
+      - "**/Infrastructure/references/contract.yaml"
+      - "**/Infrastructure/references/task-profile.json"
+      - "Plugins/skill-factory/scripts/skill-builder/**"
+      - "skills-system/skill-creator/**"
+      - "skills-system/skill-installer/**"
+
+      - "Plugins/skill-factory/references/skill-builder/**"
+      - "Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/scripts/**"
+      - "Plugins/skill-factory/skills/infrastructure_ops/skill-installer/Infrastructure/scripts/install-skill-from-github.py"
+      - "Plugins/skill-factory/skills/infrastructure_ops/skill-installer/scripts/install-skill-from-github.py"
+      - "Infrastructure/scripts/validate_skill_authoring_family.sh"
+      - "Infrastructure/scripts/validate_skill_authoring_family_benchmarks.py"
+      - "Infrastructure/scripts/projection_integrity.py"
+      - "Infrastructure/scripts/validate_projection_integrity.sh"
+      - "Infrastructure/scripts/sync_projection_trees.sh"
+      - "Infrastructure/scripts/sync_plugin_factory_family.sh"
+      - "Infrastructure/templates/evals.yaml"
+  workflow_dispatch:
+    inputs:
+      run_evals:
+        description: "Run LLM evals (requires codex/claude CLIs and auth on runner)"
+        required: false
+        default: "false"
+      tier2_mode:
+        description: "Tier-2 handling for eval run"
+        required: false
+        default: "warn"
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  structure-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Ensure GitHub CLI is installed
+        run: bash Infrastructure/scripts/ensure-gh-cli.sh
+      - name: Install deps
+        run: python -m pip install --upgrade pip pyyaml pytest defusedxml
+      - name: Tier-1 structure gate (skill_gate)
+        run: |
+          python Plugins/skill-factory/scripts/skill-builder/run_repo_skill_quality.py \
+            --root . \
+            --baseline-file Plugins/skill-factory/references/skill-builder/skill-quality-baseline.json \
+            --benchmark-mode off \
+            --benchmark-config Plugins/skill-factory/references/skill-builder/benchmark-policy.json \
+            --benchmark-output-json Infrastructure/artifacts/industry-benchmark-latest.json \
+            --sarif-out Infrastructure/artifacts/skills/skill-structure-gates.sarif \
+            --format text
+      - name: Upload benchmark artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: skill-portfolio-benchmark
+          path: Infrastructure/artifacts/industry-benchmark-latest.json
+      - name: Upload structure reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: skill-quality-structure-reports
+          path: Infrastructure/artifacts/skills
+      - name: Skip aggregate SARIF upload
+        if: always() && hashFiles('Infrastructure/artifacts/skills/skill-structure-gates.sarif') != ''
+        run: |
+          echo "Aggregate skill structure SARIF contains one run per skill."
+          echo "GitHub code scanning rejects multi-run uploads that reuse the same category."
+          echo "Structure reports remain available via uploaded workflow artifacts."
+
+      - name: See Also gate (new skills must have ≥2 cross-skill links)
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+          ALL_CHANGED=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          CHANGED=$(printf '%s\n' "$ALL_CHANGED" | grep 'SKILL.md$' || true)
+          if [ -n "$CHANGED" ]; then
+            python3 Infrastructure/scripts/check-see-also.py . --changed-files $CHANGED
+          else
+            echo "check-see-also: no SKILL.md changes in this PR"
+          fi
+
+      - name: Hub stability gate
+        run: python3 Infrastructure/scripts/check-hub-stability.py .
+
+  authoring-family-gate:
+    runs-on: ubuntu-latest
+    needs: [structure-gate]
+    steps:
+      - uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: python -m pip install --upgrade pip pyyaml pytest defusedxml
+      - name: Validate skill authoring family (eval + security parity)
+        env:
+          SKILL_FAMILY_LOCAL_MEMORY_MODE: optional
+        run: bash Infrastructure/scripts/validate_skill_authoring_family.sh
+      - name: Sync projection trees (all scopes)
+        run: bash Infrastructure/scripts/sync_projection_trees.sh all
+      - name: Verify projection integrity (all scopes)
+        run: bash Infrastructure/scripts/validate_projection_integrity.sh
+
+  eval-baseline:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_evals == 'true'
+    runs-on: ubuntu-latest
+    needs: [structure-gate, authoring-family-gate]
+    steps:
+      - uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: python -m pip install --upgrade pip pyyaml pytest defusedxml
+      - name: Run dual-run evals (requires codex/claude binaries + auth)
+        run: |
+          python Plugins/skill-factory/scripts/skill-builder/run_repo_skill_quality.py \
+            --root . \
+            --run-evals \
+            --dual-run \
+            --capture-jsonl \
+            --tier2-mode "${{ inputs.tier2_mode }}" \
+            --benchmark-mode warn \
+            --benchmark-config Plugins/skill-factory/references/skill-builder/benchmark-policy.json \
+            --benchmark-output-json Infrastructure/artifacts/industry-benchmark-latest.json \
+            --sarif-out Infrastructure/artifacts/skills/skill-structure-gates.sarif \
+            --format text
+      - name: Build dashboard
+        run: |
+          python Plugins/skill-factory/scripts/skill-builder/build_skill_eval_dashboard.py \
+            --reports-root Infrastructure/artifacts/skills \
+            --out-json Infrastructure/artifacts/skills/dashboard.json \
+            --out-md Infrastructure/artifacts/skills/dashboard.md
+      - name: Upload reports
+        uses: actions/upload-artifact@v7
+        with:
+          name: skill-quality-reports
+          path: |
+            Infrastructure/artifacts/skills
+            Infrastructure/artifacts/industry-benchmark-latest.json
+      - name: Skip aggregate SARIF upload
+        if: always() && hashFiles('Infrastructure/artifacts/skills/skill-structure-gates.sarif') != ''
+        run: |
+          echo "Aggregate skill structure SARIF contains one run per skill."
+          echo "GitHub code scanning rejects multi-run uploads that reuse the same category."
+          echo "Structure reports remain available via uploaded workflow artifacts."

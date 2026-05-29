@@ -1,0 +1,122 @@
+name: sossoldi
+description: A wealth management / personal finance / net worth tracking app.
+
+publish_to: "none"
+
+version: 0.3.2+103
+
+environment:
+  sdk: ^3.10.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  analyzer_plugin: ^0.13.1
+  collection: ^1.19.1
+  csv: ^6.0.0
+  cupertino_icons: ^1.0.8
+  device_info_plus: ^12.3.0
+  file_picker: ^10.3.10
+  fl_chart: ^1.1.1
+  flutter_local_notifications: ^20.0.0
+  flutter_native_splash: ^2.4.7
+  flutter_phoenix: ^1.1.1
+  flutter_riverpod: ^3.1.0
+  intl: ^0.20.2
+  local_auth: ^3.0.0
+  package_info_plus: ^9.0.0
+  path: ^1.9.1
+  path_provider: ^2.1.5
+  percent_indicator: ^4.2.5
+  permission_handler: ^12.0.1
+  riverpod_annotation: ^4.0.0
+  shared_preferences: ^2.5.4
+  sqflite: ^2.4.2
+  sqflite_common_ffi: ^2.4.0
+  sqlite3_flutter_libs:
+  timezone: ^0.10.1
+  url_launcher: ^6.3.2
+  font_awesome_flutter: ^10.12.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  build_runner: ^2.10.5
+  dependency_validator: ^5.0.3
+  flutter_launcher_icons: ^0.14.4
+  flutter_lints: ^6.0.0
+  freezed: ^3.2.3
+  json_serializable: ^6.11.2
+  riverpod_generator: ^4.0.0+1
+  riverpod_lint: ^3.1.0
+  test: ^1.26.3
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+    - assets/images/
+  fonts:
+    - family: NunitoSans
+      fonts:
+        - asset: assets/fonts/NunitoSans-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/NunitoSans-ExtraLightItalic.ttf
+          style: italic
+          weight: 200
+        - asset: assets/fonts/NunitoSans-Light.ttf
+          weight: 300
+        - asset: assets/fonts/NunitoSans-LightItalic.ttf
+          style: italic
+          weight: 300
+        - asset: assets/fonts/NunitoSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/NunitoSans-Italic.ttf
+          style: italic
+          weight: 400
+        - asset: assets/fonts/NunitoSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/NunitoSans-MediumItalic.ttf
+          style: italic
+          weight: 500
+        - asset: assets/fonts/NunitoSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/NunitoSans-SemiBoldItalic.ttf
+          style: italic
+          weight: 600
+        - asset: assets/fonts/NunitoSans-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/NunitoSans-BoldItalic.ttf
+          style: italic
+          weight: 700
+        - asset: assets/fonts/NunitoSans-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/NunitoSans-ExtraBoldItalic.ttf
+          style: italic
+          weight: 800
+        - asset: assets/fonts/NunitoSans-Black.ttf
+          weight: 900
+        - asset: assets/fonts/NunitoSans-BlackItalic.ttf
+          style: italic
+          weight: 900
+
+flutter_native_splash:
+  web: false
+  color: "#ffffff"
+  image: assets/splash.png
+  android_12:
+    color: "#ffffff"
+    image: assets/android12splash.png
+
+flutter_icons:
+  android: true
+  ios: true
+  web:
+    generate: false
+  remove_alpha_ios: true
+  image_path: "assets/icon.png"
+  image_path_ios: "assets/iosicon.png"
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/icon.png"

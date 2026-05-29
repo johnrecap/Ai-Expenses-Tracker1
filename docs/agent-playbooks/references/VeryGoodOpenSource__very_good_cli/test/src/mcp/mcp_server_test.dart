@@ -1,0 +1,581 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:args/command_runner.dart';
+import 'package:dart_mcp/server.dart';
+import 'package:mason/mason.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:stream_channel/stream_channel.dart';
+import 'package:test/test.dart';
+import 'package:very_good_cli/src/command_runner.dart';
+import 'package:very_good_cli/src/mcp/mcp_server.dart';
+
+class _MockLogger extends Mock implements Logger {}
+
+class _MockVeryGoodCommandRunner extends Mock
+    implements VeryGoodCommandRunner {}
+
+int _idCounter = 1;
+
+String _jsonRpcRequest(String method, Map<String, dynamic> params) {
+  final id = _idCounter++;
+  return jsonEncode({
+    'jsonrpc': '2.0',
+    'method': method,
+    'params': params,
+    'id': id,
+  });
+}
+
+// Helper function for params, as extension type is Map
+// This helper casts the dynamic (which is really an extension type)
+// to the expected Map type.
+Map<String, Object?> _params(dynamic params) => params as Map<String, Object?>;
+
+void main() {
+  group('VeryGoodMCPServer', () {
+    late Logger mockLogger;
+    late VeryGoodCommandRunner mockCommandRunner;
+    late StreamChannelController<String> channelController;
+    // ignore: unused_local_variable Server is not used directly, but needed to keep the channel open
+    late VeryGoodMCPServer server;
+    late Stream<Map<String, dynamic>> serverResponses;
+
+    setUpAll(() {
+      _idCounter = 1;
+    });
+
+    Future<Map<String, dynamic>> sendRequest(
+      String method, [
+      Map<String, Object?> params = const {},
+    ]) async {
+      final completer = Completer<Map<String, dynamic>>();
+      // Get the ID that will be used for this request
+      final requestId = _idCounter;
+
+      final subscription = serverResponses.listen((response) {
+        if (response['id'] == requestId) {
+          completer.complete(response);
+        }
+      });
+
+      // Send the request (which increments the counter)
+      channelController.local.sink.add(
+        _jsonRpcRequest(method, params as Map<String, dynamic>),
+      );
+
+      final response = await completer.future;
+      await subscription.cancel();
+      return response;
+    }
+
+    setUp(() async {
+      mockLogger = _MockLogger();
+      mockCommandRunner = _MockVeryGoodCommandRunner();
+      channelController = StreamChannelController<String>();
+      server = VeryGoodMCPServer(
+        channel: channelController.foreign,
+        logger: mockLogger,
+        commandRunner: mockCommandRunner,
+      );
+
+      serverResponses = channelController.local.stream
+          .map((event) => jsonDecode(event) as Map<String, dynamic>)
+          .asBroadcastStream();
+
+      registerFallbackValue(
+        InitializeRequest(
+          protocolVersion: ProtocolVersion.latestSupported,
+          capabilities: ClientCapabilities(),
+          clientInfo: Implementation(name: 'test', version: '1.0.0'),
+        ),
+      );
+      registerFallbackValue(
+        CallToolRequest(name: 'dummyTool', arguments: const {}),
+      );
+
+      when(
+        () => mockCommandRunner.run(any()),
+      ).thenAnswer((_) async => ExitCode.success.code);
+      when(() => mockLogger.info(any())).thenAnswer((_) {});
+      when(() => mockLogger.err(any())).thenAnswer((_) {});
+      when(() => mockLogger.detail(any())).thenAnswer((_) {});
+      when(() => mockLogger.success(any())).thenAnswer((_) {});
+
+      // This is the handshake that
+      // MUST happen before any other requests, to fix the timeout.
+      final initResponse = await sendRequest(
+        InitializeRequest.methodName,
+        // Use the helper to cast the extension type
+        _params(
+          InitializeRequest(
+            protocolVersion: ProtocolVersion.latestSupported,
+            capabilities: ClientCapabilities(),
+            clientInfo: Implementation(name: 'test_client', version: '0.1.0'),
+          ),
+        ),
+      );
+
+      expect(
+        initResponse['error'],
+        isNull,
+        reason: 'Server initialization failed',
+      );
+    });
+
+    test('constructor uses default logger and runner if not provided', () {
+      final defaultFactoryChannelController = StreamChannelController<String>();
+
+      final defaultServer = VeryGoodMCPServer(
+        channel: defaultFactoryChannelController.foreign,
+      );
+      expect(defaultServer, isA<VeryGoodMCPServer>());
+    });
+
+    test('initialize (via tools/list) registers all 4 tools', () async {
+      // The server is ALREADY initialized in setUp.
+      // We can just send a 'tools/list' request directly.
+      final response = await sendRequest(ListToolsRequest.methodName);
+
+      expect(response['error'], isNull);
+      expect(response['result'], isA<Map<String, dynamic>>());
+
+      final result = ListToolsResult.fromMap(
+        response['result'] as Map<String, Object?>,
+      );
+      expect(result.tools.length, 4);
+      expect(
+        result.tools.map((t) => t.name),
+        containsAll([
+          'create',
+          'test',
+          'packages_get',
+          'packages_check_licenses',
+        ]),
+      );
+    });
+
+    group('Tool: create', () {
+      test('handles basic case', () async {
+        final response = await sendRequest(
+          CallToolRequest.methodName,
+          _params(
+            CallToolRequest(
+              name: 'create',
+              arguments: {'subcommand': 'flutter_app', 'name': 'my_app'},
+            ),
+          ),
+        );
+
+        expect(response['error'], isNull);
+        final result = CallToolResult.fromMap(
+          response['result'] as Map<String, Object?>,
+        );
+        expect(result.isError, isFalse);
+        expect(
+          (result.content.first as TextContent).text,
+          '"create" completed successfully.',
+        );
+
+        final capturedArgs =
+            verify(() => mockCommandRunner.run(captureAny())).captured.first
+                as List<String>;
+        expect(capturedArgs, ['create', 'flutter_app', 'my_app']);
+      });
+
+      test('handles all arguments', () async {
+        await sendRequest(
+          CallToolRequest.methodName,
+          _params(
+            CallToolRequest(
+              name: 'create',
+              arguments: {
+                'subcommand': 'flutter_app',
+                'name': 'my_app',
+                'description': 'my_desc',
+                'org_name': 'com.test',
+                'output_directory': 'my_dir',
+                'application_id': 'com.test.my_app',
+                'platforms': 'ios,web',
+                'publishable': true,
+                'executable-name': 'my_cli',
+                'template': 'core',
+              },
+            ),
+          ),
+        );
+
+        final capturedArgs =
+            verify(() => mockCommandRunner.run(captureAny())).captured.first
+                as List<String>;
+        expect(capturedArgs, [
+          'create',
+          'flutter_app',
+          'my_app',
+          '--desc',
+          'my_desc',
+          '--org-name',
+          'com.test',
+          '-o',
+          'my_dir',
+          '--application-id',
+          'com.test.my_app',
+          '--platforms',
+          'ios,web',
+          '--publishable',
+          '--executable-name',
+          'my_cli',
+          '-t',
+          'core',
+        ]);
+      });
+
+      test('handles command runner failure', () async {
+        when(
+          () => mockCommandRunner.run(any()),
+        ).thenAnswer((_) async => ExitCode.software.code);
+
+        final response = await sendRequest(
+          CallToolRequest.methodName,
+          _params(
+            CallToolRequest(
+              name: 'create',
+              arguments: {'subcommand': 'flutter_app', 'name': 'my_app'},
+            ),
+          ),
+        );
+
+        expect(response['error'], isNull);
+        final result = CallToolResult.fromMap(
+          response['result'] as Map<String, Object?>,
+        );
+        expect(result.isError, isTrue);
+        expect(
+          (result.content.first as TextContent).text,
+          contains('"create" failed with exit code'),
+        );
+      });
+
+      test('handles argument parsing exception', () async {
+        // Missing 'name' argument
+        final response = await sendRequest(
+          CallToolRequest.methodName,
+          _params(
+            CallToolRequest(
+              name: 'create',
+              arguments: {'subcommand': 'flutter_app'},
+            ),
+          ),
+        );
+
+        // The handler's try/catch will catch this
+        expect(response['error'], isNull);
+        final result = CallToolResult.fromMap(
+          response['result'] as Map<String, Object?>,
+        );
+        expect(result.isError, isTrue);
+        expect(
+          (result.content.first as TextContent).text,
+          contains('Required property "name" is missing at path #root'),
+        );
+      });
+    });
+
+    group('Tool: test', () {
+      test('handles default args (no flags added)', () async {
+        await sendRequest(
+          CallToolRequest.methodName,
+          _params(CallToolRequest(name: 'test', arguments: {})),
+        );
+
+        final capturedArgs =
+            verify(() => mockCommandRunner.run(captureAny())).captured.first
+                as List<String>;
+        expect(capturedArgs, ['test']);
+      });
+
+      test('passes --no-optimization when explicitly false', () async {
+        await sendRequest(
+          CallToolRequest.methodName,
+          _params(
+            CallToolRequest(name: 'test', arguments: {'optimization': false}),
+          ),
+        );
+
+        final capturedArgs =
+            verify(() => mockCommandRunner.run(captureAny())).captured.first
+                as List<String>;
+        expect(capturedArgs, ['test', '--no-optimization']);
+      });
+
+      test('handles all arguments', () async {
+        await sendRequest(
+          CallToolRequest.methodName,
+          _params(
+            CallToolRequest(
+              name: 'test',
+              arguments: {
+                'dart': true,
+                'coverage': true,
+                'recursive': true,
+                'optimization': true,
+                'concurrency': '8',
+                'tags': 'a,b',
+                'exclude_coverage': '**/*.g.dart',
+                'exclude_tags': 'c,d',
+                'min_coverage': '90',
+                'test_randomize_ordering_seed': '123',
+                'update_goldens': true,
+                'force_ansi': true,
+                'dart-define': 'foo=bar',
+                'dart-define-from-file': 'my_file.json',
+                'platform': 'chrome',
+                'run_skipped': true,
+                'check_ignore': true,
+              },
+            ),
+          ),
+        );
+
+        final capturedArgs =
+            verify(() => mockCommandRunner.run(captureAny())).captured.first
+                as List<String>;
+        expect(capturedArgs, [
+          'dart',
+          'test',
+          '--coverage',
+          '-r',
+          '-j',
+          '8',
+          '-t',
+          'a,b',
+          '--exclude-coverage',
+          '**/*.g.dart',
+          '-x',
+          'c,d',
+          '--min-coverage',
+          '90',
+          '--test-randomize-ordering-seed',
+          '123',
+          '--update-goldens',
+          '--force-ansi',
+          '--dart-define',
+          'foo=bar',
+          '--dart-define-from-file',
+          'my_file.json',
+          '--platform',
+          'chrome',
+          '--run-skipped',
+          '--check-ignore',
+        ]);
+      });
+
+      test('passes directory as positional argument', () async {
+        await sendRequest(
+          CallToolRequest.methodName,
+          _params(
+            CallToolRequest(name: 'test', arguments: {'directory': 'my_dir'}),
+          ),
+        );
+
+        final capturedArgs =
+            verify(() => mockCommandRunner.run(captureAny())).captured.first
+                as List<String>;
+        expect(capturedArgs, ['test', 'my_dir']);
+      });
+
+      test('passes directory as positional argument with dart flag', () async {
+        await sendRequest(
+          CallToolRequest.methodName,
+          _params(
+            CallToolRequest(
+              name: 'test',
+              arguments: {'directory': 'my_dir', 'dart': true},
+            ),
+          ),
+        );
+
+        final capturedArgs =
+            verify(() => mockCommandRunner.run(captureAny())).captured.first
+                as List<String>;
+        expect(capturedArgs, ['dart', 'test', 'my_dir']);
+      });
+
+      test('handles command failure', () async {
+        when(
+          () => mockCommandRunner.run(any()),
+        ).thenAnswer((_) async => ExitCode.software.code);
+        final response = await sendRequest(
+          CallToolRequest.methodName,
+          _params(CallToolRequest(name: 'test', arguments: {})),
+        );
+
+        expect(response['error'], isNull);
+        final result = CallToolResult.fromMap(
+          response['result'] as Map<String, Object?>,
+        );
+        expect(result.isError, isTrue);
+        expect(
+          (result.content.first as TextContent).text,
+          contains('"test" failed with exit code'),
+        );
+      });
+    });
+
+    group('Tool: packages_get', () {
+      test('handles basic case', () async {
+        await sendRequest(
+          CallToolRequest.methodName,
+          _params(CallToolRequest(name: 'packages_get', arguments: {})),
+        );
+
+        final capturedArgs =
+            verify(() => mockCommandRunner.run(captureAny())).captured.first
+                as List<String>;
+        expect(capturedArgs, ['packages', 'get']);
+      });
+
+      test('handles all arguments (with split "ignore")', () async {
+        await sendRequest(
+          CallToolRequest.methodName,
+          _params(
+            CallToolRequest(
+              name: 'packages_get',
+              arguments: {
+                'directory': 'my_dir',
+                'recursive': true,
+                'ignore': 'pkg1, pkg2',
+              },
+            ),
+          ),
+        );
+
+        final capturedArgs =
+            verify(() => mockCommandRunner.run(captureAny())).captured.first
+                as List<String>;
+        expect(capturedArgs, [
+          'packages',
+          'get',
+          'my_dir',
+          '--recursive',
+          '--ignore',
+          'pkg1',
+          '--ignore',
+          'pkg2',
+        ]);
+      });
+    });
+
+    group('Tool: packages_check_licenses', () {
+      test('handles basic case (licenses=true)', () async {
+        await sendRequest(
+          CallToolRequest.methodName,
+          _params(
+            CallToolRequest(
+              name: 'packages_check_licenses',
+              arguments: {'licenses': true, 'directory': 'my_dir'},
+            ),
+          ),
+        );
+
+        final capturedArgs =
+            verify(() => mockCommandRunner.run(captureAny())).captured.first
+                as List<String>;
+        expect(capturedArgs, ['packages', 'check', 'licenses', 'my_dir']);
+      });
+
+      test('defaults to licenses=true if not provided', () async {
+        await sendRequest(
+          CallToolRequest.methodName,
+          _params(
+            CallToolRequest(
+              name: 'packages_check_licenses',
+              arguments: {'directory': 'my_dir'},
+            ),
+          ),
+        );
+
+        final capturedArgs =
+            verify(() => mockCommandRunner.run(captureAny())).captured.first
+                as List<String>;
+        expect(capturedArgs, ['packages', 'check', 'licenses', 'my_dir']);
+      });
+
+      test('returns error if licenses=false', () async {
+        final response = await sendRequest(
+          CallToolRequest.methodName,
+          _params(
+            CallToolRequest(
+              name: 'packages_check_licenses',
+              arguments: {'licenses': false},
+            ),
+          ),
+        );
+
+        expect(response['error'], isNull);
+        final result = CallToolResult.fromMap(
+          response['result'] as Map<String, Object?>,
+        );
+        expect(result.isError, isTrue);
+        expect(
+          (result.content.first as TextContent).text,
+          contains('No check specified'),
+        );
+        verifyNever(() => mockCommandRunner.run(any()));
+      });
+    });
+
+    group('_runToolCommand error handling', () {
+      test('handles UsageException with descriptive message', () async {
+        final exception = UsageException('bad usage', 'usage string');
+        when(() => mockCommandRunner.run(any())).thenThrow(exception);
+
+        final response = await sendRequest(
+          CallToolRequest.methodName,
+          _params(
+            CallToolRequest(
+              name: 'create',
+              arguments: {'subcommand': 'flutter_app', 'name': 'my_app'},
+            ),
+          ),
+        );
+
+        expect(response['error'], isNull);
+        final result = CallToolResult.fromMap(
+          response['result'] as Map<String, Object?>,
+        );
+
+        expect(result.isError, isTrue);
+        final text = (result.content.first as TextContent).text;
+        expect(text, contains('"create" usage error: bad usage'));
+        expect(text, contains('Command: very_good'));
+      });
+
+      test('handles general Exception with descriptive message', () async {
+        final exception = Exception('big bad');
+        when(() => mockCommandRunner.run(any())).thenThrow(exception);
+
+        final response = await sendRequest(
+          CallToolRequest.methodName,
+          _params(
+            CallToolRequest(
+              name: 'create',
+              arguments: {'subcommand': 'flutter_app', 'name': 'my_app'},
+            ),
+          ),
+        );
+
+        expect(response['error'], isNull);
+        final result = CallToolResult.fromMap(
+          response['result'] as Map<String, Object?>,
+        );
+
+        expect(result.isError, isTrue);
+        final text = (result.content.first as TextContent).text;
+        expect(text, contains('"create" threw an exception'));
+        expect(text, contains('big bad'));
+        expect(text, contains('Command: very_good'));
+      });
+    });
+  });
+}

@@ -1,0 +1,253 @@
+@Tags(['golden'])
+library;
+
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:forui/forui.dart';
+import '../../../test_scaffold.dart';
+
+void main() {
+  const key = ValueKey('select');
+
+  for (final theme in TestScaffold.themes) {
+    testWidgets('no results', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          alignment: .topCenter,
+          child: FSelect<String>.searchBuilder(
+            key: key,
+            format: (s) => s,
+            filter: (_) => [],
+            contentBuilder: (_, _, _) => [],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectLater(
+        find.byType(TestScaffold),
+        matchesGoldenFile('select/${theme.name}/search-content/no-results.png'),
+      );
+    });
+
+    testWidgets('selected result', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          alignment: .topCenter,
+          child: FSelect<String>.searchBuilder(
+            key: key,
+            format: (s) => s,
+            filter: (_) => [],
+            contentBuilder: (_, _, _) => [
+              .item(title: const Text('A'), value: 'A'),
+              .item(title: const Text('B'), value: 'B'),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('B'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectLater(
+        find.byType(TestScaffold),
+        matchesGoldenFile('select/${theme.name}/search-content/selected-result.png'),
+      );
+    });
+
+    testWidgets('sync', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          alignment: .topCenter,
+          child: FSelect<String>.searchBuilder(
+            key: key,
+            format: (s) => s,
+            filter: (_) => [],
+            contentBuilder: (_, _, _) => [.item(title: const Text('A'), value: 'A')],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('select/${theme.name}/search-content/sync.png'));
+    });
+
+    testWidgets('desktop', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          platform: .macOS,
+          alignment: .topCenter,
+          child: FSelect<String>.searchBuilder(
+            key: key,
+            format: (s) => s,
+            filter: (_) => [],
+            contentBuilder: (_, _, _) => [.item(title: const Text('A'), value: 'A')],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectLater(
+        find.byType(TestScaffold),
+        matchesGoldenFile('select/${theme.name}/search-content/desktop.png'),
+      );
+    });
+
+    testWidgets('desktop with selected item', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          platform: .macOS,
+          alignment: .topCenter,
+          child: FSelect<String>.searchBuilder(
+            key: key,
+            control: const .managed(initial: '99'),
+            format: (s) => s,
+            filter: (_) => [],
+            contentBuilder: (_, _, _) => [for (var i = 0; i < 100; i++) .item(title: Text('Item $i'), value: '$i')],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectLater(
+        find.byType(TestScaffold),
+        matchesGoldenFile('select/${theme.name}/search-content/desktop-selected.png'),
+      );
+    });
+
+    testWidgets('async', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          alignment: .topCenter,
+          child: FSelect<String>.searchBuilder(
+            key: key,
+            format: (s) => s,
+            filter: (_) async {
+              await Future.delayed(const Duration(seconds: 1));
+              return [];
+            },
+            contentBuilder: (_, _, _) => [.item(title: const Text('A'), value: 'A')],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('select/${theme.name}/search-content/async.png'));
+    });
+
+    testWidgets('async error with error builder', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          alignment: .topCenter,
+          child: FSelect<String>.searchBuilder(
+            key: key,
+            format: (s) => s,
+            filter: (_) async {
+              await Future.delayed(const Duration(seconds: 5));
+              throw ArgumentError();
+            },
+            contentBuilder: (_, _, _) => [.item(title: const Text('A'), value: 'A')],
+            contentErrorBuilder: (_, error, trace) => Container(color: Colors.red, height: 10, width: 10),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectLater(
+        find.byType(TestScaffold),
+        matchesGoldenFile('select/${theme.name}/search-content/async-error-with-error-builder.png'),
+      );
+
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('async error with no error builder', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          alignment: .topCenter,
+          child: FSelect<String>.searchBuilder(
+            key: key,
+            format: (s) => s,
+            filter: (_) async {
+              await Future.delayed(const Duration(seconds: 5));
+              throw ArgumentError();
+            },
+            contentBuilder: (_, _, values) => [for (final v in values) .item(title: Text(v), value: v)],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pumpAndSettle();
+
+      await expectLater(
+        find.byType(TestScaffold),
+        matchesGoldenFile('select/${theme.name}/search-content/async-error.png'),
+      );
+
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('async loading', (tester) async {
+      final completer = Completer<void>();
+
+      await tester.pumpWidget(
+        TestScaffold.app(
+          theme: theme.data,
+          alignment: .topCenter,
+          child: FSelect<String>.searchBuilder(
+            key: key,
+            format: (s) => s,
+            filter: (_) async {
+              await completer.future;
+              return [];
+            },
+            contentBuilder: (_, _, _) => [const FSelectItem(title: Text('A'), value: 'A')],
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(key));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
+
+      await expectLater(
+        find.byType(TestScaffold),
+        matchesGoldenFile('select/${theme.name}/search-content/async-loading.png'),
+      );
+
+      completer.complete();
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+    });
+  }
+}

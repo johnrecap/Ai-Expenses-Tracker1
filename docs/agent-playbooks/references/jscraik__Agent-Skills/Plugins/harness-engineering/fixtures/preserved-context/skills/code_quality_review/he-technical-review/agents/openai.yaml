@@ -1,0 +1,11 @@
+interface:
+  display_name: "Harness Engineering Technical Review"
+  short_description: "Run findings-first technical critique on diffs, PRs, specs, plans, and incoming review feedback with severity-ranked issues."
+  icon_small: "../assets/icon-small.png"
+  icon_large: "../assets/icon-large.png"
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools: []

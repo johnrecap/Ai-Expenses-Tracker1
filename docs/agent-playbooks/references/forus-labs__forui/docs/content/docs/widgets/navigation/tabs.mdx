@@ -1,0 +1,62 @@
+---
+title: Tabs
+description: A set of layered sections of content—known as tab entries—that are displayed one at a time.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.tabs/
+---
+
+import { Tabs, Tab } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import defaultSnippet from '@/snippets/examples/navigation/tabs/default.json';
+import swipeableSnippet from '@/snippets/examples/navigation/tabs/swipeable.json';
+import tabsUsage from '@/snippets/usages/navigation/tabs/tabs.json';
+import tabEntryUsage from '@/snippets/usages/navigation/tabs/tabEntry.json';
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='navigation/tabs' height={500}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={defaultSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Tabs']}>
+    <Tab value="Tabs">
+        ```shell copy
+        dart run forui style create tabs
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `FTabs(...)`
+<UsageSnippet usage={tabsUsage} />
+
+### `FTabEntry(...)`
+<UsageSnippet usage={tabEntryUsage} />
+
+## Examples
+
+### Swipeable
+
+<Callout type="info">
+  Hold `Shift` while scrolling to swipe between tabs on desktop and web.
+</Callout>
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='navigation/tabs' variant='swipeable' height={500}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={swipeableSnippet} />
+  </Tab>
+</Tabs>
+

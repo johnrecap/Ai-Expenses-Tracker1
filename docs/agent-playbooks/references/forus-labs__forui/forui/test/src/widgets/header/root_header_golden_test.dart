@@ -1,0 +1,176 @@
+@Tags(['golden'])
+library;
+
+import 'package:flutter/widgets.dart';
+
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:forui/forui.dart';
+import '../../test_scaffold.dart';
+
+const title =
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna '
+    'aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.';
+
+void main() {
+  testWidgets('blue screen', (tester) async {
+    await tester.pumpWidget(
+      TestScaffold.blue(
+        child: FHeader(
+          style: TestScaffold.blueScreen.headerStyles.resolve({}),
+          title: const Text('Title'),
+          suffixes: [
+            FHeaderAction.back(onPress: () {}),
+            const FHeaderAction(icon: Icon(FLucideIcons.alarmClock), onPress: null),
+          ],
+        ),
+      ),
+    );
+
+    await expectBlueScreen();
+  });
+
+  for (final theme in TestScaffold.themes) {
+    testWidgets('${theme.name} with FRootHeader actions', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          theme: theme.data,
+          child: FHeader(
+            title: const Text(title),
+            suffixes: [
+              const FHeaderAction(icon: Icon(FLucideIcons.alarmClock), onPress: null),
+              FHeaderAction(icon: const Icon(FLucideIcons.plus), onPress: () {}),
+            ],
+          ),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('header/root/${theme.name}.png'));
+    });
+
+    testWidgets('${theme.name} glassmorphic', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          theme: theme.data,
+          child: Column(
+            mainAxisSize: .min,
+            children: [
+              Stack(
+                children: [
+                  const Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit.'),
+                  FHeader(
+                    style: .delta(
+                      backgroundFilter: .blur(sigmaX: 5, sigmaY: 5),
+                      decoration: .value(BoxDecoration(color: theme.data.colors.background.withValues(alpha: 0.5))),
+                    ),
+                    title: const Text('Title'),
+                    suffixes: [
+                      FHeaderAction(icon: const Icon(FLucideIcons.plus), onPress: () {}),
+                      FHeaderAction.x(onPress: () {}),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('header/root/${theme.name}-glassmorphic.png'));
+    });
+
+    testWidgets('${theme.name} larger title', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          theme: theme.data,
+          child: Builder(
+            builder: (context) => Column(
+              mainAxisSize: .min,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(border: .all(color: context.theme.colors.primary)),
+                  child: FHeader(
+                    title: Text('Title', style: context.theme.typography.xl3),
+                    suffixes: [FHeaderAction(icon: const Icon(FLucideIcons.plus), onPress: () {})],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('header/root/${theme.name}-larger-title.png'));
+    });
+
+    testWidgets('${theme.name} smaller title', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          theme: theme.data,
+          child: Builder(
+            builder: (context) => Column(
+              mainAxisSize: .min,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(border: .all(color: context.theme.colors.primary)),
+                  child: FHeader(
+                    title: Text('Title', style: context.theme.typography.xs),
+                    suffixes: [FHeaderAction(icon: const Icon(FLucideIcons.plus), onPress: () {})],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('header/root/${theme.name}-smaller-title.png'));
+    });
+
+    testWidgets('${theme.name} with no FRootHeader actions', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          theme: theme.data,
+          child: const FHeader(title: Text(title)),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('header/root/${theme.name}-no-actions.png'));
+    });
+
+    testWidgets('${theme.name} with focused FRootHeader actions', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          theme: theme.data,
+          child: FHeader(
+            title: const Text(title),
+            suffixes: [
+              const FHeaderAction(icon: Icon(FLucideIcons.alarmClock), onPress: null),
+              FHeaderAction(autofocus: true, icon: const Icon(FLucideIcons.plus), onPress: () {}),
+            ],
+          ),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('header/root/${theme.name}-focused.png'));
+    });
+
+    testWidgets('${theme.name} with RTL FRootHeader actions', (tester) async {
+      await tester.pumpWidget(
+        TestScaffold(
+          theme: theme.data,
+          textDirection: .rtl,
+          child: const FHeader(
+            title: Text(title),
+            suffixes: [
+              FHeaderAction(icon: Icon(FLucideIcons.alarmClock), onPress: null),
+              FHeaderAction(icon: Icon(FLucideIcons.plus), onPress: null),
+            ],
+          ),
+        ),
+      );
+
+      await expectLater(find.byType(TestScaffold), matchesGoldenFile('header/root/${theme.name}-rtl.png'));
+    });
+  }
+}

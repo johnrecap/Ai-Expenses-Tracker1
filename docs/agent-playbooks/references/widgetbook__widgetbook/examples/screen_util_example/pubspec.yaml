@@ -1,0 +1,20 @@
+name: screen_util_example
+description: An example project that demonstrates how to use Widgetbook with the flutter_screenutil package.
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.0
+  flutter: ^3.41.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # flutter_screenutil >= 5.9.2 doesn't work with widgetbook as
+  # they are using `View.of` instead of `MediaQuery.of`
+  # https://github.com/OpenFlutter/flutter_screenutil/commit/f7c551acd4cc82460c3a29ec5a7262d6ec678746
+  flutter_screenutil: 5.9.1
+  widgetbook: ^3.23.0
+
+flutter:
+  uses-material-design: true

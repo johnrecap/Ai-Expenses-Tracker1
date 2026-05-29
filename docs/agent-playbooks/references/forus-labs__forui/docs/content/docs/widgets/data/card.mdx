@@ -1,0 +1,42 @@
+---
+title: Card
+description: A flexible container component that displays content with an optional title, subtitle, and child widget. Cards are commonly used to group related information and actions.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.card/
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import defaultSnippet from '@/snippets/examples/data/card/default.json';
+import cardUsage from '@/snippets/usages/data/card/card.json';
+import cardRawUsage from '@/snippets/usages/data/card/raw.json';
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+      <Widget name='data/card' height={400}/>
+  </Tab>
+  <Tab value="Code">
+      <CodeSnippet snippet={defaultSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Card']}>
+    <Tab value="Card">
+        ```shell copy
+        dart run forui style create card
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `FCard(...)`
+<UsageSnippet usage={cardUsage} />
+
+### `FCard.raw(...)`
+<UsageSnippet usage={cardRawUsage} />

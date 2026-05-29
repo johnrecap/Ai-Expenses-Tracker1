@@ -1,0 +1,64 @@
+name: Forui Nightly
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-nightly:
+    if: github.actor != 'auto-maid[bot]'
+    name: Build Nightly Artifacts
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: forui
+
+    steps:
+      - uses: tibdex/github-app-token@v2
+        id: generate-token
+        with:
+          app_id: ${{ secrets.AUTO_MAID_APP_ID }}
+          private_key: ${{ secrets.AUTO_MAID_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - uses: subosito/flutter-action@v2.23.0
+      - run: flutter pub get
+      - run: dart run build_runner build
+
+      - run: |
+          git fetch origin main
+          git checkout -B nightly origin/main
+          git push origin nightly --force
+
+      - uses: EndBug/add-and-commit@v10
+        with:
+          add: '--force **/*.design.dart **/*.control.dart'
+          new_branch: 'nightly'
+          push: 'origin nightly --set-upstream --force'
+
+  verify-nightly:
+    needs: build-nightly
+    name: Verify Nightly Artifacts
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: forui
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: nightly
+
+      - uses: subosito/flutter-action@v2.23.0
+      - run: flutter pub get
+      - run: flutter analyze --no-fatal-infos --no-fatal-warnings

@@ -1,0 +1,185 @@
+{
+  "fullDate": "{date}",
+  "@fullDate": {
+    "description": "The full date.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMMd"
+      }
+    }
+  },
+  "year": "{date}",
+  "@year": {
+    "description": "The year.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "y"
+      }
+    }
+  },
+  "yearMonth": "{date}",
+  "@yearMonth": {
+    "description": "The year and month.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMM"
+      }
+    }
+  },
+  "abbreviatedMonth": "{date}",
+  "@abbreviatedMonth": {
+    "description": "The abbreviated month.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMM"
+      }
+    }
+  },
+  "day": "{date}",
+  "@day": {
+    "description": "The day of the month.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "d"
+      }
+    }
+  },
+  "shortDate": "{date}",
+  "@shortDate": {
+    "description": "The short date.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMd"
+      }
+    }
+  },
+  "barrierLabel": "Barrier",
+  "@barrierLabel": {
+    "description": "The label for the barrier rendered underneath the content of a bottom sheet (used as the 'modalRouteContentName' of the 'barrierOnTapHint' message)."
+  },
+  "barrierOnTapHint": "Close {modalRouteContentName}",
+  "@barrierOnTapHint": {
+    "description": "The onTapHint for the barrier rendered underneath the content of a modal route (especially a sheet) which users can tap to dismiss the content.",
+    "placeholders": {
+      "modalRouteContentName": {
+        "type": "String"
+      }
+    }
+  },
+  "autocompleteNoResults": "No matches found.",
+  "@autocompleteNoResults": {
+    "description": "The message displayed when there are no matching results."
+  },
+  "contextMenuSemanticsLabel": "Context menu",
+  "@contextMenuSemanticsLabel": {
+    "description": "The semantic label for a context menu."
+  },
+  "dateFieldHint": "Pick a date",
+  "@dateFieldHint": {
+    "description": "The hint text for the calendar-only date field."
+  },
+  "dateFieldInvalidDateError": "Invalid date.",
+  "@dateFieldInvalidDateError": {
+    "description": "Error message displayed to the user when they have entered a text string in a time field that is not in a valid time format."
+  },
+  "shortDateSeparator": "/",
+  "@shortDateSeparator": {
+    "description": "The short date's separator, typically /."
+  },
+  "shortDateSuffix": "",
+  "@shortDateSuffix": {
+    "description": "The short date's suffix, typically empty."
+  },
+  "dateTimePickerToday": "Today",
+  "@dateTimePickerToday": {
+    "description": "The label for today's date in the date time picker."
+  },
+  "dialogSemanticsLabel": "Dialog",
+  "@dialogSemanticsLabel": {
+    "description": "The sheet's label."
+  },
+  "paginationPreviousSemanticsLabel": "Previous",
+  "@paginationPreviousSemanticsLabel": {
+    "description": "The label for the previous button in a pagination control."
+  },
+  "paginationNextSemanticsLabel": "Next",
+  "@paginationNextSemanticsLabel": {
+    "description": "The label for the next button in a pagination control."
+  },
+  "popoverSemanticsLabel": "Popover",
+  "@popoverSemanticsLabel": {
+    "description": "The semantic label for a popover."
+  },
+  "progressSemanticsLabel": "Loading",
+  "@progressSemanticsLabel": {
+    "description": "The default semantics label for a progress indicator."
+  },
+  "multiSelectHint": "Select items",
+  "@multiSelectHint": {
+    "description": "The hint text for the multi-select field."
+  },
+  "selectHint": "Select an item",
+  "@selectHint": {
+    "description": "The hint text for the select field."
+  },
+  "selectSearchHint": "Search",
+  "@selectSearchHint": {
+    "description": "The hint text for the search field in a select field."
+  },
+  "selectNoResults": "No matches found.",
+  "@selectNoResults": {
+    "description": "The message displayed when there are no matching results."
+  },
+  "selectScrollUpSemanticsLabel": "Scroll up",
+  "@selectScrollUpSemanticsLabel": {
+    "description": "The semantic label for the scroll handle in a select field."
+  },
+  "selectScrollDownSemanticsLabel": "Scroll down",
+  "@selectScrollDownSemanticsLabel": {
+    "description": "The semantic label for the scroll handle in a select field."
+  },
+  "sheetSemanticsLabel": "Sheet",
+  "@sheetSemanticsLabel": {
+    "description": "The semantic label for a sheet."
+  },
+  "textFieldEmailLabel": "Email",
+  "@textFieldEmailLabel": {
+    "description": "The email text field's label."
+  },
+  "textFieldClearButtonSemanticsLabel": "Clear",
+  "@textFieldClearButtonSemanticsLabel": {
+    "description": "The semantic label for the clear button in a text field."
+  },
+  "passwordFieldLabel": "Password",
+  "@passwordFieldLabel": {
+    "description": "The password text field's label."
+  },
+  "passwordFieldObscureTextButtonSemanticsLabel": "Hide password",
+  "@passwordFieldObscureTextButtonSemanticsLabel": {
+    "description": "The semantic label for the unobscure text button in a text field when the text is obscured."
+  },
+  "passwordFieldUnobscureTextButtonSemanticsLabel": "Show password",
+  "timeFieldTimeSeparator": ":",
+  "@timeFieldTimeSeparator": {
+    "description": "The time field's time separator, typically ':'."
+  },
+  "timeFieldPeriodSeparator": " ",
+  "@timeFieldPeriodSeparator": {
+    "description": "The time field's period separator, typically ' '."
+  },
+  "timeFieldSuffix": "",
+  "@timeFieldSuffix": {
+    "description": "The time field's suffix, typically none."
+  },
+  "timeFieldHint": "Pick a time",
+  "@timeFieldHint": {
+    "description": "The hint text for the picker-only time field."
+  },
+  "timeFieldInvalidDateError": "Invalid time."
+}

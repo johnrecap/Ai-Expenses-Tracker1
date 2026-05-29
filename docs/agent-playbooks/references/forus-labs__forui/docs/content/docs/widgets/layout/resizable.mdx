@@ -1,0 +1,92 @@
+---
+title: Resizable
+description: A box which children can be resized along either the horizontal or vertical axis.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.resizable/
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import defaultSnippet from '@/snippets/examples/layout/resizable/default.json';
+import horizontalSnippet from '@/snippets/examples/layout/resizable/horizontal.json';
+import dividerSnippet from '@/snippets/examples/layout/resizable/divider.json';
+import noDividerSnippet from '@/snippets/examples/layout/resizable/no-divider.json';
+import noCascadingSnippet from '@/snippets/examples/layout/resizable/no-cascading.json';
+import resizableUsage from '@/snippets/usages/layout/resizable/resizable.json';
+import resizableRegionUsage from '@/snippets/usages/layout/resizable/resizableRegion.json';
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='layout/resizable' height={700}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={defaultSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Resizables']}>
+    <Tab value="Resizables">
+        ```shell copy
+        dart run forui style create resizables
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `FResizable(...)`
+<UsageSnippet usage={resizableUsage} />
+
+### `FResizableRegion(...)`
+<UsageSnippet usage={resizableRegionUsage} />
+
+## Examples
+
+### Without Cascading
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='layout/resizable' variant='no-cascading' height={700}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={noCascadingSnippet} />
+  </Tab>
+</Tabs>
+
+### Horizontal
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='layout/resizable' variant='horizontal' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={horizontalSnippet} />
+  </Tab>
+</Tabs>
+
+### Divider with No Thumb
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='layout/resizable' variant='divider' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={dividerSnippet} />
+  </Tab>
+</Tabs>
+
+### Without Divider
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='layout/resizable' variant='no-divider' height={400}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={noDividerSnippet} />
+  </Tab>
+</Tabs>

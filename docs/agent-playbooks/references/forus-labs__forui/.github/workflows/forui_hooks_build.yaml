@@ -1,0 +1,51 @@
+name: Forui Hooks Build
+
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - .github/workflows/forui_hooks_build.yaml
+      - forui_hooks/**
+  pull_request:
+    paths:
+      - forui_hooks/**
+
+jobs:
+  test:
+    name: Build & test
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: forui_hooks
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        flutter-version: [ 3.x ]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2.23.0
+        with:
+          flutter-version: ${{ matrix.flutter-version }}
+      - working-directory: forui
+        run: |
+          flutter pub get
+          dart run build_runner build
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - run: |
+          if output=$(dart doc --dry-run 2>&1); then
+              if echo "$output" | grep -q -i "warning:"; then
+                  echo "Documentation warnings found:"
+                  echo "$output" | grep -i "warning:"
+                  exit 1
+              else
+                  echo "No documentation warnings found!"
+                  exit 0
+              fi
+          else
+              echo "Error: dart doc command failed"
+              echo "$output"
+              exit 1
+          fi
+        if: runner.os == 'Linux'

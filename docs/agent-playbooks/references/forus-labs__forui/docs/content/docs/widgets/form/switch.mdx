@@ -1,0 +1,76 @@
+---
+title: Switch
+description: A toggle switch component that allows users to enable or disable a setting with a sliding motion.
+apiReference: https://pub.dev/documentation/forui/latest/forui.widgets.switch_/
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Widget } from '@/components/demo/widget';
+import { CodeSnippet } from '@/components/code-snippet/code-snippet';
+import { UsageSnippet } from '@/components/usage-snippet/usage-snippet';
+import defaultSnippet from '@/snippets/examples/form/switch/default.json';
+import leadingLabelSnippet from '@/snippets/examples/form/switch/leading-label.json';
+import disabledSnippet from '@/snippets/examples/form/switch/disabled.json';
+import formSnippet from '@/snippets/examples/form/switch/form.json';
+import switchUsage from '@/snippets/usages/form/switch/switchWidget.json';
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/switch'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={defaultSnippet} />
+  </Tab>
+</Tabs>
+
+## CLI
+
+To generate a specific style for customization:
+
+<Tabs items={['Switch']}>
+    <Tab value="Switch">
+        ```shell copy
+        dart run forui style create switch
+        ````
+    </Tab>
+</Tabs>
+
+## Usage
+
+### `FSwitch(...)`
+<UsageSnippet usage={switchUsage} />
+
+## Examples
+
+### Leading Label
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/switch' variant='leading-label'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={leadingLabelSnippet} />
+  </Tab>
+</Tabs>
+
+### Disabled
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/switch' variant='disabled'/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={disabledSnippet} />
+  </Tab>
+</Tabs>
+
+### Form
+
+<Tabs items={['Preview', 'Code']}>
+  <Tab value="Preview">
+    <Widget name='form/switch' variant='form' height={500}/>
+  </Tab>
+  <Tab value="Code">
+    <CodeSnippet snippet={formSnippet} />
+  </Tab>
+</Tabs>
