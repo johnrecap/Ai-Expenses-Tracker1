@@ -97,4 +97,36 @@ class MockAiService extends AiService {
   Future<AiResponse> extractReceipt(String base64Image) async {
     return AiResponse(description: 'Receipt scanned', amount: 0, confidence: 0.5);
   }
+
+  @override
+  Future<AiResponse> parseExpense(String input, AiContext context) async {
+    return parseExpenseText(input, context);
+  }
+
+  @override
+  Expense? parseExpenseToDraft(AiResponse response) {
+    if (response.amount == null || response.description == null) return null;
+
+    final cat = Category.empty.copyWith(
+      categoryId: response.categoryId ?? 'other',
+      name: response.categoryId ?? 'Other',
+      icon: 'category',
+      color: 0xFF9E9E9E,
+    );
+
+    return Expense(
+      expenseId: '',
+      amount: response.amount!,
+      description: response.description!,
+      category: cat,
+      categoryId: cat.categoryId,
+      categoryName: cat.name,
+      categoryIcon: cat.icon,
+      categoryColor: cat.color,
+      currency: response.currency ?? 'USD',
+      date: response.date ?? DateTime.now(),
+      source: ExpenseSource.aiText,
+      userId: '',
+    );
+  }
 }

@@ -10,8 +10,6 @@ import 'package:expenses_tracker/core/widgets/app_background.dart';
 import 'package:expenses_tracker/core/widgets/gradient_button.dart';
 import 'package:expense_repository/expense_repository.dart';
 import 'package:expenses_tracker/features/ai/services/ai_service.dart';
-import 'package:expenses_tracker/features/ai/services/ai_gateway_client.dart';
-import 'package:expenses_tracker/core/config/app_config.dart';
 import 'package:expenses_tracker/features/auth/auth_bloc/auth_bloc.dart';
 import 'package:expenses_tracker/features/expenses/create_expense_bloc/create_expense_bloc.dart';
 import 'widgets/segmented_mode_control.dart';
@@ -135,7 +133,11 @@ class _AddExpenseReceiptScreenState extends State<AddExpenseReceiptScreen> {
       listener: (context, state) {
         if (state is CreateExpenseSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Expense saved')));
-          context.pop();
+          if (Navigator.canPop(context)) {
+            context.pop();
+          } else {
+            context.go('/expenses');
+          }
         } else if (state is CreateExpenseFailure) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
         }
