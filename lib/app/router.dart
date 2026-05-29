@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:expense_repository/expense_repository.dart';
 import 'package:expenses_tracker/l10n/app_language_cubit.dart';
 import 'package:expenses_tracker/features/auth/auth_bloc/auth_bloc.dart';
 import 'go_router_refresh_stream.dart';
@@ -88,7 +89,7 @@ class AppRouter {
         GoRoute(path: AppRoutes.categories, pageBuilder: (c, s) => const NoTransitionPage(child: CategoriesScreen())),
         GoRoute(path: AppRoutes.securityUnlock, pageBuilder: (c, s) => const NoTransitionPage(child: UnlockScreen())),
         GoRoute(path: AppRoutes.securityCreatePin, pageBuilder: (c, s) => const NoTransitionPage(child: CreatePinScreen())),
-        GoRoute(path: AppRoutes.accountProfile, pageBuilder: (c, s) => NoTransitionPage(child: AccountProfileScreen(user: (s.extra as Map)['user'] as dynamic))),
+        GoRoute(path: AppRoutes.accountProfile, pageBuilder: (c, s) => NoTransitionPage(child: AccountProfileScreen(user: (s.extra as Map)['user'] as AppUser))),
         GoRoute(path: AppRoutes.subscription, pageBuilder: (c, s) => const NoTransitionPage(child: FreePremiumScreen())),
       ],
       errorBuilder: (context, state) => const NotFoundScreen(),

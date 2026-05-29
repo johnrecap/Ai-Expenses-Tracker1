@@ -14,6 +14,7 @@ class EntitlementSnapshot {
 
   factory EntitlementSnapshot.freeDefault() => const EntitlementSnapshot(
     status: 'active', plan: PlanTier.free, isPremiumActive: false, shouldDisableAds: false,
+    expiryDate: null,
   );
 
   factory EntitlementSnapshot.premiumActive({DateTime? expiry}) => EntitlementSnapshot(

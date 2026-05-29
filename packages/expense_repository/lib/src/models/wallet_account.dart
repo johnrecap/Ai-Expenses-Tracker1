@@ -1,3 +1,5 @@
+import '../entities/wallet_entity.dart' as e;
+
 class WalletAccount {
   final String walletId;
   final String userId;
@@ -30,6 +32,20 @@ class WalletAccount {
       createdAt: createdAt ?? this.createdAt, updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+
+  e.WalletAccountEntity toEntity() => e.WalletAccountEntity(
+    walletId: walletId, userId: userId, name: name,
+    type: type, balance: balance, currency: currency,
+    icon: icon, color: color,
+    createdAt: createdAt, updatedAt: updatedAt,
+  );
+
+  factory WalletAccount.fromEntity(e.WalletAccountEntity entity) => WalletAccount(
+    walletId: entity.walletId, userId: entity.userId, name: entity.name,
+    type: entity.type, balance: entity.balance, currency: entity.currency,
+    icon: entity.icon, color: entity.color,
+    createdAt: entity.createdAt, updatedAt: entity.updatedAt,
+  );
 }
 
 class Transfer {
@@ -48,4 +64,18 @@ class Transfer {
     required this.amount, this.note, required this.date,
     required this.createdAt,
   });
+
+  e.TransferEntity toEntity() => e.TransferEntity(
+    transferId: transferId, userId: userId,
+    fromWalletId: fromWalletId, toWalletId: toWalletId,
+    amount: amount, note: note,
+    date: date, createdAt: createdAt,
+  );
+
+  factory Transfer.fromEntity(e.TransferEntity entity) => Transfer(
+    transferId: entity.transferId, userId: entity.userId,
+    fromWalletId: entity.fromWalletId, toWalletId: entity.toWalletId,
+    amount: entity.amount, note: entity.note,
+    date: entity.date, createdAt: entity.createdAt,
+  );
 }
