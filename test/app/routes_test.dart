@@ -1,6 +1,21 @@
 ﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:expenses_tracker/app/routes.dart';
 import 'package:expenses_tracker/app/router.dart';
+import 'package:expenses_tracker/features/auth/auth_bloc/auth_bloc.dart';
+import 'package:expense_repository/expense_repository.dart';
+
+class _MockAuthRepo implements AuthRepository {
+  @override AppUser get currentUser => AppUser.empty;
+  @override Stream<AppUser> get user => Stream.value(AppUser.empty);
+  @override Future<AppUser> signIn({required String email, required String password}) async => AppUser.empty;
+  @override Future<AppUser> signInWithGoogle() async => AppUser.empty;
+  @override Future<AppUser> signUp({required String email, required String password, String? displayName}) async => AppUser.empty;
+  @override Future<void> signOut() async {}
+  @override Future<void> resetPassword(String email) async {}
+  @override Future<AppUser> updateDisplayName(String name) async => AppUser.empty;
+  @override Future<void> deleteAccount() async {}
+  @override Future<AppUser> reauthenticate({required String email, required String password}) async => AppUser.empty;
+}
 
 void main() {
   group('Route constants', () {
@@ -33,7 +48,7 @@ void main() {
     });
 
     test('router can be created', () {
-      final router = AppRouter.create();
+      final router = AppRouter.create(AuthBloc(_MockAuthRepo()));
       expect(router, isNotNull);
     });
   });
