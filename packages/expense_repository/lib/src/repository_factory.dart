@@ -1,5 +1,4 @@
 import 'package:expense_repository/src/ai_action_log_repo.dart';
-import 'package:expense_repository/src/api/firebase_token_provider.dart';
 import 'package:expense_repository/src/api/vps_api_client.dart';
 import 'package:expense_repository/src/budget_repo.dart';
 import 'package:expense_repository/src/category_alias_repo.dart';
@@ -23,9 +22,7 @@ import 'package:expense_repository/src/recurring_expense_repo.dart';
 import 'package:expense_repository/src/repository_runtime_mode.dart';
 import 'package:expense_repository/src/saving_goal_repo.dart';
 import 'package:expense_repository/src/settings_repo.dart';
-import 'package:expense_repository/src/sync/local_sync_queue.dart';
 import 'package:expense_repository/src/sync/migration_comparison_repository.dart';
-import 'package:expense_repository/src/sync/sync_coordinator.dart';
 import 'package:expense_repository/src/wallet_account_repo.dart';
 import 'auth/auth_repository.dart';
 
@@ -102,7 +99,6 @@ class AuthenticatedRepositoryFactory {
 
   AuthenticatedRepositoryBundle _createVpsLocalFirstBundle({required String userId}) {
     final store = DriftLocalRepositoryStore(userId: userId);
-    final apiConfig = VpsApiConfig.fromEnvironment();
     return AuthenticatedRepositoryBundle(
       expenseRepository: LocalExpenseRepository(store: store),
       categoryRepository: LocalCategoryRepository(store: store),

@@ -4,7 +4,6 @@ class LocalSyncQueue {
   final List<SyncChange> pending;
   final void Function(List<String>) onUploaded;
   final VoidCallback onChanged;
-  bool _retryScheduled = false;
 
   LocalSyncQueue({required this.pending, required this.onUploaded, required this.onChanged});
 
