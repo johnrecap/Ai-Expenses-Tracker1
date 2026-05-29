@@ -134,4 +134,39 @@ class LocalRepositoryStore implements LocalStoreInterface {
     if (g.deadline != null) 'deadline': g.deadline!.toIso8601String(),
   };
   Map<String, dynamic> _walletToDoc(WalletAccount w) => {'walletId': w.walletId, 'name': w.name, 'balance': w.balance, 'currency': w.currency, 'type': w.type, 'icon': w.icon, 'color': w.color};
+
+  Map<String, dynamic> _transferToDoc(Transfer t) => {
+    'transferId': t.transferId, 'userId': t.userId,
+    'fromWalletId': t.fromWalletId, 'toWalletId': t.toWalletId,
+    'amount': t.amount, if (t.note != null) 'note': t.note,
+    'date': t.date.toIso8601String(), 'createdAt': t.createdAt.toIso8601String(),
+  };
+
+  Map<String, dynamic> _categoryBudgetToDoc(CategoryBudget b) => {
+    'budgetId': b.budgetId, 'userId': b.userId, 'categoryId': b.categoryId,
+    'amount': b.amount, 'month': b.month, 'year': b.year,
+    'createdAt': b.createdAt.toIso8601String(), 'updatedAt': b.updatedAt.toIso8601String(),
+  };
+
+  Map<String, dynamic> _categoryAliasToDoc(CategoryAlias a) => {
+    'aliasId': a.aliasId, 'userId': a.userId, 'name': a.name,
+    'categoryId': a.categoryId, 'createdAt': a.createdAt.toIso8601String(),
+  };
+
+  Map<String, dynamic> _recurringExpenseToDoc(RecurringExpense e) => {
+    'recurringExpenseId': e.recurringExpenseId, 'userId': e.userId,
+    'name': e.name, 'amount': e.amount, 'currency': e.currency,
+    'categoryId': e.categoryId, 'frequency': e.frequency,
+    'startDate': e.startDate.toIso8601String(),
+    if (e.endDate != null) 'endDate': e.endDate!.toIso8601String(),
+    if (e.lastGeneratedDate != null) 'lastGeneratedDate': e.lastGeneratedDate!.toIso8601String(),
+    'createdAt': e.createdAt.toIso8601String(), 'updatedAt': e.updatedAt.toIso8601String(),
+  };
+
+  Map<String, dynamic> _aiActionLogToDoc(AiActionLog l) => {
+    'actionId': l.actionId, 'userId': l.userId, 'actionType': l.actionType,
+    'input': l.input, if (l.output != null) 'output': l.output,
+    'success': l.success, 'quotaUsed': l.quotaUsed,
+    'createdAt': l.createdAt.toIso8601String(),
+  };
 }

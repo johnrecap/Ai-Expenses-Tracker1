@@ -350,7 +350,7 @@ class _CategoryFormDialogState extends State<_CategoryFormDialog> {
                 color: _icon == i ? AppColors.primaryContainer : AppColors.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(CategoriesScreen.iconMap[i] ?? Icons.circle, size: 20, color: _icon == i ? AppColors.primary : AppColors.onSurfaceVariant),
+              child: Icon(_CategoryCard.iconMap[i] ?? Icons.circle, size: 20, color: _icon == i ? AppColors.primary : AppColors.onSurfaceVariant),
             ),
           )).toList()),
           const SizedBox(height: AppSpacing.md),
