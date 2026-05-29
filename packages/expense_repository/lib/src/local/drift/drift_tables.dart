@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:expense_repository/src/models/money_snapshot.dart';
 
+part 'drift_tables.g.dart';
+
 // ---------------------------------------------------------------------------
 // Type converters for complex types stored as JSON text
 // ---------------------------------------------------------------------------
