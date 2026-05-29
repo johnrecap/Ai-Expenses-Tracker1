@@ -51,7 +51,7 @@ class AiResponse {
 class AiService {
   final String gatewayUrl;
 
-  AiService({this.gatewayUrl = ''});
+  const AiService({this.gatewayUrl = ''});
 
   Future<AiResponse> parseExpenseText(String input, AiContext context) async {
     await Future.delayed(const Duration(milliseconds: 500));
@@ -92,7 +92,7 @@ class AiService {
 }
 
 class MockAiService extends AiService {
-  MockAiService() : super();
+  const MockAiService() : super();
 
   Future<AiResponse> extractReceipt(String base64Image) async {
     return AiResponse(description: 'Receipt scanned', amount: 0, confidence: 0.5);

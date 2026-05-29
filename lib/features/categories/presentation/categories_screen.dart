@@ -247,13 +247,13 @@ class _CategoryCard extends StatelessWidget {
     // The repository stores icon names like 'restaurant', 'home', etc.
     // The safest approach: use a switch or map.
     try {
-      return _iconMap[name] ?? Icons.more_horiz;
+      return iconMap[name] ?? Icons.more_horiz;
     } catch (_) {
       return Icons.more_horiz;
     }
   }
 
-  static const _iconMap = <String, IconData>{
+  static const iconMap = <String, IconData>{
     'restaurant': Icons.restaurant,
     'local_taxi': Icons.local_taxi,
     'shopping_bag': Icons.shopping_bag,
@@ -350,7 +350,7 @@ class _CategoryFormDialogState extends State<_CategoryFormDialog> {
                 color: _icon == i ? AppColors.primaryContainer : AppColors.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(CategoriesScreen._iconMap[i] ?? Icons.circle, size: 20, color: _icon == i ? AppColors.primary : AppColors.onSurfaceVariant),
+              child: Icon(CategoriesScreen.iconMap[i] ?? Icons.circle, size: 20, color: _icon == i ? AppColors.primary : AppColors.onSurfaceVariant),
             ),
           )).toList()),
           const SizedBox(height: AppSpacing.md),
