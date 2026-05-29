@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:drift/drift.dart' as drift;
 import 'package:drift/native.dart';
@@ -927,13 +928,13 @@ class DriftLocalRepositoryStore implements LocalStoreInterface {
 // Static helper — creates a Drift-native database connection
 // ---------------------------------------------------------------------------
 
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
+drift.LazyDatabase _openConnection() {
+  return drift.LazyDatabase(() async {
     // Ensure the native SQLite library is loaded (provided by
     // sqlite3_flutter_libs).
     await applyWorkaroundToOpenSqlite3OnOldAndroidVersions();
     final appDir = await getApplicationDocumentsDirectory();
     final dbPath = p.join(appDir.path, 'expenses_tracker.db');
-    return NativeDatabase.createInBackground(dbPath);
+    return NativeDatabase.createInBackground(File(dbPath));
   });
 }

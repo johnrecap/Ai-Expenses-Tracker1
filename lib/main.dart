@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'app/app.dart';
+import 'services/analytics/analytics_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +18,8 @@ Future<void> main() async {
     runApp(_FirebaseErrorApp(error: e));
     return;
   }
+
+  await AnalyticsService.instance.initialize();
 
   if (kDebugMode) {
     Bloc.observer = DebugBlocObserver();
