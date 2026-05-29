@@ -48,14 +48,11 @@ class AiResponse {
   bool get isParsed => amount != null && description != null;
 }
 
-abstract class AiService {
-  Future<AiResponse> parseExpenseText(String input, AiContext context);
-}
+class AiService {
+  final String gatewayUrl;
 
-class MockAiService implements AiService {
-  const MockAiService();
+  AiService({this.gatewayUrl = ''});
 
-  @override
   Future<AiResponse> parseExpenseText(String input, AiContext context) async {
     await Future.delayed(const Duration(milliseconds: 500));
     final words = input.trim().split(RegExp(r'\s+'));
@@ -84,4 +81,16 @@ class MockAiService implements AiService {
       rawInput: input,
     );
   }
+
+  Future<AiResponse> parseExpense(String input, AiContext context) {
+    return parseExpenseText(input, context);
+  }
+
+  Expense? parseExpenseToDraft(AiResponse response) {
+    return null;
+  }
+}
+
+class MockAiService extends AiService {
+  const MockAiService() : super();
 }

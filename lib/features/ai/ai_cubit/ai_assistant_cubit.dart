@@ -19,7 +19,7 @@ class AiAssistantCubit extends Cubit<AiAssistantState> {
     }
 
     try {
-      final result = await _aiService.parseExpense(text);
+      final result = await _aiService.parseExpense(text, AiContext(now: DateTime.now()));
       final draft = _aiService.parseExpenseToDraft(result);
       if (draft != null) {
         messages.add(AiMessage(role: 'assistant', content: 'Found: ${draft.description} — ${draft.amount.toStringAsFixed(3)} in ${draft.category.name}'));

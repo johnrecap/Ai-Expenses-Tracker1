@@ -36,7 +36,7 @@ class WalletsAccountsScreen extends StatelessWidget {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (state.wallets.isEmpty) {
-                    return const EmptyState(message: 'No wallets yet');
+                    return const EmptyState(icon: Icons.wallet_outlined, title: 'No wallets yet');
                   }
                   return SingleChildScrollView(
                     padding: const EdgeInsets.all(AppSpacing.containerPadding),
@@ -214,17 +214,17 @@ class _WalletFormState extends State<_WalletForm> {
           const SizedBox(height: AppSpacing.lg),
           Text(widget.existing != null ? 'Edit Wallet' : 'New Wallet', style: AppTextStyles.titleMedium.copyWith(color: AppColors.onSurface)),
           const SizedBox(height: AppSpacing.md),
-          TextField(controller: _nameCtrl, decoration: const InputDecoration(labelText: 'Name', filled: true, fillColor: AppColors.surfaceContainerLow, border: OutlineInputBorder(borderSide: BorderSide.none), borderRadius: BorderRadius.all(Radius.circular(12)))),
+          TextField(controller: _nameCtrl, decoration: InputDecoration(labelText: 'Name', filled: true, fillColor: AppColors.surfaceContainerLow, border: const OutlineInputBorder(borderSide: BorderSide.none))),
           const SizedBox(height: AppSpacing.sm),
           DropdownButtonFormField<String>(
             value: _type,
-            decoration: const InputDecoration(labelText: 'Type', filled: true, fillColor: AppColors.surfaceContainerLow, border: OutlineInputBorder(borderSide: BorderSide.none), borderRadius: BorderRadius.all(Radius.circular(12))),
+            decoration: InputDecoration(labelText: 'Type', filled: true, fillColor: AppColors.surfaceContainerLow, border: const OutlineInputBorder(borderSide: BorderSide.none)),
             items: ['cash', 'current', 'savings', 'credit'].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
             onChanged: (v) => setState(() => _type = v!),
           ),
           const SizedBox(height: AppSpacing.sm),
           Row(children: [
-            Expanded(child: TextField(controller: _balanceCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Balance', filled: true, fillColor: AppColors.surfaceContainerLow, border: OutlineInputBorder(borderSide: BorderSide.none), borderRadius: BorderRadius.all(Radius.circular(12))))),
+            Expanded(child: TextField(controller: _balanceCtrl, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: 'Balance', filled: true, fillColor: AppColors.surfaceContainerLow, border: const OutlineInputBorder(borderSide: BorderSide.none)))),
             const SizedBox(width: AppSpacing.sm),
             DropdownButtonFormField<String>(
               value: _currency,

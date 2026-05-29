@@ -88,7 +88,7 @@ class AppRouter {
         GoRoute(path: AppRoutes.categories, pageBuilder: (c, s) => const NoTransitionPage(child: CategoriesScreen())),
         GoRoute(path: AppRoutes.securityUnlock, pageBuilder: (c, s) => const NoTransitionPage(child: UnlockScreen())),
         GoRoute(path: AppRoutes.securityCreatePin, pageBuilder: (c, s) => const NoTransitionPage(child: CreatePinScreen())),
-        GoRoute(path: AppRoutes.accountProfile, pageBuilder: (c, s) => NoTransitionPage(child: AccountProfileScreen(user: (c.extra as Map)['user'] as dynamic))),
+        GoRoute(path: AppRoutes.accountProfile, pageBuilder: (c, s) => NoTransitionPage(child: AccountProfileScreen(user: (s.extra as Map)['user'] as dynamic))),
         GoRoute(path: AppRoutes.subscription, pageBuilder: (c, s) => const NoTransitionPage(child: FreePremiumScreen())),
       ],
       errorBuilder: (context, state) => const NotFoundScreen(),

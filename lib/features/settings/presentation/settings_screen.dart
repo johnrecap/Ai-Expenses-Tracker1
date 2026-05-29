@@ -124,7 +124,7 @@ class _SecuritySection extends StatelessWidget {
             value: state.biometricEnabled,
             activeColor: AppColors.primary,
             onChanged: (state.isBusy || !state.appLockEnabled || !state.hasPin || !state.biometricAvailable)
-                ? null : (v) => cubit.setBiometricEnabled(v),
+                ? null : (v) => cubit?.setBiometricEnabled(v),
           ),
         ],
       ),

@@ -34,7 +34,7 @@ class _AddExpenseReceiptScreenState extends State<AddExpenseReceiptScreen> {
   Expense? _parsedExpense;
   bool _parsing = false;
 
-  final _aiService = AiService(gatewayUrl: AppConfig.aiGatewayUrl);
+  final _aiService = const MockAiService();
   final _picker = ImagePicker();
 
   @override

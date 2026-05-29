@@ -19,7 +19,6 @@ import 'package:expenses_tracker/features/ai/services/ai_service.dart';
 import 'package:expenses_tracker/features/security/cubit/app_lock_cubit.dart';
 import 'package:expenses_tracker/features/wallets/wallet_bloc/wallet_bloc.dart';
 import 'package:expenses_tracker/features/recurring_expenses/recurring_expense_bloc/recurring_expense_bloc.dart';
-import 'package:expenses_tracker/core/config/app_config.dart';
 import 'package:expenses_tracker/features/categories/category_bloc/category_bloc.dart';
 import 'package:expense_repository/expense_repository.dart';
 import 'go_router_refresh_stream.dart';
@@ -125,7 +124,7 @@ class _AppState extends State<App> {
         RepositoryProvider<BudgetRepository>.value(value: bundle.budgetRepository),
         RepositoryProvider<SavingGoalRepository>.value(value: bundle.savingGoalRepository),
         RepositoryProvider<CategoryRepository>.value(value: bundle.categoryRepository),
-        RepositoryProvider<WalletAccountRepository>.value(value: bundle.walletRepository),
+        RepositoryProvider<WalletAccountRepository>.value(value: bundle.walletAccountRepository),
         RepositoryProvider<TransferRepository>.value(value: bundle.transferRepository),
         RepositoryProvider<RecurringExpenseRepository>.value(value: bundle.recurringExpenseRepository),
       ],
@@ -142,9 +141,9 @@ class _AppState extends State<App> {
           BlocProvider(create: (_) => SettingsCubit(bundle.settingsRepository)),
           BlocProvider(create: (_) => OnboardingCubit(bundle.settingsRepository)),
           BlocProvider(create: (_) => AppLanguageCubit()),
-          BlocProvider(create: (_) => AiAssistantCubit(aiService: AiService(gatewayUrl: AppConfig.aiGatewayUrl))),
+          BlocProvider(create: (_) => AiAssistantCubit(aiService: const MockAiService())),
           BlocProvider(create: (_) => AppLockCubit()..initialize()),
-          BlocProvider(create: (_) => WalletBloc(bundle.walletRepository, bundle.transferRepository)..add(const WalletsWatched())),
+          BlocProvider(create: (_) => WalletBloc(bundle.walletAccountRepository, bundle.transferRepository)..add(const WalletsWatched())),
           BlocProvider(create: (_) => RecurringExpenseBloc(bundle.recurringExpenseRepository, _userId ?? '')..add(const RecurringExpensesWatched())),
         ],
         child: BlocListener<CreateExpenseBloc, CreateExpenseState>(

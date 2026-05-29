@@ -30,10 +30,10 @@ class SubscriptionsCenterScreen extends StatelessWidget {
                   if (state is RecurringExpenseLoading) {
                     return const Center(child: CircularProgressIndicator());
                   }
-                  final expenses = state is RecurringExpenseLoaded ? state.expenses.where((e) => e.isActive).toList() : <RecurringExpense>[];
+                  final activeItems = state is RecurringExpenseLoaded ? state.activeItems : <RecurringExpense>[];
 
-                  if (expenses.isEmpty) {
-                    return const EmptyState(message: 'No active subscriptions');
+                  if (activeItems.isEmpty) {
+                    return const EmptyState(icon: Icons.subscriptions_outlined, title: 'No active subscriptions');
                   }
 
                   return SingleChildScrollView(
@@ -41,7 +41,7 @@ class SubscriptionsCenterScreen extends StatelessWidget {
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text('Active Subscriptions', style: AppTextStyles.labelCaps.copyWith(color: AppColors.onSurfaceVariant)),
                       const SizedBox(height: AppSpacing.sm),
-                      ...expenses.map((e) => Padding(
+                      ...activeItems.map((e) => Padding(
                         padding: const EdgeInsets.only(bottom: AppSpacing.md),
                         child: _SubscriptionCard(expense: e),
                       )),
@@ -68,9 +68,10 @@ class _SubscriptionCard extends StatelessWidget {
       'daily': '/day', 'weekly': '/week', 'monthly': '/mo', 'yearly': '/year',
     }[expense.frequency] ?? '/mo';
 
-    final nextBilling = expense.nextRunDate != null
-        ? '${expense.nextRunDate!.day}/${expense.nextRunDate!.month}'
-        : 'N/A';
+    final isActive = expense.endDate == null || expense.endDate!.isAfter(DateTime.now());
+    final nextRun = expense.lastGeneratedDate != null
+        ? '${expense.lastGeneratedDate!.day}/${expense.lastGeneratedDate!.month}'
+        : _nextRunLabel(expense.startDate);
 
     return GlassCard(
       child: Row(children: [
@@ -82,7 +83,7 @@ class _SubscriptionCard extends StatelessWidget {
           ),
           child: Center(
             child: Text(
-              expense.description.isNotEmpty ? expense.description.substring(0, minS(expense.description.length, 2)).toUpperCase() : '?',
+              expense.name.isNotEmpty ? expense.name.substring(0, minS(expense.name.length, 2)).toUpperCase() : '?',
               style: AppTextStyles.titleMedium.copyWith(color: AppColors.primary),
             ),
           ),
@@ -91,14 +92,14 @@ class _SubscriptionCard extends StatelessWidget {
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              Text(expense.description, style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface, fontWeight: FontWeight.w600)),
+              Text(expense.name, style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface, fontWeight: FontWeight.w600)),
               const Spacer(),
               Text('${expense.amount.toStringAsFixed(3)} ${expense.currency}$frequencyLabel',
                 style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface, fontWeight: FontWeight.w600)),
             ]),
             const SizedBox(height: 2),
             Row(children: [
-              Text('Next: $nextBilling', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+              Text('Next: $nextRun', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 2),
@@ -106,7 +107,7 @@ class _SubscriptionCard extends StatelessWidget {
                   color: AppColors.primaryContainer.withAlpha(50),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: Text(expense.isActive ? 'active' : 'paused',
+                child: Text(isActive ? 'active' : 'paused',
                   style: AppTextStyles.labelCaps.copyWith(color: AppColors.primary, fontSize: 10)),
               ),
             ]),
@@ -115,6 +116,8 @@ class _SubscriptionCard extends StatelessWidget {
       ]),
     );
   }
+
+  String _nextRunLabel(DateTime start) => '${start.day}/${start.month}';
 }
 
 int minS(int a, int b) => a < b ? a : b;
