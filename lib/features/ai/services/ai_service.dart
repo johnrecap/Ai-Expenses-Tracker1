@@ -99,11 +99,6 @@ class MockAiService extends AiService {
   }
 
   @override
-  Future<AiResponse> parseExpense(String input, AiContext context) async {
-    return parseExpenseText(input, context);
-  }
-
-  @override
   Expense? parseExpenseToDraft(AiResponse response) {
     if (response.amount == null || response.description == null) return null;
 
