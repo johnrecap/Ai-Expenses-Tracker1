@@ -1,15 +1,19 @@
 <!--
 Sync Impact Report
-Version change: 1.0.0 -> 2.0.0
-Modified principles:
-- Principle III: UI-only Native Flutter Scope -> Production Flutter App Scope
-- Principle IV: Spec-driven Reusable Implementation -> Spec-driven Full-Stack Implementation
-- Added sections: Backend Architecture, AI Infrastructure, Multi-Backend Support
-- Removed: UI-only restrictions, forbidden package list, mock-data-only constraint
-Updated templates:
-- plan-template.md: allow backend, Firebase, API, persistence
-- tasks-template.md: allow backend services, repositories, state management
+Version change: 2.0.0 -> 2.1.0
+Added sections:
+- Security Layer (App Lock: PIN + Biometric)
+- Account Management (Profile, Deletion, Reauthentication)
+- Full Settings (9 sections)
+- Monetization (Free/Premium, AdMob-ready)
+- AI Services (Voice, Prediction, Mock)
+- Backup/Restore
+- VPS Architecture Analysis (4 blockers documented)
+Updated sections:
+- Multi-Backend Support: Documented vpsLocalFirst blockers
+- Runtime Modes: Added VPS_API_BASE_URL requirement
 Constitution ratified: 2026-05-28
+Last Amended: 2026-05-29
 -->
 
 # AI Expenses Tracker Constitution
@@ -203,4 +207,8 @@ Compliance review:
 - Every final implementation report MUST mention verification commands and any
   blocked checks.
 
-**Version**: 2.0.0 | **Ratified**: 2026-05-28 | **Last Amended**: 2026-05-28
+- Firebase Auth remains the identity provider even when app data moves to VPS.
+- **VPS Architecture**: See `specs/023-vps-architecture-fix/spec.md` for 4 documented blockers preventing `vpsLocalFirst` from working. Key issues: in-memory storage, stub repos, VPS not connected, sync pull not applied.
+- **Legacy Feature Port**: See `specs/022-legacy-feature-port/spec.md` for complete list of features ported from old app (security, account, settings, monetization, AI, backup).
+
+**Version**: 2.1.0 | **Ratified**: 2026-05-28 | **Last Amended**: 2026-05-29

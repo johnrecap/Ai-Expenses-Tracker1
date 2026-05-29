@@ -14,6 +14,9 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
 
   CategoryBloc(this._repo, this._userId) : super(CategoryInitial()) {
     on<CategoriesWatched>(_onWatch);
+    on<CreateCategory>(_onCreate);
+    on<UpdateCategory>(_onUpdate);
+    on<ArchiveCategory>(_onArchive);
   }
 
   Future<void> _onWatch(CategoriesWatched event, Emitter<CategoryState> emit) async {
@@ -29,6 +32,48 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       }
     } catch (_) {
       emit(const CategoryError('Failed to load categories.'));
+    }
+  }
+
+  Future<void> _onCreate(CreateCategory event, Emitter<CategoryState> emit) async {
+    try {
+      await _repo.createCategory(event.category);
+      final updated = await _repo.getCategories();
+      emit(CategoryCreated(event.category));
+      emit(CategoryLoaded(updated));
+    } catch (e) {
+      debugPrint('CategoryBloc: create failed: $e');
+      emit(CategoryError('Failed to create category: $e'));
+    }
+  }
+
+  Future<void> _onUpdate(UpdateCategory event, Emitter<CategoryState> emit) async {
+    try {
+      await _repo.updateCategory(event.category);
+      final updated = await _repo.getCategories();
+      emit(CategoryUpdated(event.category));
+      emit(CategoryLoaded(updated));
+    } catch (e) {
+      debugPrint('CategoryBloc: update failed: $e');
+      emit(CategoryError('Failed to update category: $e'));
+    }
+  }
+
+  Future<void> _onArchive(ArchiveCategory event, Emitter<CategoryState> emit) async {
+    try {
+      final currentState = state;
+      if (currentState is CategoryLoaded) {
+        final target = currentState.categories.firstWhere(
+          (c) => c.categoryId == event.categoryId,
+        );
+        await _repo.archiveCategory(target);
+        final updated = await _repo.getCategories();
+        emit(CategoryArchived(event.categoryId));
+        emit(CategoryLoaded(updated));
+      }
+    } catch (e) {
+      debugPrint('CategoryBloc: archive failed: $e');
+      emit(CategoryError('Failed to archive category: $e'));
     }
   }
 

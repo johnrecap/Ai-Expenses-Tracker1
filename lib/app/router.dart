@@ -28,6 +28,11 @@ import 'package:expenses_tracker/features/subscriptions/presentation/subscriptio
 import 'package:expenses_tracker/features/ai/presentation/ai_advice_screen.dart';
 import 'package:expenses_tracker/features/ai/presentation/ai_history_screen.dart';
 import 'package:expenses_tracker/features/settings/presentation/settings_screen.dart';
+import 'package:expenses_tracker/features/categories/presentation/categories_screen.dart';
+import 'package:expenses_tracker/features/security/presentation/unlock_screen.dart';
+import 'package:expenses_tracker/features/security/presentation/create_pin_screen.dart';
+import 'package:expenses_tracker/features/account/presentation/account_profile_screen.dart';
+import 'package:expenses_tracker/monetization/presentation/free_premium_screen.dart';
 import 'not_found_screen.dart';
 
 class AppRouter {
@@ -80,6 +85,11 @@ class AppRouter {
         GoRoute(path: AppRoutes.aiHistory, pageBuilder: (c, s) => const NoTransitionPage(child: AiHistoryScreen())),
         GoRoute(path: AppRoutes.storyMonthly, pageBuilder: (c, s) => const NoTransitionPage(child: MonthlyFinancialStoryScreen())),
         GoRoute(path: AppRoutes.settings, pageBuilder: (c, s) => const NoTransitionPage(child: SettingsScreen())),
+        GoRoute(path: AppRoutes.categories, pageBuilder: (c, s) => const NoTransitionPage(child: CategoriesScreen())),
+        GoRoute(path: AppRoutes.securityUnlock, pageBuilder: (c, s) => const NoTransitionPage(child: UnlockScreen())),
+        GoRoute(path: AppRoutes.securityCreatePin, pageBuilder: (c, s) => const NoTransitionPage(child: CreatePinScreen())),
+        GoRoute(path: AppRoutes.accountProfile, pageBuilder: (c, s) => NoTransitionPage(child: AccountProfileScreen(user: (c.extra as Map)['user'] as dynamic))),
+        GoRoute(path: AppRoutes.subscription, pageBuilder: (c, s) => const NoTransitionPage(child: FreePremiumScreen())),
       ],
       errorBuilder: (context, state) => const NotFoundScreen(),
     );

@@ -1,43 +1,87 @@
 import 'package:expense_repository/expense_repository.dart';
-import 'ai_gateway_client.dart';
 
-class AiService {
-  final AiGatewayClient _client;
+class AiContext {
+  final DateTime now;
+  final String? userId;
+  final List<Category> categories;
+  final List<CategoryAlias> categoryAliases;
+  final List<Expense> expenses;
+  final Budget? budget;
+  final UserSettings? settings;
+  final String defaultCurrency;
+  final PaymentMethod defaultPaymentMethod;
+  final String locale;
 
-  AiService({required String gatewayUrl, AiGatewayClient? client})
-      : _client = client ?? AiGatewayClient(baseUrl: gatewayUrl);
+  const AiContext({
+    required this.now, this.userId, this.categories = const [],
+    this.categoryAliases = const [], this.expenses = const [],
+    this.budget, this.settings, this.defaultCurrency = 'EGP',
+    this.defaultPaymentMethod = PaymentMethod.cash, this.locale = 'en-US',
+  });
 
-  Future<Map<String, dynamic>> parseExpense(String text) async {
-    return _client.parseExpense(text);
+  UserSettings get effectiveSettings {
+    final s = settings;
+    if (s != null) return s;
+    return UserSettings.defaults(userId: userId ?? '').copyWith(
+      baseCurrency: defaultCurrency,
+      supportedCurrencies: [defaultCurrency],
+      defaultPaymentMethod: defaultPaymentMethod,
+    );
   }
+}
 
-  Future<Map<String, dynamic>> extractReceipt(String imageBase64) async {
-    return _client.extractReceipt(imageBase64);
-  }
+class AiResponse {
+  final String? description;
+  final double? amount;
+  final String? currency;
+  final String? categoryId;
+  final DateTime? date;
+  final String? paymentMethod;
+  final String? rawInput;
+  final double confidence;
 
-  Future<Map<String, dynamic>> getAdvice({required Map<String, double> categoryTotals, required double totalSpent}) async {
-    return _client.getAdvice({
-      'categoryTotals': categoryTotals,
-      'totalSpent': totalSpent,
-    });
-  }
+  const AiResponse({
+    this.description, this.amount, this.currency, this.categoryId,
+    this.date, this.paymentMethod, this.rawInput, this.confidence = 0,
+  });
 
-  Expense? parseExpenseToDraft(Map<String, dynamic> aiResponse) {
-    try {
-      final json = aiResponse['structuredJson'] as Map<String, dynamic>?;
-      if (json == null) return null;
-      final amount = (json['amount'] as num?)?.toDouble();
-      if (amount == null || amount <= 0) return null;
-      return Expense(
-        expenseId: '',
-        category: Category.empty.copyWith(name: json['category'] as String? ?? ''),
-        date: DateTime.tryParse(json['date'] as String? ?? '') ?? DateTime.now(),
-        amount: amount,
-        description: json['description'] as String? ?? '',
-        paymentMethod: PaymentMethod.cash,
-      );
-    } catch (_) {
-      return null;
+  bool get isParsed => amount != null && description != null;
+}
+
+abstract class AiService {
+  Future<AiResponse> parseExpenseText(String input, AiContext context);
+}
+
+class MockAiService implements AiService {
+  const MockAiService();
+
+  @override
+  Future<AiResponse> parseExpenseText(String input, AiContext context) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    final words = input.trim().split(RegExp(r'\s+'));
+    double? amount;
+    String? description;
+
+    for (final word in words) {
+      final cleaned = word.replaceAll(RegExp(r'[^0-9.]'), '');
+      if (cleaned.isNotEmpty) {
+        amount = double.tryParse(cleaned);
+        if (amount != null) break;
+      }
     }
+
+    final nonAmountWords = words.where((w) {
+      final c = w.replaceAll(RegExp(r'[^0-9.]'), '');
+      return c.isEmpty || double.tryParse(c) == null;
+    }).join(' ');
+
+    description = nonAmountWords.isNotEmpty ? nonAmountWords : input;
+
+    return AiResponse(
+      description: description, amount: amount,
+      currency: context.defaultCurrency,
+      date: context.now, confidence: amount != null ? 0.8 : 0.3,
+      rawInput: input,
+    );
   }
 }

@@ -40,4 +40,13 @@ abstract class AppRoutes {
   static const String settings = '/settings';
 
   static const String notFound = '/not-found';
+
+  static const String categories = '/categories';
+
+  static const String securityUnlock = '/security/unlock';
+  static const String securityCreatePin = '/security/create-pin';
+
+  static const String accountProfile = '/account/profile';
+
+  static const String subscription = '/subscription';
 }

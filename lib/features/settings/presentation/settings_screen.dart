@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:expenses_tracker/core/theme/app_colors.dart';
 import 'package:expenses_tracker/core/theme/app_spacing.dart';
 import 'package:expenses_tracker/core/theme/app_text_styles.dart';
@@ -8,206 +5,349 @@ import 'package:expenses_tracker/core/widgets/app_background.dart';
 import 'package:expenses_tracker/core/widgets/app_bottom_nav.dart';
 import 'package:expenses_tracker/core/widgets/app_top_bar.dart';
 import 'package:expenses_tracker/core/widgets/glass_card.dart';
-import 'package:expense_repository/expense_repository.dart';
+import 'package:expenses_tracker/features/security/cubit/app_lock_cubit.dart';
+import 'package:expenses_tracker/features/security/presentation/create_pin_screen.dart';
 import 'package:expenses_tracker/app/routes.dart';
-import 'package:expenses_tracker/features/auth/auth_bloc/auth_bloc.dart';
-import 'package:expenses_tracker/features/settings/settings_cubit/settings_cubit.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
-
-  @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends State<SettingsScreen> {
-  bool _notificationsOn = true;
-  bool _darkMode = false;
-  bool _biometrics = false;
-
-  void _saveSetting(UserSettings Function(UserSettings) update) {
-    final cubit = context.read<SettingsCubit>();
-    final current = cubit.state;
-    if (current is SettingsSuccess) {
-      cubit.saveSettings(update(current.settings));
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: AppBackground(
         child: SafeArea(
-          child: Column(
-            children: [
-              const AppTopBar(title: 'Settings'),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(AppSpacing.containerPadding),
-                  child: BlocBuilder<AuthBloc, AuthState>(
-                    builder: (context, authState) {
-                      final user = authState is AuthAuthenticated ? authState.user : null;
-                      return BlocBuilder<SettingsCubit, SettingsState>(
-                        builder: (context, settingsState) {
-                          final baseCurrency = settingsState is SettingsSuccess
-                              ? settingsState.settings.baseCurrency
-                              : 'KWD';
-                          final displayName = user?.displayName ?? user?.email ?? 'User';
-
-                          return Column(
-                            children: [
-                              GlassCard(
-                                child: Row(
-                                  children: [
-                                    const CircleAvatar(radius: 28, backgroundColor: AppColors.primaryContainer, child: Icon(Icons.person, size: 28, color: AppColors.primary)),
-                                    const SizedBox(width: AppSpacing.md),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(displayName, style: AppTextStyles.titleMedium.copyWith(color: AppColors.onSurface)),
-                                          const SizedBox(height: 2),
-                                          Text('Manage your profile', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
-                                        ],
-                                      ),
-                                    ),
-                                    const Icon(Icons.chevron_right, color: AppColors.outline),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.lg),
-                              _SectionLabel(label: 'Preferences'),
-                              const SizedBox(height: AppSpacing.sm),
-                              GlassCard(
-                                padding: EdgeInsets.zero,
-                                child: Column(
-                                  children: [
-                                    _ToggleRow(icon: Icons.notifications_outlined, label: 'Notifications', value: _notificationsOn, onChanged: (v) {
-                                      setState(() => _notificationsOn = v);
-                                      _saveSetting((UserSettings s) => s.copyWith(notificationSettings: s.notificationSettings, updatedAt: DateTime.now()));
-                                    }),
-                                    const Divider(height: 1, indent: 56, color: AppColors.surfaceContainerHigh),
-                                    _ToggleRow(icon: Icons.dark_mode_outlined, label: 'Dark Mode', value: _darkMode, onChanged: (v) {
-                                      setState(() => _darkMode = v);
-                                      _saveSetting((UserSettings s) => s.copyWith(updatedAt: DateTime.now()));
-                                    }),
-                                    const Divider(height: 1, indent: 56, color: AppColors.surfaceContainerHigh),
-                                    _ToggleRow(icon: Icons.fingerprint, label: 'Biometric Lock', value: _biometrics, onChanged: (v) {
-                                      setState(() => _biometrics = v);
-                                      _saveSetting((UserSettings s) => s.copyWith(updatedAt: DateTime.now()));
-                                    }),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.lg),
-                              _SectionLabel(label: 'Data'),
-                              const SizedBox(height: AppSpacing.sm),
-                              GlassCard(
-                                padding: EdgeInsets.zero,
-                                child: Column(
-                                  children: [
-                                    _NavRow(icon: Icons.language, label: 'Language', value: 'English'),
-                                    const Divider(height: 1, indent: 56, color: AppColors.surfaceContainerHigh),
-                                    _NavRow(icon: Icons.currency_exchange, label: 'Base Currency', value: baseCurrency),
-                                    const Divider(height: 1, indent: 56, color: AppColors.surfaceContainerHigh),
-                                    _NavRow(icon: Icons.category, label: 'Categories', value: 'Manage'),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.lg),
-                              _SectionLabel(label: 'About'),
-                              const SizedBox(height: AppSpacing.sm),
-                              GlassCard(
-                                padding: EdgeInsets.zero,
-                                child: Column(
-                                  children: [
-                                    _NavRow(icon: Icons.info_outline, label: 'Version', value: '1.0.0'),
-                                    const Divider(height: 1, indent: 56, color: AppColors.surfaceContainerHigh),
-                                    _NavRow(icon: Icons.description_outlined, label: 'Terms of Service'),
-                                    const Divider(height: 1, indent: 56, color: AppColors.surfaceContainerHigh),
-                                    _NavRow(icon: Icons.privacy_tip_outlined, label: 'Privacy Policy'),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 80),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                  ),
+          child: Column(children: [
+            const AppTopBar(title: 'Settings'),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(AppSpacing.containerPadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _SecuritySection(),
+                    const SizedBox(height: AppSpacing.md),
+                    _AppearanceSection(),
+                    const SizedBox(height: AppSpacing.md),
+                    _NotificationSection(),
+                    const SizedBox(height: AppSpacing.md),
+                    _PrivacySection(),
+                    const SizedBox(height: AppSpacing.md),
+                    _DataSection(),
+                    const SizedBox(height: AppSpacing.md),
+                    _ProfileSection(context),
+                    const SizedBox(height: AppSpacing.md),
+                    _SupportSection(),
+                    const SizedBox(height: AppSpacing.md),
+                    _DangerSection(context),
+                    const SizedBox(height: 80),
+                  ],
                 ),
               ),
-              AppBottomNav(
-                selectedIndex: 4,
-                onDestinationSelected: (i) {
-                  switch (i) {
-                    case 0: context.go(AppRoutes.home);
-                    case 1: context.go(AppRoutes.reports);
-                    case 2: context.go(AppRoutes.budgets);
-                    case 3: context.go(AppRoutes.wallets);
-                    case 4: context.go(AppRoutes.settings);
-                  }
-                },
-              ),
-            ],
-          ),
+            ),
+            AppBottomNav(
+              selectedIndex: 4,
+              onDestinationSelected: (i) {
+                switch (i) {
+                  case 0: context.go(AppRoutes.home);
+                  case 1: context.go(AppRoutes.reports);
+                  case 2: context.go(AppRoutes.budgets);
+                  case 3: context.go(AppRoutes.wallets);
+                  case 4: context.go(AppRoutes.settings);
+                }
+              },
+            ),
+          ]),
         ),
       ),
     );
   }
 }
 
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel({required this.label});
-  final String label;
+class _Section extends StatelessWidget {
+  const _Section({required this.title, this.subtitle, required this.children});
+  final String title;
+  final String? subtitle;
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Text(label, style: AppTextStyles.labelCaps.copyWith(color: AppColors.onSurfaceVariant)),
+    return GlassCard(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(title, style: AppTextStyles.titleMedium.copyWith(color: AppColors.onSurface)),
+        if (subtitle != null) ...[
+          const SizedBox(height: 4),
+          Text(subtitle!, style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+        ],
+        const SizedBox(height: AppSpacing.sm),
+        ...children,
+      ]),
     );
   }
 }
 
-class _NavRow extends StatelessWidget {
-  const _NavRow({required this.icon, required this.label, this.value});
-  final IconData icon;
-  final String label;
-  final String? value;
-
+class _SecuritySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon, size: 22, color: AppColors.onSurfaceVariant),
-      title: Text(label, style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurface)),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
+    AppLockCubit? cubit;
+    try { cubit = context.read<AppLockCubit>(); } catch (_) { return const SizedBox.shrink(); }
+
+    return BlocBuilder<AppLockCubit, AppLockState>(
+      bloc: cubit,
+      builder: (context, state) => _Section(
+        title: 'Security',
+        subtitle: 'App lock, PIN, and biometrics',
         children: [
-          if (value != null) Text(value!, style: AppTextStyles.bodySmall.copyWith(color: AppColors.outline)),
-          const SizedBox(width: 4),
-          const Icon(Icons.chevron_right, size: 18, color: AppColors.outline),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text('PIN Lock', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
+            subtitle: Text('Require PIN to open the app', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+            value: state.appLockEnabled,
+            activeColor: AppColors.primary,
+            onChanged: state.isBusy ? null : (v) => _toggleLock(context, v),
+          ),
+          if (state.appLockEnabled && state.hasPin)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text('Change PIN', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
+              trailing: const Icon(Icons.chevron_right, color: AppColors.onSurfaceVariant),
+              onTap: state.isBusy ? null : () => _openPinScreen(context, changeExisting: true),
+            ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text('Biometric Unlock', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
+            subtitle: Text(state.biometricAvailable ? 'Use fingerprint or face' : 'Not available on this device',
+                style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+            value: state.biometricEnabled,
+            activeColor: AppColors.primary,
+            onChanged: (state.isBusy || !state.appLockEnabled || !state.hasPin || !state.biometricAvailable)
+                ? null : (v) => cubit.setBiometricEnabled(v),
+          ),
         ],
       ),
     );
   }
+
+  Future<void> _toggleLock(BuildContext context, bool enabled) async {
+    if (enabled) {
+      await _openPinScreen(context);
+    } else {
+      await context.read<AppLockCubit>().disableLock();
+    }
+  }
+
+  Future<void> _openPinScreen(BuildContext context, {bool changeExisting = false}) async {
+    await Navigator.push(context, MaterialPageRoute(
+      builder: (_) => BlocProvider.value(
+        value: context.read<AppLockCubit>(),
+        child: CreatePinScreen(changeExistingPin: changeExisting),
+      ),
+    ));
+  }
 }
 
-class _ToggleRow extends StatelessWidget {
-  const _ToggleRow({required this.icon, required this.label, required this.value, required this.onChanged});
-  final IconData icon;
-  final String label;
-  final bool value;
-  final ValueChanged<bool> onChanged;
+class _AppearanceSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return _Section(
+      title: 'Appearance',
+      subtitle: 'Language and currency',
+      children: [
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.language, color: AppColors.primary),
+          title: Text('Language', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
+          subtitle: Text('English / العربية', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+          trailing: const Icon(Icons.chevron_right, color: AppColors.onSurfaceVariant),
+          onTap: () => context.go(AppRoutes.onboardingLanguage),
+        ),
+        const Divider(height: 1, color: AppColors.surfaceContainerHigh),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.attach_money, color: AppColors.primary),
+          title: Text('Currency', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
+          subtitle: Text('Base currency for the app', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+          trailing: const Icon(Icons.chevron_right, color: AppColors.onSurfaceVariant),
+          onTap: () => context.go(AppRoutes.onboardingCurrency),
+        ),
+      ],
+    );
+  }
+}
+
+class _NotificationSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return _Section(
+      title: 'Notifications',
+      subtitle: 'Budget alerts and reminders',
+      children: [
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text('Push Notifications', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
+          subtitle: Text('Get alerts for budgets and bills', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+          value: true,
+          activeColor: AppColors.primary,
+          onChanged: (_) {},
+        ),
+      ],
+    );
+  }
+}
+
+class _PrivacySection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return _Section(
+      title: 'Privacy & Data',
+      subtitle: 'Control your data',
+      children: [
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.shield_outlined, color: AppColors.primary),
+          title: Text('Privacy Policy', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
+          trailing: const Icon(Icons.open_in_new, size: 18, color: AppColors.onSurfaceVariant),
+          onTap: () {},
+        ),
+        const Divider(height: 1, color: AppColors.surfaceContainerHigh),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.description_outlined, color: AppColors.primary),
+          title: Text('Terms of Service', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
+          trailing: const Icon(Icons.open_in_new, size: 18, color: AppColors.onSurfaceVariant),
+          onTap: () {},
+        ),
+      ],
+    );
+  }
+}
+
+class _DataSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return _Section(
+      title: 'Data',
+      subtitle: 'Backup and sync',
+      children: [
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.backup_outlined, color: AppColors.primary),
+          title: Text('Backup Data', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
+          subtitle: Text('Save a local backup of your data', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+          trailing: const Icon(Icons.chevron_right, color: AppColors.onSurfaceVariant),
+          onTap: () {},
+        ),
+        const Divider(height: 1, color: AppColors.surfaceContainerHigh),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.restore_outlined, color: AppColors.primary),
+          title: Text('Restore Data', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
+          subtitle: Text('Restore from a previous backup', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+          trailing: const Icon(Icons.chevron_right, color: AppColors.onSurfaceVariant),
+          onTap: () {},
+        ),
+      ],
+    );
+  }
+}
+
+Widget _ProfileSection(BuildContext context) {
+  return _Section(
+    title: 'Account',
+    subtitle: 'Profile and subscription',
+    children: [
+      ListTile(
+        contentPadding: EdgeInsets.zero,
+        leading: const Icon(Icons.person_outline, color: AppColors.primary),
+        title: Text('Profile', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
+        subtitle: Text('Name, email, account settings', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+        trailing: const Icon(Icons.chevron_right, color: AppColors.onSurfaceVariant),
+        onTap: () {},
+      ),
+      const Divider(height: 1, color: AppColors.surfaceContainerHigh),
+      ListTile(
+        contentPadding: EdgeInsets.zero,
+        leading: const Icon(Icons.workspace_premium, color: AppColors.primary),
+        title: Text('Subscription', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
+        subtitle: Text('Free plan', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+        trailing: const Icon(Icons.chevron_right, color: AppColors.onSurfaceVariant),
+        onTap: () {},
+      ),
+    ],
+  );
+}
+
+class _SupportSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return _Section(
+      title: 'Support',
+      subtitle: 'Help and feedback',
+      children: [
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.help_outline, color: AppColors.primary),
+          title: Text('Help Center', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
+          trailing: const Icon(Icons.open_in_new, size: 18, color: AppColors.onSurfaceVariant),
+          onTap: () {},
+        ),
+        const Divider(height: 1, color: AppColors.surfaceContainerHigh),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.feedback_outlined, color: AppColors.primary),
+          title: Text('Send Feedback', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
+          trailing: const Icon(Icons.chevron_right, color: AppColors.onSurfaceVariant),
+          onTap: () {},
+        ),
+        const Divider(height: 1, color: AppColors.surfaceContainerHigh),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.info_outline, color: AppColors.primary),
+          title: Text('About', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
+          subtitle: Text('Version 1.0.0+1', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+          enabled: false,
+        ),
+      ],
+    );
+  }
+}
+
+class _DangerSection extends StatelessWidget {
+  const _DangerSection(this.context);
+  final BuildContext context;
 
   @override
   Widget build(BuildContext context) {
-    return SwitchListTile(
-      secondary: Icon(icon, size: 22, color: AppColors.onSurfaceVariant),
-      title: Text(label, style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurface)),
-      value: value,
-      onChanged: onChanged,
+    return _Section(
+      title: 'Danger Zone',
+      subtitle: 'Irreversible actions',
+      children: [
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.delete_forever_outlined, color: AppColors.error),
+          title: Text('Delete Account', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.error)),
+          subtitle: Text('Permanently delete all data', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+          trailing: const Icon(Icons.chevron_right, color: AppColors.onSurfaceVariant),
+          onTap: () => _showDeleteDialog(context),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showDeleteDialog(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text('This will permanently delete all your data. This cannot be undone.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete Forever', style: TextStyle(color: AppColors.error))),
+        ],
+      ),
     );
   }
 }

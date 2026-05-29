@@ -21,3 +21,18 @@ class CategoryError extends CategoryState {
   final String message;
   const CategoryError(this.message);
 }
+
+class CategoryCreated extends CategoryState {
+  final Category category;
+  const CategoryCreated(this.category);
+}
+
+class CategoryUpdated extends CategoryState {
+  final Category category;
+  const CategoryUpdated(this.category);
+}
+
+class CategoryArchived extends CategoryState {
+  final String categoryId;
+  const CategoryArchived(this.categoryId);
+}

@@ -26,6 +26,8 @@ Current canonical Spec Kit plan set:
 - `specs/019-engagement-guided-tour/plan.md`
 - `specs/020-monetization-observability/plan.md`
 - `specs/021-localization-routing-ci/plan.md`
+- `specs/022-legacy-feature-port/spec.md`
+- `specs/023-vps-architecture-fix/spec.md`
 <!-- SPECKIT END -->
 
 # AI Expenses Tracker Agent Guide
