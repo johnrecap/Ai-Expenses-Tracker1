@@ -1,10 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:expenses_tracker/core/theme/app_colors.dart';
 import 'package:expenses_tracker/core/theme/app_spacing.dart';
 import 'package:expenses_tracker/core/theme/app_text_styles.dart';
 import 'package:expenses_tracker/core/widgets/glass_bottom_sheet.dart';
-import 'package:expenses_tracker/core/mock/mock_data.dart';
-import 'package:expenses_tracker/core/mock/mock_models.dart';
+import 'package:expenses_tracker/features/ai/services/ai_service.dart';
 import 'widgets/chat_bubble.dart';
 
 class AiAssistantSheet extends StatefulWidget {
@@ -16,9 +15,74 @@ class AiAssistantSheet extends StatefulWidget {
 
 class _AiAssistantSheetState extends State<AiAssistantSheet> {
   final _controller = TextEditingController();
-  final _messages = <MockChatMessage>[
-    ...MockData.chatMessages.take(2),
-  ];
+  final _aiService = const MockAiService();
+  List<AiChatMessage> _messages = [];
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    try {
+      final history = await _aiService.getChatHistory();
+      if (mounted) {
+        setState(() {
+          _messages = history;
+          _loading = false;
+          _error = null;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = 'Failed to load chat history.';
+        });
+      }
+    }
+  }
+
+  Future<void> _sendMessage() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+
+    final userMessage = AiChatMessage(
+      id: 'sheet-${_messages.length}',
+      author: 'You',
+      text: text,
+      timestampLabel: 'Now',
+      isUser: true,
+      timestamp: DateTime.now(),
+    );
+
+    setState(() {
+      _messages.add(userMessage);
+      _loading = true;
+      _error = null;
+    });
+    _controller.clear();
+
+    try {
+      final response = await _aiService.sendChatMessage(text);
+      if (mounted) {
+        setState(() {
+          _messages.add(response);
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = 'Failed to get AI response. Please try again.';
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -44,7 +108,7 @@ class _AiAssistantSheetState extends State<AiAssistantSheet> {
                     onTap: () => Navigator.of(context).pop(),
                     child: Container(
                       width: 32, height: 32,
-                      decoration: BoxDecoration(color: AppColors.surfaceContainerHigh, shape: BoxShape.circle),
+                      decoration: const BoxDecoration(color: AppColors.surfaceContainerHigh, shape: BoxShape.circle),
                       child: const Icon(Icons.close, size: 18, color: AppColors.onSurfaceVariant),
                     ),
                   ),
@@ -53,15 +117,31 @@ class _AiAssistantSheetState extends State<AiAssistantSheet> {
             ),
             const Divider(color: AppColors.surfaceContainerHigh),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(AppSpacing.containerPadding),
-                children: _messages.map((msg) => ChatBubble(
-                  text: msg.text,
-                  isUser: msg.isUser,
-                  timestamp: msg.timestampLabel,
-                )).toList(),
-              ),
+              child: _buildMessageList(),
             ),
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding, vertical: AppSpacing.sm),
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.errorContainer.withAlpha(150),
+                    borderRadius: BorderRadius.circular(AppSpacing.md),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error_outline, size: 18, color: AppColors.error),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          _error!,
+                          style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             Container(
               padding: const EdgeInsets.fromLTRB(AppSpacing.containerPadding, AppSpacing.sm, AppSpacing.containerPadding, AppSpacing.lg),
               decoration: const BoxDecoration(
@@ -81,36 +161,49 @@ class _AiAssistantSheetState extends State<AiAssistantSheet> {
                         hintStyle: AppTextStyles.bodyLarge.copyWith(color: AppColors.outline),
                         contentPadding: const EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 12),
                       ),
+                      onSubmitted: (_) => _sendMessage(),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  GestureDetector(
-                    onTap: () {
-                      if (_controller.text.isNotEmpty) {
-                        setState(() {
-                          _messages.add(MockChatMessage(
-                            id: 'sheet-${_messages.length}',
-                            author: 'You',
-                            text: _controller.text,
-                            timestampLabel: 'Now',
-                            isUser: true,
-                          ));
-                        });
-                        _controller.clear();
-                      }
-                    },
-                    child: Container(
-                      width: 40, height: 40,
-                      decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                      child: const Icon(Icons.send, size: 18, color: AppColors.onPrimary),
+                  if (_loading)
+                    const SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: Padding(
+                        padding: EdgeInsets.all(8),
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  else
+                    GestureDetector(
+                      onTap: _sendMessage,
+                      child: Container(
+                        width: 40, height: 40,
+                        decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                        child: const Icon(Icons.send, size: 18, color: AppColors.onPrimary),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildMessageList() {
+    if (_loading && _messages.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return ListView(
+      padding: const EdgeInsets.all(AppSpacing.containerPadding),
+      children: _messages.map((msg) => ChatBubble(
+        text: msg.text,
+        isUser: msg.isUser,
+        timestamp: msg.timestampLabel,
+      )).toList(),
     );
   }
 }
