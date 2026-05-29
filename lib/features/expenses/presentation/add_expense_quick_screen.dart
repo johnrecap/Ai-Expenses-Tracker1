@@ -92,7 +92,11 @@ class _AddExpenseQuickScreenState extends State<AddExpenseQuickScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Expense saved')),
           );
-          context.pop();
+          if (Navigator.canPop(context)) {
+            context.pop();
+          } else {
+            context.go('/expenses');
+          }
         } else if (state is CreateExpenseFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message)),
@@ -110,7 +114,13 @@ class _AddExpenseQuickScreenState extends State<AddExpenseQuickScreen> {
                   Row(
                     children: [
                       GestureDetector(
-                        onTap: () => context.pop(),
+                        onTap: () {
+                          if (Navigator.canPop(context)) {
+                            context.pop();
+                          } else {
+                            context.go('/expenses');
+                          }
+                        },
                         child: Container(
                           width: 40,
                           height: 40,
@@ -125,7 +135,8 @@ class _AddExpenseQuickScreenState extends State<AddExpenseQuickScreen> {
                     ],
                   ),
                   const SizedBox(height: AppSpacing.xl),
-                  Center(
+                  SizedBox(
+                    width: double.infinity,
                     child: TextField(
                       controller: _amount,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
