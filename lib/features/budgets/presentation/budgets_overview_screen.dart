@@ -99,7 +99,7 @@ class BudgetsOverviewScreen extends StatelessWidget {
                         case 3: context.go(AppRoutes.wallets);
                         case 4: context.go(AppRoutes.settings);
                         default:
-
+                          break;
                       }
                     },
                   ),

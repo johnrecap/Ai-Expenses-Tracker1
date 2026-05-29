@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:expense_repository/expense_repository.dart';
 import 'package:expenses_tracker/monetization/services/ad_service.dart';
 
 class MonetizationCubit extends Cubit<MonetizationState> {

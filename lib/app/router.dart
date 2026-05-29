@@ -1,7 +1,5 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:expense_repository/expense_repository.dart';
-import 'package:expenses_tracker/l10n/app_language_cubit.dart';
 import 'package:expenses_tracker/features/auth/auth_bloc/auth_bloc.dart';
 import 'go_router_refresh_stream.dart';
 import 'routes.dart';

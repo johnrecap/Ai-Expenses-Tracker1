@@ -5,7 +5,6 @@ import 'package:expenses_tracker/core/theme/app_spacing.dart';
 import 'package:expenses_tracker/core/theme/app_text_styles.dart';
 import 'package:expenses_tracker/core/widgets/app_background.dart';
 import 'package:expenses_tracker/core/widgets/app_top_bar.dart';
-import 'package:expenses_tracker/core/widgets/glass_card.dart';
 import 'package:expenses_tracker/core/widgets/progress_bar.dart';
 
 class CategoryBudgetsListScreen extends StatelessWidget {

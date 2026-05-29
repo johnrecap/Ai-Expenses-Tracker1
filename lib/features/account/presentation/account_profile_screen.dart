@@ -6,7 +6,6 @@ import 'package:expenses_tracker/core/widgets/app_background.dart';
 import 'package:expenses_tracker/core/widgets/glass_card.dart';
 import 'package:expenses_tracker/features/account/cubit/account_profile_cubit.dart';
 import 'package:expenses_tracker/features/account/models/account_identity.dart';
-import 'package:expenses_tracker/features/account/models/reauth_request.dart';
 import 'package:expenses_tracker/features/account/services/account_deletion_service.dart';
 import 'package:expenses_tracker/features/account/services/account_profile_service.dart';
 import 'package:flutter/material.dart';

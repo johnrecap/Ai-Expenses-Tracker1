@@ -13,7 +13,6 @@ import 'package:expenses_tracker/features/ai/services/ai_service.dart';
 import 'package:expenses_tracker/features/auth/auth_bloc/auth_bloc.dart';
 import 'package:expenses_tracker/features/expenses/create_expense_bloc/create_expense_bloc.dart';
 import 'widgets/segmented_mode_control.dart';
-import 'widgets/receipt_upload_panel.dart';
 import 'widgets/expense_form_card.dart';
 import 'dart:io';
 import 'dart:convert';
@@ -242,7 +241,7 @@ class _AddExpenseReceiptScreenState extends State<AddExpenseReceiptScreen> {
       case 0: context.go('/expenses/new/quick');
       case 1: context.go('/expenses/new/text');
       default:
-
+        break;
     }
   }
 }

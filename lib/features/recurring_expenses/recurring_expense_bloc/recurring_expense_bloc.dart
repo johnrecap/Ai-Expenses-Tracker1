@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:expense_repository/expense_repository.dart';
-import 'package:uuid/uuid.dart';
 
 part 'recurring_expense_event.dart';
 part 'recurring_expense_state.dart';

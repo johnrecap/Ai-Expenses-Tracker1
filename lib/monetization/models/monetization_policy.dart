@@ -1,4 +1,3 @@
-import 'entitlement_snapshot.dart';
 import 'monetization_plan.dart';
 
 class MonetizationPolicy {

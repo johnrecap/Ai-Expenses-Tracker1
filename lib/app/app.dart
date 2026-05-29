@@ -21,7 +21,6 @@ import 'package:expenses_tracker/features/wallets/wallet_bloc/wallet_bloc.dart';
 import 'package:expenses_tracker/features/recurring_expenses/recurring_expense_bloc/recurring_expense_bloc.dart';
 import 'package:expenses_tracker/features/categories/category_bloc/category_bloc.dart';
 import 'package:expense_repository/expense_repository.dart';
-import 'go_router_refresh_stream.dart';
 import 'router.dart';
 
 class App extends StatefulWidget {

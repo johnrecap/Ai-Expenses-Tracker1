@@ -149,7 +149,7 @@ class HomeDashboardScreen extends StatelessWidget {
                         case 4:
                           context.go(AppRoutes.settings);
                         default:
-
+                          break;
                       }
                     },
                   ),

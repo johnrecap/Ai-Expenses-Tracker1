@@ -8,7 +8,6 @@ import 'package:expenses_tracker/core/widgets/app_background.dart';
 import 'package:expenses_tracker/core/widgets/app_top_bar.dart';
 import 'package:expenses_tracker/core/widgets/glass_card.dart';
 import 'package:expenses_tracker/core/widgets/empty_state.dart';
-import 'package:expenses_tracker/core/widgets/gradient_button.dart';
 import 'package:expenses_tracker/features/categories/category_bloc/category_bloc.dart';
 
 class CategoriesScreen extends StatelessWidget {

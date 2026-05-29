@@ -8,10 +8,7 @@ import 'package:expenses_tracker/core/theme/app_text_styles.dart';
 import 'package:expenses_tracker/core/widgets/app_background.dart';
 import 'package:expenses_tracker/core/widgets/app_bottom_nav.dart';
 import 'package:expenses_tracker/core/widgets/app_top_bar.dart';
-import 'package:expenses_tracker/core/widgets/glass_card.dart';
 import 'package:expenses_tracker/core/widgets/empty_state.dart';
-import 'package:expenses_tracker/core/widgets/progress_ring.dart';
-import 'package:expenses_tracker/core/widgets/ai_insight_card.dart';
 import 'package:expenses_tracker/app/routes.dart';
 import 'package:expenses_tracker/features/goals/saving_goal_bloc/saving_goal_bloc.dart';
 import 'widgets/goal_card.dart';
@@ -48,7 +45,6 @@ class SavingGoalsScreen extends StatelessWidget {
                               padding: const EdgeInsets.only(bottom: AppSpacing.md),
                               child: GoalCard(goal: goal),
                             )),
-                          const SizedBox(height: 80),
                         ],
                       ),
                     ),
@@ -63,7 +59,7 @@ class SavingGoalsScreen extends StatelessWidget {
                         case 3: context.go(AppRoutes.wallets);
                         case 4: context.go(AppRoutes.settings);
                         default:
-
+                          break;
                       }
                     },
                   ),

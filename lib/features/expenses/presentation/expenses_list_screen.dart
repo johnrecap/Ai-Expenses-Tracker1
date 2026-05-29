@@ -167,7 +167,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
                     case 4:
                       context.go(AppRoutes.settings);
                     default:
-
+                      break;
                   }
                 },
               ),

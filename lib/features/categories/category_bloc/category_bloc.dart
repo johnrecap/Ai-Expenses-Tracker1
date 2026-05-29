@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:expense_repository/expense_repository.dart';
-import 'package:uuid/uuid.dart';
 
 part 'category_event.dart';
 part 'category_state.dart';

@@ -91,6 +91,7 @@ class _AddExpenseAiTextScreenState extends State<AddExpenseAiTextScreen> {
       case 0: context.go('/expenses/new/quick');
       case 2: context.go('/expenses/new/receipt');
       default:
+        break;
     }
   }
 
