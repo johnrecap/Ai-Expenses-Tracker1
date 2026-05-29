@@ -101,7 +101,7 @@ class _UnlockScreenState extends State<UnlockScreen> {
                         const SizedBox(height: AppSpacing.lg),
                         GradientButton(
                           label: state.isBusy ? 'Verifying...' : 'Unlock',
-                          onPressed: state.isBusy ? null : () => _unlockWithPin(),
+                          onPressed: state.isBusy ? () {} : () => _unlockWithPin(),
                         ),
                         if (state.biometricEnabled) ...[
                           const SizedBox(height: AppSpacing.md),

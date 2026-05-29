@@ -150,7 +150,7 @@ class _CreatePinScreenState extends State<CreatePinScreen> {
                           : widget.changeExistingPin
                               ? 'Save New PIN'
                               : 'Enable App Lock',
-                      onPressed: state.isBusy ? null : () => _savePin(),
+                      onPressed: state.isBusy ? () {} : () => _savePin(),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                   ],

@@ -92,5 +92,9 @@ class AiService {
 }
 
 class MockAiService extends AiService {
-  const MockAiService() : super();
+  MockAiService() : super();
+
+  Future<AiResponse> extractReceipt(String base64Image) async {
+    return AiResponse(description: 'Receipt scanned', amount: 0, confidence: 0.5);
+  }
 }
