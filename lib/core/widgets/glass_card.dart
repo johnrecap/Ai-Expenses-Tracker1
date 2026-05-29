@@ -49,7 +49,10 @@ class GlassCard extends StatelessWidget {
             ),
             boxShadow: const [AppShadows.glassCard],
           ),
-          child: child,
+          child: Material(
+            type: MaterialType.transparency,
+            child: child,
+          ),
         ),
       ),
     );
