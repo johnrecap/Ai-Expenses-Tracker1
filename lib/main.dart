@@ -19,7 +19,11 @@ Future<void> main() async {
     return;
   }
 
-  await AnalyticsService.instance.initialize();
+  try {
+    await AnalyticsService.instance.initialize();
+  } catch (e, st) {
+    debugPrint('Analytics init failed (403 likely = API not enabled in console): $e');
+  }
 
   if (kDebugMode) {
     Bloc.observer = DebugBlocObserver();
