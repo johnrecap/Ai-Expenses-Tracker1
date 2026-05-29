@@ -19,6 +19,7 @@ import 'widgets/receipt_upload_panel.dart';
 import 'widgets/expense_form_card.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'package:image/image.dart' as img;
 
 class AddExpenseReceiptScreen extends StatefulWidget {
   const AddExpenseReceiptScreen({super.key});
@@ -54,7 +55,19 @@ class _AddExpenseReceiptScreenState extends State<AddExpenseReceiptScreen> {
       });
 
       final bytes = await file.readAsBytes();
-      final base64 = base64Encode(bytes);
+      final maxBytes = 5 * 1024 * 1024; // 5MB
+      var processedBytes = bytes;
+
+      if (bytes.length > maxBytes) {
+        // Compress image to max 2048px before base64 encoding
+        final image = img.decodeImage(bytes);
+        if (image != null) {
+          final resized = img.copyResize(image, width: 2048); // maintains aspect ratio
+          processedBytes = img.encodeJpg(resized, quality: 85);
+        }
+      }
+
+      final base64 = base64Encode(processedBytes);
 
       try {
         final result = await _aiService.extractReceipt(base64);
