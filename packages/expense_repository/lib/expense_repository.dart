@@ -28,6 +28,7 @@ export 'src/firebase/firebase_recurring_expense_repo.dart';
 export 'src/firebase/firebase_ai_action_log_repo.dart';
 export 'src/local/local_repositories.dart';
 export 'src/local/local_repository_store.dart';
+export 'src/local/local_store_interface.dart';
 export 'src/local/local_stubs.dart';
 export 'src/sync/sync_change.dart';
 export 'src/sync/local_sync_queue.dart';

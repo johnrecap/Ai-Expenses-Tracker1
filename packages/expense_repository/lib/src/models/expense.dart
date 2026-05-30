@@ -131,4 +131,58 @@ class Expense {
     }
     return List.unmodifiable(normalized);
   }
+
+  Expense copyWith({
+    String? expenseId,
+    Category? category,
+    DateTime? date,
+    num? amount,
+    String? userId,
+    String? categoryId,
+    String? categoryName,
+    String? categoryIcon,
+    int? categoryColor,
+    String? description,
+    String? merchant,
+    List<String>? tags,
+    PaymentMethod? paymentMethod,
+    String? currency,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    ExpenseSource? source,
+    String? walletAccountId,
+    String? walletAccountName,
+    String? recurringExpenseId,
+    String? aiActionId,
+    MoneySnapshot? moneySnapshot,
+    SyncStatus? syncStatus,
+    SyncStatusReason? syncStatusReason,
+  }) {
+    return Expense(
+      expenseId: expenseId ?? this.expenseId,
+      category: category ?? _category,
+      date: date ?? this.date,
+      amount: amount ?? this.amount,
+      userId: userId ?? this.userId,
+      categoryId: categoryId ?? this.categoryId,
+      categoryName: categoryName ?? this.categoryName,
+      categoryIcon: categoryIcon ?? this.categoryIcon,
+      categoryColor: categoryColor ?? this.categoryColor,
+      description: description ?? this.description,
+      merchant: merchant ?? this.merchant,
+      tags: tags ?? this.tags,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      currency: currency ?? this.currency,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      source: source ?? this.source,
+      walletAccountId: walletAccountId ?? this.walletAccountId,
+      walletAccountName: walletAccountName ?? this.walletAccountName,
+      recurringExpenseId: recurringExpenseId ?? this.recurringExpenseId,
+      aiActionId: aiActionId ?? this.aiActionId,
+      moneySnapshot: moneySnapshot ?? this.moneySnapshot,
+      syncStatus: syncStatus ?? this.syncStatus,
+      syncStatusReason: syncStatusReason ?? this.syncStatusReason,
+    );
+  }
 }

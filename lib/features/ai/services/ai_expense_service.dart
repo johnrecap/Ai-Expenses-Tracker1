@@ -1,11 +1,11 @@
 import 'dart:developer' as developer;
 
 import 'package:expense_repository/expense_repository.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../core/ai/ai_expense_parser.dart';
 import '../../../core/ai/models/ai_parsed_expense.dart';
 import '../../../core/ai/smart_completion.dart';
-import 'ai_gateway_client.dart';
 
 /// {@template ai_expense_service}
 /// High-level service that connects the AI parser, smart completion, and the
@@ -143,7 +143,7 @@ class AiExpenseService {
 
     if (categoryName != null && categoryName.isNotEmpty) {
       final match = categories.firstWhere(
-        (c) => c.name.toLowerCase() == categoryName.toLowerCase(),
+        (Category c) => c.name.toLowerCase() == categoryName.toLowerCase(),
         orElse: () => Category.empty,
       );
       if (match.categoryId.isNotEmpty) {
@@ -153,7 +153,7 @@ class AiExpenseService {
 
     // Fallback to a generic "other" category if available.
     final other = categories.firstWhere(
-      (c) => c.name.toLowerCase() == 'other',
+      (Category c) => c.name.toLowerCase() == 'other',
       orElse: () => Category.empty,
     );
     if (other.categoryId.isNotEmpty) {
@@ -183,7 +183,7 @@ class AiExpenseService {
     // Boost if category was resolved from existing data.
     if (completed.category != null &&
         smartCompletion.store.categories.any(
-          (c) => c.name.toLowerCase() == completed.category!.toLowerCase(),
+          (Category c) => c.name.toLowerCase() == completed.category!.toLowerCase(),
         )) {
       score += 0.1;
     }

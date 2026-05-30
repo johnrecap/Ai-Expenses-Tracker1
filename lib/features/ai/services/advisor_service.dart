@@ -1,5 +1,4 @@
 import 'dart:developer' as developer;
-import 'dart:math' show max;
 
 import 'package:expense_repository/expense_repository.dart';
 
@@ -34,8 +33,7 @@ class AdvisorService {
     required this.store,
     this.gatewayClient,
     LanguageDetector? languageDetector,
-  })  : _languageDetector = languageDetector ?? const LanguageDetector(),
-        _prompts = AiPrompts(
+  }) : _prompts = AiPrompts(
           languageDetector: languageDetector ?? const LanguageDetector(),
         );
 
@@ -45,7 +43,6 @@ class AdvisorService {
   /// Optional AI gateway client for rich natural-language insights.
   final AiGatewayClient? gatewayClient;
 
-  final LanguageDetector _languageDetector;
   final AiPrompts _prompts;
 
   // -------------------------------------------------------------------------
@@ -121,13 +118,13 @@ class AdvisorService {
     final monthEnd = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
 
     final monthlyExpenses = expenses.where(
-      (e) => e.date.isAfter(monthStart.subtract(const Duration(seconds: 1))) &&
+      (Expense e) => e.date.isAfter(monthStart.subtract(const Duration(seconds: 1))) &&
           e.date.isBefore(monthEnd.add(const Duration(seconds: 1))),
     ).toList();
 
     final monthlyTotal = monthlyExpenses.fold<double>(
       0.0,
-      (sum, e) => sum + e.amount,
+      (double sum, Expense e) => sum + e.amount,
     );
 
     // Category breakdown
@@ -149,12 +146,12 @@ class AdvisorService {
     final prevMonthStart = DateTime(now.year, now.month - 1, 1);
     final prevMonthEnd = DateTime(now.year, now.month, 0, 23, 59, 59);
     final prevMonthExpenses = expenses.where(
-      (e) => e.date.isAfter(prevMonthStart.subtract(const Duration(seconds: 1))) &&
+      (Expense e) => e.date.isAfter(prevMonthStart.subtract(const Duration(seconds: 1))) &&
           e.date.isBefore(prevMonthEnd.add(const Duration(seconds: 1))),
     ).toList();
     final prevMonthTotal = prevMonthExpenses.fold<double>(
       0.0,
-      (sum, e) => sum + e.amount,
+      (double sum, Expense e) => sum + e.amount,
     );
 
     // Top category
@@ -168,7 +165,7 @@ class AdvisorService {
     }
 
     // All-time totals
-    final allTimeTotal = expenses.fold<double>(0.0, (sum, e) => sum + e.amount);
+    final allTimeTotal = expenses.fold<double>(0.0, (double sum, Expense e) => sum + e.amount);
 
     return SpendingSummary(
       monthlyTotal: monthlyTotal,
