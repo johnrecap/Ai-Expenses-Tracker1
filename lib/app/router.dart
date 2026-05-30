@@ -14,6 +14,7 @@ import 'package:expenses_tracker/features/expenses/presentation/expenses_list_sc
 import 'package:expenses_tracker/features/expenses/presentation/add_expense_quick_screen.dart';
 import 'package:expenses_tracker/features/expenses/presentation/add_expense_ai_text_screen.dart';
 import 'package:expenses_tracker/features/expenses/presentation/add_expense_receipt_screen.dart';
+import 'package:expenses_tracker/features/expenses/presentation/ai_expense_screen.dart';
 import 'package:expenses_tracker/features/expenses/presentation/edit_expense_screen.dart';
 import 'package:expenses_tracker/features/reports/presentation/reports_main_screen.dart';
 import 'package:expenses_tracker/features/reports/presentation/report_drilldown_screen.dart';
@@ -71,6 +72,7 @@ class AppRouter {
         GoRoute(path: AppRoutes.expensesNewQuick, pageBuilder: (c, s) => const NoTransitionPage(child: AddExpenseQuickScreen())),
         GoRoute(path: AppRoutes.expensesNewText, pageBuilder: (c, s) => const NoTransitionPage(child: AddExpenseAiTextScreen())),
         GoRoute(path: AppRoutes.expensesNewReceipt, pageBuilder: (c, s) => const NoTransitionPage(child: AddExpenseReceiptScreen())),
+        GoRoute(path: AppRoutes.expensesNewAi, pageBuilder: (c, s) => const NoTransitionPage(child: AiExpenseScreen())),
         GoRoute(path: '/expenses/:expenseId/edit', pageBuilder: (c, s) => NoTransitionPage(child: EditExpenseScreen(expenseId: s.pathParameters['expenseId']!))),
         GoRoute(path: AppRoutes.reports, pageBuilder: (c, s) => const NoTransitionPage(child: ReportsMainScreen())),
         GoRoute(path: '/reports/category/:categoryId', pageBuilder: (c, s) => NoTransitionPage(child: ReportDrilldownScreen(categoryId: s.pathParameters['categoryId']!))),

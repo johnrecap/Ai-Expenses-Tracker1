@@ -25,10 +25,28 @@ class HomeDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go(AppRoutes.expensesNewQuick),
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // زر الـ AI
+          FloatingActionButton.small(
+            onPressed: () => context.go(AppRoutes.expensesNewAi),
+            backgroundColor: Colors.cyan.withOpacity(0.9),
+            heroTag: 'ai_fab',
+            child: const Icon(
+              Icons.auto_awesome,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 8),
+          // زر الإضافة العادي
+          FloatingActionButton(
+            onPressed: () => context.go(AppRoutes.expensesNewQuick),
+            backgroundColor: AppColors.primary,
+            heroTag: 'add_fab',
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
+        ],
       ),
       body: AppBackground(
         child: SafeArea(

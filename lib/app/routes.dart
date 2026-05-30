@@ -15,6 +15,7 @@ abstract class AppRoutes {
   static const String expensesNewQuick = '/expenses/new/quick';
   static const String expensesNewText = '/expenses/new/text';
   static const String expensesNewReceipt = '/expenses/new/receipt';
+  static const String expensesNewAi = '/expenses/new/ai';
   static const String expensesEdit = '/expenses/:expenseId/edit';
   static const String expensesFilters = '/expenses/filters';
 
