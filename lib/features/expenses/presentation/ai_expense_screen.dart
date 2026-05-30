@@ -3,11 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import 'package:expenses_tracker/core/theme/app_colors.dart';
-import 'package:expenses_tracker/core/theme/app_gradients.dart';
-import 'package:expenses_tracker/core/theme/app_radii.dart';
 import 'package:expenses_tracker/core/theme/app_spacing.dart';
 import 'package:expenses_tracker/core/theme/app_text_styles.dart';
 import 'package:expenses_tracker/core/widgets/app_background.dart';
+import 'package:expenses_tracker/core/widgets/glass_card.dart';
 import 'package:expenses_tracker/core/widgets/gradient_button.dart';
 import 'package:expense_repository/expense_repository.dart';
 import 'package:expenses_tracker/features/expenses/create_expense_bloc/create_expense_bloc.dart';
@@ -31,9 +30,10 @@ class _AiExpenseScreenState extends State<AiExpenseScreen> {
   final _aiInput = TextEditingController();
   final _merchant = TextEditingController();
   final _amount = TextEditingController();
-  Category? _selectedCategory;
+  final _categoryController = TextEditingController();
+  final _dateController = TextEditingController();
+  String? _selectedCategoryId;
   bool _isProcessing = false;
-  DateTime? _selectedDate;
 
   final _aiApiService = AiApiService();
 
@@ -42,6 +42,8 @@ class _AiExpenseScreenState extends State<AiExpenseScreen> {
     _aiInput.dispose();
     _merchant.dispose();
     _amount.dispose();
+    _categoryController.dispose();
+    _dateController.dispose();
     super.dispose();
   }
 
@@ -54,45 +56,40 @@ class _AiExpenseScreenState extends State<AiExpenseScreen> {
     try {
       final result = await _aiApiService.parseExpense(input);
       if (!mounted) return;
+
       if (result != null) {
         setState(() {
-          _amount.text = result.amount?.toString() ?? '';
           _merchant.text = result.note ?? '';
-          _selectedDate = result.date;
-          
-          // Find matching category
-          final categories = _getCategories();
-          _selectedCategory = categories.firstWhere(
-            (cat) => cat.name.toLowerCase() == (result.category ?? '').toLowerCase(),
-            orElse: () => categories.first,
-          );
+          _amount.text = result.amount?.toString() ?? '';
+          _dateController.text = result.date?.toIso8601String() ?? '';
         });
+
+        final categoryState = context.read<CategoryBloc>().state;
+        final categories = (categoryState is CategoryLoaded) ? categoryState.categories : <Category>[];
+        final categoryName = result.category?.toLowerCase() ?? '';
+        final matched = categories.where((Category c) =>
+            c.name.toLowerCase().contains(categoryName) ||
+            categoryName.contains(c.name.toLowerCase())).toList();
+
+        if (matched.isNotEmpty) {
+          setState(() {
+            _selectedCategoryId = matched.first.categoryId;
+            _categoryController.text = matched.first.name;
+          });
+        }
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
     } finally {
-      setState(() => _isProcessing = false);
+      if (mounted) setState(() => _isProcessing = false);
     }
   }
 
-  List<Category> _getCategories() {
-    final state = context.read<CategoryBloc>().state;
-    if (state is CategoryLoaded) return state.categories;
-    return [];
-  }
-
-  void _onSave() {
-    final amountText = _amount.text.trim();
-    final merchant = _merchant.text.trim();
-    if (amountText.isEmpty || _selectedCategory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter amount and select a category')),
-      );
-      return;
-    }
-    final amount = double.tryParse(amountText);
+  void _save() {
+    final amount = double.tryParse(_amount.text.trim());
     if (amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a valid amount')),
@@ -100,29 +97,48 @@ class _AiExpenseScreenState extends State<AiExpenseScreen> {
       return;
     }
 
+    if (_selectedCategoryId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a category')),
+      );
+      return;
+    }
+
     final authState = context.read<AuthBloc>().state;
     final userId = authState is AuthAuthenticated ? authState.user.userId : '';
+    final currency = _readCurrency(context);
 
-    final cat = _selectedCategory!;
+    final categoryBloc = context.read<CategoryBloc>();
+    final categoryState = categoryBloc.state;
+    final categories = (categoryState is CategoryLoaded) ? categoryState.categories : <Category>[];
+    final selectedCategory = categories.firstWhere(
+      (Category c) => c.categoryId == _selectedCategoryId,
+      orElse: () => categories.isNotEmpty ? categories.first : Category.empty,
+    );
+
     final expense = Expense(
       expenseId: const Uuid().v4(),
       userId: userId,
-      category: cat,
-      categoryId: cat.categoryId,
-      categoryName: cat.name,
-      categoryIcon: cat.icon,
-      categoryColor: cat.color,
       amount: amount,
-      date: _selectedDate ?? DateTime.now(),
-      description: merchant.isNotEmpty ? merchant : cat.name,
+      currency: currency,
+      category: selectedCategory,
+      date: _dateController.text.isNotEmpty
+          ? DateTime.tryParse(_dateController.text) ?? DateTime.now()
+          : DateTime.now(),
+      description: _merchant.text.trim(),
       source: ExpenseSource.aiText,
-      paymentMethod: PaymentMethod.cash,
     );
 
     context.read<CreateExpenseBloc>().add(CreateExpense(expense));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Expense saved successfully!')),
+    );
+
+    context.go('/');
   }
 
-  String _displayCurrency(BuildContext context) {
+  String _readCurrency(BuildContext context) {
     try {
       final s = context.read<SettingsCubit>().state;
       if (s is SettingsSuccess) return s.settings.baseCurrency;
@@ -132,202 +148,112 @@ class _AiExpenseScreenState extends State<AiExpenseScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final categories = context.watch<CategoryBloc>().state is CategoryLoaded
-        ? (context.read<CategoryBloc>().state as CategoryLoaded).categories
-        : <Category>[];
+    final categoryState = context.watch<CategoryBloc>().state;
+    final categories = categoryState is CategoryLoaded ? categoryState.categories : <Category>[];
+    final categoryNames = categories.map((c) => c.name).toList();
 
-    return BlocListener<CreateExpenseBloc, CreateExpenseState>(
-      listener: (context, state) {
-        if (state is CreateExpenseSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Expense saved')),
-          );
-          if (Navigator.canPop(context)) {
-            context.pop();
-          } else {
-            context.go('/expenses');
-          }
-        } else if (state is CreateExpenseFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
-        }
-      },
-      child: Scaffold(
-        body: AppBackground(
-          child: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.containerPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header
-                  Row(
+    return Scaffold(
+      body: AppBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              // AppBar
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.containerPadding),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: AppColors.onSurface),
+                      onPressed: () => context.go('/'),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      'AI Expense',
+                      style: AppTextStyles.headlineMedium.copyWith(color: AppColors.onSurface),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(AppSpacing.containerPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      GestureDetector(
-                        onTap: () {
-                          if (Navigator.canPop(context)) {
-                            context.pop();
-                          } else {
-                            context.go('/expenses');
-                          }
+                      // AI Input
+                      GlassCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Describe your expense',
+                              style: AppTextStyles.titleMedium.copyWith(color: AppColors.onSurface),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            TextField(
+                              controller: _aiInput,
+                              style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface),
+                              decoration: InputDecoration(
+                                hintText: 'e.g. 200 KWD for groceries at Lulu',
+                                hintStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant),
+                                filled: true,
+                                fillColor: AppColors.surfaceContainerLow,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              maxLines: 2,
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            SizedBox(
+                              width: double.infinity,
+                              child: GradientButton(
+                                onPressed: _isProcessing ? () {} : _processAiInput,
+                                label: _isProcessing ? 'Processing...' : 'Parse with AI',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: AppSpacing.md),
+
+                      // Manual Form
+                      ExpenseFormCard(
+                        merchantController: _merchant,
+                        amountController: _amount,
+                        categoryController: _categoryController,
+                        dateController: _dateController,
+                        categories: categoryNames,
+                        selectedCategoryId: _selectedCategoryId,
+                        onCategoryChanged: (value) {
+                          setState(() {
+                            _selectedCategoryId = value;
+                            _categoryController.text = value;
+                          });
                         },
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: const BoxDecoration(
-                            color: AppColors.surfaceContainerHigh,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.close,
-                            size: 20,
-                            color: AppColors.onSurfaceVariant,
-                          ),
+                      ),
+
+                      const SizedBox(height: AppSpacing.md),
+
+                      // Save Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: GradientButton(
+                          onPressed: _save,
+                          label: 'Save Expense',
                         ),
                       ),
-                      const Spacer(),
-                      Text(
-                        'AI Add',
-                        style: AppTextStyles.titleMedium.copyWith(
-                          color: AppColors.onSurface,
-                        ),
-                      ),
-                      const Spacer(),
-                      const SizedBox(width: 40),
+
+                      const SizedBox(height: 80),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.xl),
-
-                  // AI Input Section
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceContainerLow,
-                      borderRadius: AppRadii.lg,
-                      border: Border.all(
-                        color: AppColors.outlineVariant.withAlpha(77),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Describe your expense',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        TextField(
-                          controller: _aiInput,
-                          style: AppTextStyles.bodyLarge.copyWith(
-                            color: AppColors.onSurface,
-                          ),
-                          maxLines: 2,
-                          textAlign: TextAlign.left,
-                          decoration: InputDecoration(
-                            hintText: 'e.g., 200 EGP for lunch yesterday',
-                            hintStyle: AppTextStyles.bodyLarge.copyWith(
-                              color: AppColors.outline,
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.zero,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        SizedBox(
-                          width: double.infinity,
-                          child: GradientButton(
-                            label: _isProcessing ? 'Processing...' : '✨ Parse with AI',
-                            onPressed: _isProcessing ? () {} : _processAiInput,
-                            gradient: AppGradients.secondaryAi,
-                            height: 40,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-
-                  // Amount Input
-                  SizedBox(
-                    width: double.infinity,
-                    child: TextField(
-                      controller: _amount,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.displayMobile.copyWith(
-                        color: AppColors.onSurface,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: '0.00',
-                        hintStyle: AppTextStyles.displayMobile.copyWith(
-                          color: AppColors.outline,
-                        ),
-                        border: InputBorder.none,
-                        suffix: Text(
-                          _displayCurrency(context),
-                          style: AppTextStyles.titleMedium.copyWith(
-                            color: AppColors.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-
-                  // Categories
-                  Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.sm,
-                    children: categories.map((cat) {
-                      final selected = _selectedCategory?.categoryId == cat.categoryId;
-                      return GestureDetector(
-                        onTap: () => setState(() => _selectedCategory = selected ? null : cat),
-                        child: Chip(
-                          label: Text(cat.name),
-                          backgroundColor: selected
-                              ? AppColors.primaryContainer
-                              : AppColors.surfaceContainerHigh,
-                          labelStyle: AppTextStyles.bodySmall.copyWith(
-                            color: selected
-                                ? AppColors.primary
-                                : AppColors.onSurfaceVariant,
-                          ),
-                          side: BorderSide.none,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-
-                  // Form Card
-                  ExpenseFormCard(
-                    merchantController: _merchant,
-                    amountController: _amount,
-                    categories: categories.map((c) => c.name).toList(),
-                    selectedCategoryId: _selectedCategory?.name,
-                    onCategoryChanged: (v) => setState(() {
-                      _selectedCategory = categories
-                          .cast<Category?>()
-                          .firstWhere(
-                            (c) => c?.name.trim().toLowerCase() == v.trim().toLowerCase(),
-                            orElse: () => null,
-                          );
-                    }),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-
-                  // Save Button
-                  GradientButton(
-                    label: 'Save Expense',
-                    onPressed: _onSave,
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
