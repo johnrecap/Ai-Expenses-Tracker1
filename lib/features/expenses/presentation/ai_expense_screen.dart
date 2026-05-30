@@ -2,9 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:expense_repository/expense_repository.dart';
 import '../../../core/ai/models/ai_parsed_expense.dart';
 import '../../ai/services/ai_api_service.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_gradients.dart';
+import '../../../core/theme/app_radii.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/gradient_button.dart';
+import '../../../core/widgets/glass_card.dart';
 
 /// شاشة إضافة مصروف بالذكاء الاصطناعي
-/// 
+///
 /// تفتح من:
 /// - الصفحة الرئيسية (زر ✨ AI)
 /// - زر الـ + (اختيار AI)
@@ -17,27 +24,14 @@ class AiExpenseScreen extends StatefulWidget {
   State<AiExpenseScreen> createState() => _AiExpenseScreenState();
 }
 
-class _AiExpenseScreenState extends State<AiExpenseScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
+class _AiExpenseScreenState extends State<AiExpenseScreen> {
   final TextEditingController _textController = TextEditingController();
   bool _isProcessing = false;
   AiParsedExpense? _parsedResult;
   final _aiApiService = AiApiService();
 
   @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-    _animationController.forward();
-  }
-
-  @override
   void dispose() {
-    _animationController.dispose();
     _textController.dispose();
     super.dispose();
   }
@@ -45,194 +39,143 @@ class _AiExpenseScreenState extends State<AiExpenseScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0E21),
+      backgroundColor: AppColors.background,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.onSurface),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
+        title: Text(
           'إضافة بالذكاء الاصطناعي',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+          style: AppTextStyles.titleMedium.copyWith(
+            color: AppColors.onSurface,
           ),
         ),
         centerTitle: true,
       ),
-      body: Stack(
-        children: [
-          // خلفية متحركة
-          _AnimatedBackground(),
-          
-          // المحتوى
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  
-                  // عنوان متحرك
-                  FadeTransition(
-                    opacity: Tween<double>(begin: 0, end: 1).animate(
-                      CurvedAnimation(
-                        parent: _animationController,
-                        curve: const Interval(0.0, 0.3, curve: Curves.easeOut),
-                      ),
-                    ),
-                    child: const Text(
-                      'اكتب مصروفك بالعربي أو الإنجليزي',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 8),
-                  
-                  // أمثلة
-                  FadeTransition(
-                    opacity: Tween<double>(begin: 0, end: 1).animate(
-                      CurvedAnimation(
-                        parent: _animationController,
-                        curve: const Interval(0.1, 0.4, curve: Curves.easeOut),
-                      ),
-                    ),
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(13),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.cyan.withAlpha(77),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildExample('🍔', '200 جنيه أكل امبارح'),
-                          _buildExample('🚕', '50 جنيه مواصلات النهاردة'),
-                          _buildExample('🛒', 'اشتريت هدوم بـ 500 من المحل'),
-                        ],
-                      ),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 20),
-                  
-                  // حقل الإدخال
-                  FadeTransition(
-                    opacity: Tween<double>(begin: 0, end: 1).animate(
-                      CurvedAnimation(
-                        parent: _animationController,
-                        curve: const Interval(0.2, 0.6, curve: Curves.easeOut),
-                      ),
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(13),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Colors.cyan.withAlpha(77),
-                        ),
-                      ),
-                      child: TextField(
-                        controller: _textController,
-                        style: const TextStyle(color: Colors.white),
-                        maxLines: 3,
-                        textAlign: TextAlign.right,
-                        decoration: InputDecoration(
-                          hintText: 'اكتب هنا...',
-                          hintStyle: TextStyle(
-                            color: Colors.white.withAlpha(100),
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.all(16),
-                          suffixIcon: IconButton(
-                            icon: const Icon(
-                              Icons.mic,
-                              color: Colors.cyan,
-                            ),
-                            onPressed: () {
-                              // TODO: Voice input
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // زر المعالجة
-                  FadeTransition(
-                    opacity: Tween<double>(begin: 0, end: 1).animate(
-                      CurvedAnimation(
-                        parent: _animationController,
-                        curve: const Interval(0.3, 0.7, curve: Curves.easeOut),
-                      ),
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: _isProcessing ? null : _processInput,
-                        icon: _isProcessing
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Icon(Icons.auto_awesome),
-                        label: Text(
-                          _isProcessing ? 'جاري المعالجة...' : '✨ فهم المصروف',
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.cyan,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 20),
-                  
-                  // النتيجة
-                  if (_parsedResult != null)
-                    Expanded(
-                      child: _ParsedExpenseCard(
-                        result: _parsedResult!,
-                        onConfirm: () {
-                          // TODO: Save expense
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('✅ تم حفظ المصروف!'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                          Navigator.of(context).pop();
-                        },
-                        onEdit: () {
-                          // TODO: Edit expense
-                        },
-                      ),
-                    ),
-                ],
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.containerPadding),
+          child: Column(
+            children: [
+              const SizedBox(height: 8),
+
+              // عنوان
+              Text(
+                'اكتب مصروفك بالعربي أو الإنجليزي',
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                ),
               ),
-            ),
+
+              const SizedBox(height: AppSpacing.sm),
+
+              // أمثلة
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceContainerLow,
+                  borderRadius: AppRadii.lg,
+                  border: Border.all(
+                    color: AppColors.outlineVariant.withAlpha(77),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildExample('🍔', '200 جنيه أكل امبارح'),
+                    _buildExample('🚕', '50 جنيه مواصلات النهاردة'),
+                    _buildExample('🛒', 'اشتريت هدوم بـ 500 من المحل'),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: AppSpacing.lg),
+
+              // حقل الإدخال
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.inputFill,
+                  borderRadius: AppRadii.xl,
+                  border: Border.all(
+                    color: AppColors.outlineVariant.withAlpha(77),
+                  ),
+                ),
+                child: TextField(
+                  controller: _textController,
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: AppColors.onSurface,
+                  ),
+                  maxLines: 3,
+                  textAlign: TextAlign.right,
+                  decoration: InputDecoration(
+                    hintText: 'اكتب هنا...',
+                    hintStyle: AppTextStyles.bodyLarge.copyWith(
+                      color: AppColors.outline,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.all(AppSpacing.md),
+                    suffixIcon: IconButton(
+                      icon: const Icon(
+                        Icons.mic,
+                        color: AppColors.primary,
+                      ),
+                      onPressed: () {
+                        // TODO: Voice input
+                      },
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: AppSpacing.md),
+
+              // زر المعالجة – uses AI secondary accent gradient per design system
+              GradientButton(
+                label: _isProcessing ? 'جاري المعالجة...' : '✨ فهم المصروف',
+                onPressed: _isProcessing ? () {} : _processInput,
+                gradient: AppGradients.secondaryAi,
+                prefixIcon: _isProcessing
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.auto_awesome, color: Colors.white),
+              ),
+
+              const SizedBox(height: AppSpacing.lg),
+
+              // النتيجة
+              if (_parsedResult != null)
+                Expanded(
+                  child: _ParsedExpenseCard(
+                    result: _parsedResult!,
+                    onConfirm: () {
+                      // TODO: Save expense
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('✅ تم حفظ المصروف!'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                      Navigator.of(context).pop();
+                    },
+                    onEdit: () {
+                      // TODO: Edit expense
+                    },
+                  ),
+                ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -246,9 +189,8 @@ class _AiExpenseScreenState extends State<AiExpenseScreen>
           const SizedBox(width: 8),
           Text(
             text,
-            style: TextStyle(
-              color: Colors.cyan.withAlpha(204),
-              fontSize: 14,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.onSurfaceVariant,
             ),
           ),
         ],
@@ -283,61 +225,6 @@ class _AiExpenseScreenState extends State<AiExpenseScreen>
   }
 }
 
-/// خلفية متحركة
-class _AnimatedBackground extends StatefulWidget {
-  @override
-  State<_AnimatedBackground> createState() => _AnimatedBackgroundState();
-}
-
-class _AnimatedBackgroundState extends State<_AnimatedBackground>
-    with TickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 10),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color.lerp(
-                  const Color(0xFF0A0E21),
-                  const Color(0xFF1A1F3D),
-                  _controller.value,
-                )!,
-                Color.lerp(
-                  const Color(0xFF1A1F3D),
-                  const Color(0xFF0A0E21),
-                  _controller.value,
-                )!,
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
 /// بطاقة عرض المصروف المفهوم
 class _ParsedExpenseCard extends StatelessWidget {
   final AiParsedExpense result;
@@ -352,70 +239,47 @@ class _ParsedExpenseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1F3D),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.cyan.withAlpha(77),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.cyan.withAlpha(26),
-            blurRadius: 20,
-            spreadRadius: 5,
-          ),
-        ],
-      ),
+    return GlassCard(
+      fillColor: AppColors.surfaceContainerLowest,
+      borderColor: AppColors.outlineVariant.withAlpha(102),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             '✨ فهمت مصروفك!',
-            style: TextStyle(
-              color: Colors.cyan,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+            style: AppTextStyles.headlineMedium.copyWith(
+              color: AppColors.secondary,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           _buildFieldRow('💰 المبلغ', '${result.amount?.toString() ?? '???'} ${result.currency ?? ''}'),
           _buildFieldRow('📁 الفئة', result.category ?? '???'),
           _buildFieldRow('📅 التاريخ', result.date?.toString() ?? '???'),
           _buildFieldRow('📝 الملاحظات', result.note ?? '???'),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
               Expanded(
-                child: ElevatedButton.icon(
+                child: GradientButton(
+                  label: 'تأكيد',
                   onPressed: onConfirm,
-                  icon: const Icon(Icons.check),
-                  label: const Text('تأكيد'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.cyan,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  height: 48,
+                  prefixIcon: const Icon(Icons.check, color: Colors.white, size: 20),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: onEdit,
-                  icon: const Icon(Icons.edit),
+                  icon: const Icon(Icons.edit, size: 20),
                   label: const Text('تعديل'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white70,
+                    foregroundColor: AppColors.onSurfaceVariant,
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    side: BorderSide(color: Colors.white.withAlpha(77)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    side: BorderSide(color: AppColors.outlineVariant.withAlpha(128)),
+                    shape: const StadiumBorder(),
+                    minimumSize: const Size(double.infinity, 48),
                   ),
                 ),
               ),
@@ -433,23 +297,21 @@ class _ParsedExpenseCard extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.onSurfaceVariant,
             ),
           ),
           const Spacer(),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.cyan.withAlpha(26),
-              borderRadius: BorderRadius.circular(8),
+              color: AppColors.secondaryContainer.withAlpha(26),
+              borderRadius: AppRadii.md,
             ),
             child: Text(
               value,
-              style: const TextStyle(
-                color: Colors.cyan,
-                fontSize: 14,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.secondary,
                 fontWeight: FontWeight.bold,
               ),
             ),
