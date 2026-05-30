@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import '../../../core/ai/models/ai_parsed_expense.dart';
 
@@ -9,13 +10,15 @@ import '../../../core/ai/models/ai_parsed_expense.dart';
 /// - Gemini API (Google) - الافتراضي
 /// - Groq API - للسرعة
 class AiApiService {
-  final String geminiKey;
-  final String groqKey;
+  late final String geminiKey;
+  late final String groqKey;
 
-  AiApiService({
-    required this.geminiKey,
-    required this.groqKey,
-  });
+  AiApiService() {
+    geminiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+    groqKey = dotenv.env['GROQ_API_KEY'] ?? '';
+  }
+
+  bool get isConfigured => geminiKey.isNotEmpty || groqKey.isNotEmpty;
 
   /// فهم المصروف من النص الطبيعي
   Future<AiParsedExpense?> parseExpense(String input) async {
