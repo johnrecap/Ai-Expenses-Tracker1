@@ -288,7 +288,7 @@ def _detect_currency(text: str) -> str:
     if any(word in text_lower for word in ['درهم', 'dirham', 'aed']):
         return 'AED'
     # International currencies
-    if 'usd' in text_lower or '$' in text:
+    if any(word in text_lower for word in ['دولار', 'دولارات', 'usd', '$']):
         return 'USD'
     if 'eur' in text_lower or '€' in text:
         return 'EUR'
