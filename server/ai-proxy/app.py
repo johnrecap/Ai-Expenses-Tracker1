@@ -257,13 +257,47 @@ def _gemini_parse_expense(text: str) -> dict:
 
 def _fallback_parse(text: str) -> dict:
     """Fallback parsing when JSON parsing fails."""
+    amount = _extract_amount(text)
+    if amount is None:
+        # Try harder to find numbers
+        numbers = re.findall(r'\d+(?:\.\d+)?', text)
+        if numbers:
+            try:
+                amount = float(numbers[0])
+            except ValueError:
+                amount = None
+    
     return {
-        'amount': _extract_amount(text),
-        'currency': 'EGP' if any('\u0600' <= c <= '\u06FF' for c in text) else 'USD',
+        'amount': amount,
+        'currency': _detect_currency(text),
         'category': _detect_category(text),
         'description': text,
         'date': datetime.now(timezone.utc).strftime('%Y-%m-%d'),
     }
+
+def _detect_currency(text: str) -> str:
+    """Detect currency from text."""
+    text_lower = text.lower()
+    # Arabic currencies
+    if any(word in text_lower for word in ['جنيه', 'جنايح', 'egp', 'جنية']):
+        return 'EGP'
+    if any(word in text_lower for word in ['ريال', 'riyal', 'sar']):
+        return 'SAR'
+    if any(word in text_lower for word in ['دينار', 'dinar', 'kwd']):
+        return 'KWD'
+    if any(word in text_lower for word in ['درهم', 'dirham', 'aed']):
+        return 'AED'
+    # International currencies
+    if 'usd' in text_lower or '$' in text:
+        return 'USD'
+    if 'eur' in text_lower or '€' in text:
+        return 'EUR'
+    if 'gbp' in text_lower or '£' in text:
+        return 'GBP'
+    # Default based on language
+    if any('\u0600' <= c <= '\u06FF' for c in text):
+        return 'EGP'  # Default for Arabic
+    return 'USD'  # Default for English
 
 def _extract_amount(text: str) -> float | None:
     """Extract numeric amount from text using regex."""
@@ -379,6 +413,9 @@ def parse_expense():
     if GEMINI_API_KEY:
         try:
             result = _gemini_parse_expense(text)
+            # Validate result
+            if result.get('amount') is None:
+                raise ValueError('Could not extract amount from text')
             return jsonify({
                 'success': True,
                 'data': result,
@@ -391,6 +428,9 @@ def parse_expense():
     if GROQ_API_KEY:
         try:
             result = _groq_parse_expense(text)
+            # Validate result
+            if result.get('amount') is None:
+                raise ValueError('Could not extract amount from text')
             return jsonify({
                 'success': True,
                 'data': result,
@@ -400,9 +440,15 @@ def parse_expense():
             logger.error('Groq also failed: %s', e)
             errors.append(f'Groq: {str(e)}')
     
-    # Both failed
-    logger.error('All providers failed: %s', errors)
-    abort(500, description=f'All AI providers failed: {"; ".join(errors)}')
+    # Both failed - use fallback
+    logger.warning('All providers failed, using fallback: %s', errors)
+    fallback_result = _fallback_parse(text)
+    return jsonify({
+        'success': True,
+        'data': fallback_result,
+        'provider': 'fallback',
+        'warnings': errors,
+    })
 
 @app.route('/getAdvice', methods=['POST'])
 @rate_limit
