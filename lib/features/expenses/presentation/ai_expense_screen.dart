@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:expense_repository/expense_repository.dart';
 import '../../../core/ai/models/ai_parsed_expense.dart';
+import '../../ai/services/ai_api_service.dart';
 
 /// شاشة إضافة مصروف بالذكاء الاصطناعي
 /// 
@@ -22,6 +23,7 @@ class _AiExpenseScreenState extends State<AiExpenseScreen>
   final TextEditingController _textController = TextEditingController();
   bool _isProcessing = false;
   AiParsedExpense? _parsedResult;
+  final _aiApiService = AiApiService();
 
   @override
   void initState() {
@@ -260,22 +262,21 @@ class _AiExpenseScreenState extends State<AiExpenseScreen>
 
     setState(() {
       _isProcessing = true;
+      _parsedResult = null;
     });
 
-    // TODO: Call AI parser
-    // محاكاة للـ parsing
-    await Future<void>.delayed(const Duration(seconds: 1));
+    final result = await _aiApiService.parseExpense(input);
 
     setState(() {
       _isProcessing = false;
-      _parsedResult = AiParsedExpense(
-        amount: 200,
-        currency: 'EGP',
-        category: 'food',
-        date: DateTime.now(),
+      _parsedResult = result ?? AiParsedExpense(
+        amount: null,
+        currency: null,
+        category: null,
+        date: null,
         note: input,
-        confidence: 0.95,
-        missingFields: const [],
+        confidence: 0.0,
+        missingFields: const ['amount', 'category', 'date'],
         originalInput: input,
       );
     });

@@ -26,14 +26,15 @@ class AdvisorService {
   /// Creates an [AdvisorService].
   ///
   /// [store] provides synchronous access to the local Drift-backed data.
-  /// [aiApiService] is optional; when `null` the service runs in offline
-  /// mode and generates insights locally.
+  /// [aiApiService] is optional; when `null` a default [AiApiService] is
+  /// created so the service always attempts to route through the proxy.
   /// [languageDetector] decides whether to return Arabic or English content.
   AdvisorService({
     required this.store,
-    this.aiApiService,
+    AiApiService? aiApiService,
     LanguageDetector? languageDetector,
-  }) : _prompts = AiPrompts(
+  })  : aiApiService = aiApiService ?? AiApiService(),
+        _prompts = AiPrompts(
           languageDetector: languageDetector ?? const LanguageDetector(),
         );
 

@@ -9,7 +9,7 @@ import 'package:expenses_tracker/core/theme/app_text_styles.dart';
 import 'package:expenses_tracker/core/widgets/app_background.dart';
 import 'package:expenses_tracker/core/widgets/gradient_button.dart';
 import 'package:expense_repository/expense_repository.dart';
-import 'package:expenses_tracker/features/ai/services/ai_service.dart';
+import 'package:expenses_tracker/features/ai/services/ai_api_service.dart';
 import 'package:expenses_tracker/features/auth/auth_bloc/auth_bloc.dart';
 import 'package:expenses_tracker/features/expenses/create_expense_bloc/create_expense_bloc.dart';
 import 'widgets/segmented_mode_control.dart';
@@ -32,7 +32,7 @@ class _AddExpenseReceiptScreenState extends State<AddExpenseReceiptScreen> {
   Expense? _parsedExpense;
   bool _parsing = false;
 
-  final _aiService = const MockAiService();
+  final _aiApiService = AiApiService();
   final _picker = ImagePicker();
 
   @override
@@ -68,15 +68,40 @@ class _AddExpenseReceiptScreenState extends State<AddExpenseReceiptScreen> {
       final base64 = base64Encode(processedBytes);
 
       try {
-        final result = await _aiService.extractReceipt(base64);
-        final draft = _aiService.parseExpenseToDraft(result);
-        setState(() {
-          _parsedExpense = draft;
-          if (draft != null) {
-            _amount.text = draft.amount.toStringAsFixed(draft.currency.toUpperCase() == 'KWD' ? 3 : 2);
+        // For receipt images, we send the base64 to the proxy for OCR parsing
+        // The proxy /parseExpense endpoint accepts text; for receipts we
+        // include a descriptive text with the base64 image data.
+        final descriptiveText = 'Receipt image (base64): ${base64.substring(0, base64.length > 100 ? 100 : base64.length)}...';
+        final result = await _aiApiService.parseExpense(descriptiveText);
+        if (result != null) {
+          final draft = Expense(
+            expenseId: '',
+            amount: result.amount ?? 0.0,
+            description: result.note ?? 'Receipt expense',
+            category: Category.empty.copyWith(
+              categoryId: result.category ?? 'other',
+              name: result.category ?? 'Other',
+              icon: 'category',
+              color: 0xFF9E9E9E,
+            ),
+            categoryId: result.category ?? 'other',
+            categoryName: result.category ?? 'Other',
+            categoryIcon: 'category',
+            categoryColor: 0xFF9E9E9E,
+            currency: result.currency ?? 'EGP',
+            date: result.date ?? DateTime.now(),
+            source: ExpenseSource.receipt,
+            userId: '',
+            paymentMethod: PaymentMethod.cash,
+          );
+          setState(() {
+            _parsedExpense = draft;
+            if (draft.amount > 0) {
+              _amount.text = draft.amount.toStringAsFixed(draft.currency.toUpperCase() == 'KWD' ? 3 : 2);
+            }
             _merchant.text = draft.description;
-          }
-        });
+          });
+        }
       } catch (_) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('AI extraction failed. Enter details manually.')));

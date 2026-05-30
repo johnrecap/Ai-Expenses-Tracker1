@@ -4,6 +4,7 @@ import 'package:expenses_tracker/core/theme/app_radii.dart';
 import 'package:expenses_tracker/core/theme/app_spacing.dart';
 import 'package:expenses_tracker/core/theme/app_text_styles.dart';
 import 'package:expense_repository/expense_repository.dart';
+import 'package:expenses_tracker/features/ai/services/ai_api_service.dart';
 import 'package:expenses_tracker/features/ai/services/ai_service.dart';
 
 class AiExpenseParsePanel extends StatefulWidget {
@@ -20,7 +21,7 @@ class _AiExpenseParsePanelState extends State<AiExpenseParsePanel> {
   bool _loading = false;
   Expense? _parsedExpense;
 
-  final _aiService = const MockAiService();
+  final _aiApiService = AiApiService();
 
   @override
   void dispose() {
@@ -35,8 +36,40 @@ class _AiExpenseParsePanelState extends State<AiExpenseParsePanel> {
     setState(() => _loading = true);
 
     try {
-      final result = await _aiService.parseExpense(text, AiContext(now: DateTime.now()));
-      final draft = _aiService.parseExpenseToDraft(result);
+      final parsed = await _aiApiService.parseExpense(text);
+      if (parsed == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('AI parsing failed. Enter details manually.')),
+          );
+        }
+        setState(() => _parsedExpense = null);
+        widget.onParsed?.call(null);
+        return;
+      }
+
+      // Convert AiParsedExpense to Expense draft
+      final draft = Expense(
+        expenseId: '',
+        amount: parsed.amount ?? 0.0,
+        description: parsed.note ?? parsed.originalInput,
+        category: Category.empty.copyWith(
+          categoryId: parsed.category ?? 'other',
+          name: parsed.category ?? 'Other',
+          icon: 'category',
+          color: 0xFF9E9E9E,
+        ),
+        categoryId: parsed.category ?? 'other',
+        categoryName: parsed.category ?? 'Other',
+        categoryIcon: 'category',
+        categoryColor: 0xFF9E9E9E,
+        currency: parsed.currency ?? 'EGP',
+        date: parsed.date ?? DateTime.now(),
+        source: ExpenseSource.aiText,
+        userId: '',
+        paymentMethod: PaymentMethod.cash,
+      );
+
       setState(() => _parsedExpense = draft);
       widget.onParsed?.call(draft);
     } catch (_) {
@@ -45,6 +78,8 @@ class _AiExpenseParsePanelState extends State<AiExpenseParsePanel> {
           const SnackBar(content: Text('AI parsing failed. Enter details manually.')),
         );
       }
+      setState(() => _parsedExpense = null);
+      widget.onParsed?.call(null);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
