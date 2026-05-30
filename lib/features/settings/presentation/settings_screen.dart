@@ -5,6 +5,7 @@ import 'package:expenses_tracker/core/widgets/app_background.dart';
 import 'package:expenses_tracker/core/widgets/app_bottom_nav.dart';
 import 'package:expenses_tracker/core/widgets/app_top_bar.dart';
 import 'package:expenses_tracker/core/widgets/glass_card.dart';
+import 'package:expenses_tracker/features/settings/settings_cubit/settings_cubit.dart';
 import 'package:expenses_tracker/features/security/cubit/app_lock_cubit.dart';
 import 'package:expenses_tracker/features/security/presentation/create_pin_screen.dart';
 import 'package:expenses_tracker/app/routes.dart';
@@ -152,28 +153,36 @@ class _SecuritySection extends StatelessWidget {
 class _AppearanceSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return _Section(
-      title: 'Appearance',
-      subtitle: 'Language and currency',
-      children: [
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.language, color: AppColors.primary),
-          title: Text('Language', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
-          subtitle: Text('English / العربية', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
-          trailing: const Icon(Icons.chevron_right, color: AppColors.onSurfaceVariant),
-          onTap: () => context.go(AppRoutes.onboardingLanguage),
-        ),
-        const Divider(height: 1, color: AppColors.surfaceContainerHigh),
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.attach_money, color: AppColors.primary),
-          title: Text('Currency', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
-          subtitle: Text('Base currency for the app', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
-          trailing: const Icon(Icons.chevron_right, color: AppColors.onSurfaceVariant),
-          onTap: () => context.go(AppRoutes.onboardingCurrency),
-        ),
-      ],
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      builder: (context, state) {
+        final currency = state is SettingsSuccess 
+            ? state.settings.baseCurrency 
+            : 'KWD';
+        
+        return _Section(
+          title: 'Appearance',
+          subtitle: 'Language and currency',
+          children: [
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.language, color: AppColors.primary),
+              title: Text('Language', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
+              subtitle: Text('English / العربية', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+              trailing: const Icon(Icons.chevron_right, color: AppColors.onSurfaceVariant),
+              onTap: () => context.go(AppRoutes.onboardingLanguage),
+            ),
+            const Divider(height: 1, color: AppColors.surfaceContainerHigh),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.attach_money, color: AppColors.primary),
+              title: Text('Currency', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
+              subtitle: Text(currency, style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+              trailing: const Icon(Icons.chevron_right, color: AppColors.onSurfaceVariant),
+              onTap: () => context.go(AppRoutes.onboardingCurrency),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -181,19 +190,32 @@ class _AppearanceSection extends StatelessWidget {
 class _NotificationSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return _Section(
-      title: 'Notifications',
-      subtitle: 'Budget alerts and reminders',
-      children: [
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text('Push Notifications', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
-          subtitle: Text('Get alerts for budgets and bills', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
-          value: true,
-          activeThumbColor: AppColors.primary,
-          onChanged: (_) {},
-        ),
-      ],
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      builder: (context, state) {
+        final notificationsEnabled = state is SettingsSuccess 
+            ? true // TODO: Add notificationsEnabled to UserSettings
+            : true;
+        
+        return _Section(
+          title: 'Notifications',
+          subtitle: 'Budget alerts and reminders',
+          children: [
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text('Push Notifications', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface)),
+              subtitle: Text('Get alerts for budgets and bills', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+              value: notificationsEnabled,
+              activeThumbColor: AppColors.primary,
+              onChanged: (v) {
+                // TODO: Save notification preference
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Coming soon')),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -10,11 +10,20 @@ import 'package:expenses_tracker/core/widgets/app_top_bar.dart';
 import 'package:expenses_tracker/core/widgets/glass_card.dart';
 import 'package:expenses_tracker/core/widgets/progress_bar.dart';
 import 'package:expenses_tracker/app/routes.dart';
+import 'package:expenses_tracker/features/settings/settings_cubit/settings_cubit.dart';
 import 'package:expenses_tracker/features/budgets/budget_bloc/budget_bloc.dart';
 import 'package:expenses_tracker/features/reports/report_cubit/report_cubit.dart';
 
 class BudgetsOverviewScreen extends StatelessWidget {
   const BudgetsOverviewScreen({super.key});
+
+  String _displayCurrency(BuildContext context) {
+    try {
+      final s = context.read<SettingsCubit>().state;
+      if (s is SettingsSuccess) return s.settings.baseCurrency;
+    } catch (_) {}
+    return 'KWD';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +64,7 @@ class BudgetsOverviewScreen extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(spent.toStringAsFixed(2), style: AppTextStyles.displayMobile.copyWith(color: AppColors.onSurface)),
-                                    Text(' / ${totalBudget.toStringAsFixed(2)} KWD', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+                                    Text(' / ${totalBudget.toStringAsFixed(2)} ${_displayCurrency(context)}', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
                                   ],
                                 ),
                                 const SizedBox(height: AppSpacing.md),
@@ -63,7 +72,7 @@ class BudgetsOverviewScreen extends StatelessWidget {
                                 const SizedBox(height: AppSpacing.sm),
                                 Text('${(progress * 100).toStringAsFixed(0)}% used', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
                                 const SizedBox(height: AppSpacing.sm),
-                                Text('${(totalBudget - spent).clamp(0, double.infinity).toStringAsFixed(2)} KWD remaining', style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary)),
+                                Text('${(totalBudget - spent).clamp(0, double.infinity).toStringAsFixed(2)} ${_displayCurrency(context)} remaining', style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary)),
                               ],
                             ),
                           ),

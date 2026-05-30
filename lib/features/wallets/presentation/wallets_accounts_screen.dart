@@ -246,8 +246,26 @@ class _WalletFormState extends State<_WalletForm> {
 
   void _save() {
     final name = _nameCtrl.text.trim();
-    if (name.isEmpty) return;
-    final balance = double.tryParse(_balanceCtrl.text.trim()) ?? 0;
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a name')),
+      );
+      return;
+    }
+    final balanceText = _balanceCtrl.text.trim();
+    if (balanceText.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a balance')),
+      );
+      return;
+    }
+    final balance = double.tryParse(balanceText);
+    if (balance == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid number')),
+      );
+      return;
+    }
     final bloc = context.read<WalletBloc>();
 
     if (widget.existing != null) {

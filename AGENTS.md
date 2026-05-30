@@ -52,5 +52,4 @@ Use these checks when relevant:
 flutter pub get
 flutter analyze
 flutter test
-flutter build apk --debug
 ```

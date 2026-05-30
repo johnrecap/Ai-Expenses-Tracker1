@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:uuid/uuid.dart';
+import 'package:expenses_tracker/core/theme/app_colors.dart';
+import 'package:expenses_tracker/core/theme/app_gradients.dart';
+import 'package:expenses_tracker/core/theme/app_radii.dart';
+import 'package:expenses_tracker/core/theme/app_spacing.dart';
+import 'package:expenses_tracker/core/theme/app_text_styles.dart';
+import 'package:expenses_tracker/core/widgets/app_background.dart';
+import 'package:expenses_tracker/core/widgets/gradient_button.dart';
 import 'package:expense_repository/expense_repository.dart';
-import '../../../core/ai/models/ai_parsed_expense.dart';
+import 'package:expenses_tracker/features/expenses/create_expense_bloc/create_expense_bloc.dart';
+import 'package:expenses_tracker/features/auth/auth_bloc/auth_bloc.dart';
+import 'package:expenses_tracker/features/categories/category_bloc/category_bloc.dart';
+import 'package:expenses_tracker/features/settings/settings_cubit/settings_cubit.dart';
 import '../../ai/services/ai_api_service.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_gradients.dart';
-import '../../../core/theme/app_radii.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/widgets/gradient_button.dart';
-import '../../../core/widgets/glass_card.dart';
+import 'widgets/expense_form_card.dart';
 
 /// شاشة إضافة مصروف بالذكاء الاصطناعي
-///
-/// تفتح من:
-/// - الصفحة الرئيسية (زر ✨ AI)
-/// - زر الـ + (اختيار AI)
 class AiExpenseScreen extends StatefulWidget {
   const AiExpenseScreen({super.key});
 
@@ -25,361 +28,308 @@ class AiExpenseScreen extends StatefulWidget {
 }
 
 class _AiExpenseScreenState extends State<AiExpenseScreen> {
-  final TextEditingController _textController = TextEditingController();
+  final _aiInput = TextEditingController();
+  final _merchant = TextEditingController();
+  final _amount = TextEditingController();
+  Category? _selectedCategory;
   bool _isProcessing = false;
-  AiParsedExpense? _parsedResult;
+  DateTime? _selectedDate;
+
   final _aiApiService = AiApiService();
 
   @override
   void dispose() {
-    _textController.dispose();
+    _aiInput.dispose();
+    _merchant.dispose();
+    _amount.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.onSurface),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          'إضافة بالذكاء الاصطناعي',
-          style: AppTextStyles.titleMedium.copyWith(
-            color: AppColors.onSurface,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.containerPadding),
-            child: Column(
-              children: [
-                const SizedBox(height: 8),
-
-                // عنوان
-                Text(
-                  'اكتب مصروفك بالعربي أو الإنجليزي',
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    color: AppColors.onSurfaceVariant,
-                  ),
-                ),
-
-                const SizedBox(height: AppSpacing.sm),
-
-                // أمثلة
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceContainerLow,
-                    borderRadius: AppRadii.lg,
-                    border: Border.all(
-                      color: AppColors.outlineVariant.withAlpha(77),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildExample('🍔', '200 جنيه أكل امبارح'),
-                      _buildExample('🚕', '50 جنيه مواصلات النهاردة'),
-                      _buildExample('🛒', 'اشتريت هدوم بـ 500 من المحل'),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: AppSpacing.lg),
-
-                // حقل الإدخال
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.inputFill,
-                    borderRadius: AppRadii.xl,
-                    border: Border.all(
-                      color: AppColors.outlineVariant.withAlpha(77),
-                    ),
-                  ),
-                  child: TextField(
-                    controller: _textController,
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      color: AppColors.onSurface,
-                    ),
-                    maxLines: 3,
-                    textAlign: TextAlign.right,
-                    decoration: InputDecoration(
-                      hintText: 'اكتب هنا...',
-                      hintStyle: AppTextStyles.bodyLarge.copyWith(
-                        color: AppColors.outline,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.all(AppSpacing.md),
-                      suffixIcon: IconButton(
-                        icon: const Icon(
-                          Icons.mic,
-                          color: AppColors.primary,
-                        ),
-                        onPressed: () {
-                          // TODO: Voice input
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: AppSpacing.md),
-
-                // زر المعالجة – uses AI secondary accent gradient per design system
-                GradientButton(
-                  label: _isProcessing ? 'جاري المعالجة...' : '✨ فهم المصروف',
-                  onPressed: _isProcessing ? () {} : _processInput,
-                  gradient: AppGradients.secondaryAi,
-                  prefixIcon: _isProcessing
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(Icons.auto_awesome, color: Colors.white),
-                ),
-
-                const SizedBox(height: AppSpacing.lg),
-
-                // النتيجة
-                if (_parsedResult != null)
-                  _ParsedExpenseCard(
-                    result: _parsedResult!,
-                    onConfirm: () {
-                      // TODO: Save expense
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('✅ تم حفظ المصروف!'),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                      Navigator.of(context).pop();
-                    },
-                    onEdit: () {
-                      _showEditDialog(context);
-                    },
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildExample(String emoji, String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 18)),
-          const SizedBox(width: 8),
-          Text(
-            text,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _processInput() async {
-    final input = _textController.text.trim();
+  Future<void> _processAiInput() async {
+    final input = _aiInput.text.trim();
     if (input.isEmpty) return;
 
-    setState(() {
-      _isProcessing = true;
-      _parsedResult = null;
-    });
+    setState(() => _isProcessing = true);
 
-    final result = await _aiApiService.parseExpense(input);
-
-    setState(() {
-      _isProcessing = false;
-      _parsedResult = result ?? AiParsedExpense(
-        amount: null,
-        currency: null,
-        category: null,
-        date: null,
-        note: input,
-        confidence: 0.0,
-        missingFields: const ['amount', 'category', 'date'],
-        originalInput: input,
+    try {
+      final result = await _aiApiService.parseExpense(input);
+      if (!mounted) return;
+      if (result != null) {
+        setState(() {
+          _amount.text = result.amount?.toString() ?? '';
+          _merchant.text = result.note ?? '';
+          _selectedDate = result.date;
+          
+          // Find matching category
+          final categories = _getCategories();
+          _selectedCategory = categories.firstWhere(
+            (cat) => cat.name.toLowerCase() == (result.category ?? '').toLowerCase(),
+            orElse: () => categories.first,
+          );
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
       );
-    });
+    } finally {
+      setState(() => _isProcessing = false);
+    }
   }
 
-  void _showEditDialog(BuildContext context) {
-    final amountController = TextEditingController(text: _parsedResult?.amount?.toString() ?? '');
-    final categoryController = TextEditingController(text: _parsedResult?.category ?? '');
-    final dateController = TextEditingController(text: _parsedResult?.date?.toIso8601String().split('T').first ?? '');
-    final noteController = TextEditingController(text: _parsedResult?.note ?? '');
+  List<Category> _getCategories() {
+    final state = context.read<CategoryBloc>().state;
+    if (state is CategoryLoaded) return state.categories;
+    return [];
+  }
 
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('تعديل المصروف'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: amountController,
-                decoration: const InputDecoration(labelText: 'المبلغ'),
-                keyboardType: TextInputType.number,
-              ),
-              TextField(
-                controller: categoryController,
-                decoration: const InputDecoration(labelText: 'الفئة'),
-              ),
-              TextField(
-                controller: dateController,
-                decoration: const InputDecoration(labelText: 'التاريخ (YYYY-MM-DD)'),
-              ),
-              TextField(
-                controller: noteController,
-                decoration: const InputDecoration(labelText: 'الملاحظات'),
-                maxLines: 2,
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                _parsedResult = AiParsedExpense(
-                  amount: double.tryParse(amountController.text),
-                  currency: _parsedResult?.currency ?? 'EGP',
-                  category: categoryController.text.isEmpty ? null : categoryController.text,
-                  date: dateController.text.isEmpty ? null : DateTime.tryParse(dateController.text),
-                  note: noteController.text.isEmpty ? null : noteController.text,
-                  confidence: 1.0,
-                  missingFields: const [],
-                  originalInput: _parsedResult?.originalInput ?? '',
-                );
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('حفظ'),
-          ),
-        ],
-      ),
+  void _onSave() {
+    final amountText = _amount.text.trim();
+    final merchant = _merchant.text.trim();
+    if (amountText.isEmpty || _selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter amount and select a category')),
+      );
+      return;
+    }
+    final amount = double.tryParse(amountText);
+    if (amount == null || amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid amount')),
+      );
+      return;
+    }
+
+    final authState = context.read<AuthBloc>().state;
+    final userId = authState is AuthAuthenticated ? authState.user.userId : '';
+
+    final cat = _selectedCategory!;
+    final expense = Expense(
+      expenseId: const Uuid().v4(),
+      userId: userId,
+      category: cat,
+      categoryId: cat.categoryId,
+      categoryName: cat.name,
+      categoryIcon: cat.icon,
+      categoryColor: cat.color,
+      amount: amount,
+      date: _selectedDate ?? DateTime.now(),
+      description: merchant.isNotEmpty ? merchant : cat.name,
+      source: ExpenseSource.aiText,
+      paymentMethod: PaymentMethod.cash,
     );
+
+    context.read<CreateExpenseBloc>().add(CreateExpense(expense));
   }
-}
 
-/// بطاقة عرض المصروف المفهوم
-class _ParsedExpenseCard extends StatelessWidget {
-  final AiParsedExpense result;
-  final VoidCallback onConfirm;
-  final VoidCallback onEdit;
-
-  const _ParsedExpenseCard({
-    required this.result,
-    required this.onConfirm,
-    required this.onEdit,
-  });
+  String _displayCurrency(BuildContext context) {
+    try {
+      final s = context.read<SettingsCubit>().state;
+      if (s is SettingsSuccess) return s.settings.baseCurrency;
+    } catch (_) {}
+    return 'KWD';
+  }
 
   @override
   Widget build(BuildContext context) {
-    return GlassCard(
-      fillColor: AppColors.surfaceContainerLowest,
-      borderColor: AppColors.outlineVariant.withAlpha(102),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '✨ فهمت مصروفك!',
-            style: AppTextStyles.headlineMedium.copyWith(
-              color: AppColors.secondary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          _buildFieldRow('💰 المبلغ', '${result.amount?.toString() ?? '???'} ${result.currency ?? ''}'),
-          _buildFieldRow('📁 الفئة', result.category ?? '???'),
-          _buildFieldRow('📅 التاريخ', result.date?.toString() ?? '???'),
-          _buildFieldRow('📝 الملاحظات', result.note ?? '???'),
-          const SizedBox(height: AppSpacing.lg),
-          Row(
-            children: [
-              Expanded(
-                child: GradientButton(
-                  label: 'تأكيد',
-                  onPressed: onConfirm,
-                  height: 56,
-                  prefixIcon: const Icon(Icons.check, color: Colors.white, size: 20),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: onEdit,
-                  icon: const Icon(Icons.edit, size: 20),
-                  label: const Text('تعديل'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.onSurfaceVariant,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    side: BorderSide(color: AppColors.outlineVariant.withAlpha(128)),
-                    shape: const StadiumBorder(),
-                    minimumSize: const Size(double.infinity, 48),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+    final categories = context.watch<CategoryBloc>().state is CategoryLoaded
+        ? (context.read<CategoryBloc>().state as CategoryLoaded).categories
+        : <Category>[];
 
-  Widget _buildFieldRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Text(
-            label,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
-          ),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.secondaryContainer.withAlpha(26),
-              borderRadius: AppRadii.md,
-            ),
-            child: Text(
-              value,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.secondary,
-                fontWeight: FontWeight.bold,
+    return BlocListener<CreateExpenseBloc, CreateExpenseState>(
+      listener: (context, state) {
+        if (state is CreateExpenseSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Expense saved')),
+          );
+          if (Navigator.canPop(context)) {
+            context.pop();
+          } else {
+            context.go('/expenses');
+          }
+        } else if (state is CreateExpenseFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      child: Scaffold(
+        body: AppBackground(
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.containerPadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          if (Navigator.canPop(context)) {
+                            context.pop();
+                          } else {
+                            context.go('/expenses');
+                          }
+                        },
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: const BoxDecoration(
+                            color: AppColors.surfaceContainerHigh,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            size: 20,
+                            color: AppColors.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        'AI Add',
+                        style: AppTextStyles.titleMedium.copyWith(
+                          color: AppColors.onSurface,
+                        ),
+                      ),
+                      const Spacer(),
+                      const SizedBox(width: 40),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+
+                  // AI Input Section
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceContainerLow,
+                      borderRadius: AppRadii.lg,
+                      border: Border.all(
+                        color: AppColors.outlineVariant.withAlpha(77),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Describe your expense',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        TextField(
+                          controller: _aiInput,
+                          style: AppTextStyles.bodyLarge.copyWith(
+                            color: AppColors.onSurface,
+                          ),
+                          maxLines: 2,
+                          textAlign: TextAlign.left,
+                          decoration: InputDecoration(
+                            hintText: 'e.g., 200 EGP for lunch yesterday',
+                            hintStyle: AppTextStyles.bodyLarge.copyWith(
+                              color: AppColors.outline,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        SizedBox(
+                          width: double.infinity,
+                          child: GradientButton(
+                            label: _isProcessing ? 'Processing...' : '✨ Parse with AI',
+                            onPressed: _isProcessing ? () {} : _processAiInput,
+                            gradient: AppGradients.secondaryAi,
+                            height: 40,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // Amount Input
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextField(
+                      controller: _amount,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.displayMobile.copyWith(
+                        color: AppColors.onSurface,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: '0.00',
+                        hintStyle: AppTextStyles.displayMobile.copyWith(
+                          color: AppColors.outline,
+                        ),
+                        border: InputBorder.none,
+                        suffix: Text(
+                          _displayCurrency(context),
+                          style: AppTextStyles.titleMedium.copyWith(
+                            color: AppColors.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // Categories
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
+                    children: categories.map((cat) {
+                      final selected = _selectedCategory?.categoryId == cat.categoryId;
+                      return GestureDetector(
+                        onTap: () => setState(() => _selectedCategory = selected ? null : cat),
+                        child: Chip(
+                          label: Text(cat.name),
+                          backgroundColor: selected
+                              ? AppColors.primaryContainer
+                              : AppColors.surfaceContainerHigh,
+                          labelStyle: AppTextStyles.bodySmall.copyWith(
+                            color: selected
+                                ? AppColors.primary
+                                : AppColors.onSurfaceVariant,
+                          ),
+                          side: BorderSide.none,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // Form Card
+                  ExpenseFormCard(
+                    merchantController: _merchant,
+                    amountController: _amount,
+                    categories: categories.map((c) => c.name).toList(),
+                    selectedCategoryId: _selectedCategory?.name,
+                    onCategoryChanged: (v) => setState(() {
+                      _selectedCategory = categories
+                          .cast<Category?>()
+                          .firstWhere(
+                            (c) => c?.name.trim().toLowerCase() == v.trim().toLowerCase(),
+                            orElse: () => null,
+                          );
+                    }),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // Save Button
+                  GradientButton(
+                    label: 'Save Expense',
+                    onPressed: _onSave,
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                ],
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
