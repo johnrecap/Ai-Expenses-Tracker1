@@ -58,105 +58,105 @@ class _AiExpenseScreenState extends State<AiExpenseScreen> {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.containerPadding),
-          child: Column(
-            children: [
-              const SizedBox(height: 8),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.containerPadding),
+            child: Column(
+              children: [
+                const SizedBox(height: 8),
 
-              // عنوان
-              Text(
-                'اكتب مصروفك بالعربي أو الإنجليزي',
-                style: AppTextStyles.bodyLarge.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                ),
-              ),
-
-              const SizedBox(height: AppSpacing.sm),
-
-              // أمثلة
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceContainerLow,
-                  borderRadius: AppRadii.lg,
-                  border: Border.all(
-                    color: AppColors.outlineVariant.withAlpha(77),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildExample('🍔', '200 جنيه أكل امبارح'),
-                    _buildExample('🚕', '50 جنيه مواصلات النهاردة'),
-                    _buildExample('🛒', 'اشتريت هدوم بـ 500 من المحل'),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: AppSpacing.lg),
-
-              // حقل الإدخال
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.inputFill,
-                  borderRadius: AppRadii.xl,
-                  border: Border.all(
-                    color: AppColors.outlineVariant.withAlpha(77),
-                  ),
-                ),
-                child: TextField(
-                  controller: _textController,
+                // عنوان
+                Text(
+                  'اكتب مصروفك بالعربي أو الإنجليزي',
                   style: AppTextStyles.bodyLarge.copyWith(
-                    color: AppColors.onSurface,
+                    color: AppColors.onSurfaceVariant,
                   ),
-                  maxLines: 3,
-                  textAlign: TextAlign.right,
-                  decoration: InputDecoration(
-                    hintText: 'اكتب هنا...',
-                    hintStyle: AppTextStyles.bodyLarge.copyWith(
-                      color: AppColors.outline,
+                ),
+
+                const SizedBox(height: AppSpacing.sm),
+
+                // أمثلة
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceContainerLow,
+                    borderRadius: AppRadii.lg,
+                    border: Border.all(
+                      color: AppColors.outlineVariant.withAlpha(77),
                     ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.all(AppSpacing.md),
-                    suffixIcon: IconButton(
-                      icon: const Icon(
-                        Icons.mic,
-                        color: AppColors.primary,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildExample('🍔', '200 جنيه أكل امبارح'),
+                      _buildExample('🚕', '50 جنيه مواصلات النهاردة'),
+                      _buildExample('🛒', 'اشتريت هدوم بـ 500 من المحل'),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: AppSpacing.lg),
+
+                // حقل الإدخال
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.inputFill,
+                    borderRadius: AppRadii.xl,
+                    border: Border.all(
+                      color: AppColors.outlineVariant.withAlpha(77),
+                    ),
+                  ),
+                  child: TextField(
+                    controller: _textController,
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      color: AppColors.onSurface,
+                    ),
+                    maxLines: 3,
+                    textAlign: TextAlign.right,
+                    decoration: InputDecoration(
+                      hintText: 'اكتب هنا...',
+                      hintStyle: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.outline,
                       ),
-                      onPressed: () {
-                        // TODO: Voice input
-                      },
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.all(AppSpacing.md),
+                      suffixIcon: IconButton(
+                        icon: const Icon(
+                          Icons.mic,
+                          color: AppColors.primary,
+                        ),
+                        onPressed: () {
+                          // TODO: Voice input
+                        },
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: AppSpacing.md),
+                const SizedBox(height: AppSpacing.md),
 
-              // زر المعالجة – uses AI secondary accent gradient per design system
-              GradientButton(
-                label: _isProcessing ? 'جاري المعالجة...' : '✨ فهم المصروف',
-                onPressed: _isProcessing ? () {} : _processInput,
-                gradient: AppGradients.secondaryAi,
-                prefixIcon: _isProcessing
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.auto_awesome, color: Colors.white),
-              ),
+                // زر المعالجة – uses AI secondary accent gradient per design system
+                GradientButton(
+                  label: _isProcessing ? 'جاري المعالجة...' : '✨ فهم المصروف',
+                  onPressed: _isProcessing ? () {} : _processInput,
+                  gradient: AppGradients.secondaryAi,
+                  prefixIcon: _isProcessing
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.auto_awesome, color: Colors.white),
+                ),
 
-              const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.lg),
 
-              // النتيجة
-              if (_parsedResult != null)
-                Expanded(
-                  child: _ParsedExpenseCard(
+                // النتيجة
+                if (_parsedResult != null)
+                  _ParsedExpenseCard(
                     result: _parsedResult!,
                     onConfirm: () {
                       // TODO: Save expense
@@ -169,11 +169,11 @@ class _AiExpenseScreenState extends State<AiExpenseScreen> {
                       Navigator.of(context).pop();
                     },
                     onEdit: () {
-                      // TODO: Edit expense
+                      _showEditDialog(context);
                     },
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -222,6 +222,69 @@ class _AiExpenseScreenState extends State<AiExpenseScreen> {
         originalInput: input,
       );
     });
+  }
+
+  void _showEditDialog(BuildContext context) {
+    final amountController = TextEditingController(text: _parsedResult?.amount?.toString() ?? '');
+    final categoryController = TextEditingController(text: _parsedResult?.category ?? '');
+    final dateController = TextEditingController(text: _parsedResult?.date?.toIso8601String().split('T').first ?? '');
+    final noteController = TextEditingController(text: _parsedResult?.note ?? '');
+
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('تعديل المصروف'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: amountController,
+                decoration: const InputDecoration(labelText: 'المبلغ'),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: categoryController,
+                decoration: const InputDecoration(labelText: 'الفئة'),
+              ),
+              TextField(
+                controller: dateController,
+                decoration: const InputDecoration(labelText: 'التاريخ (YYYY-MM-DD)'),
+              ),
+              TextField(
+                controller: noteController,
+                decoration: const InputDecoration(labelText: 'الملاحظات'),
+                maxLines: 2,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إلغاء'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _parsedResult = AiParsedExpense(
+                  amount: double.tryParse(amountController.text),
+                  currency: _parsedResult?.currency ?? 'EGP',
+                  category: categoryController.text.isEmpty ? null : categoryController.text,
+                  date: dateController.text.isEmpty ? null : DateTime.tryParse(dateController.text),
+                  note: noteController.text.isEmpty ? null : noteController.text,
+                  confidence: 1.0,
+                  missingFields: const [],
+                  originalInput: _parsedResult?.originalInput ?? '',
+                );
+              });
+              Navigator.pop(context);
+            },
+            child: const Text('حفظ'),
+          ),
+        ],
+      ),
+    );
   }
 }
 

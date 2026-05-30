@@ -22,6 +22,13 @@ import '../../../features/ai/presentation/ai_assistant_sheet.dart';
 class HomeDashboardScreen extends StatelessWidget {
   const HomeDashboardScreen({super.key});
 
+  String _getGreeting(BuildContext context) {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'صباح الخير';
+    if (hour < 17) return 'مساء الخير';
+    return 'تصبح على الخير';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +38,7 @@ class HomeDashboardScreen extends StatelessWidget {
           // زر الـ AI
           FloatingActionButton.small(
             onPressed: () => context.go(AppRoutes.expensesNewAi),
-            backgroundColor: Colors.cyan.withOpacity(0.9),
+            backgroundColor: AppColors.secondary,
             heroTag: 'ai_fab',
             child: const Icon(
               Icons.auto_awesome,
@@ -59,7 +66,7 @@ class HomeDashboardScreen extends StatelessWidget {
               return Column(
                 children: [
                   AppTopBar(
-                    title: 'Good morning',
+                    title: _getGreeting(context),
                     leading: IconButton(
                       icon: const Icon(Icons.menu, color: AppColors.onSurface),
                       onPressed: () {},
