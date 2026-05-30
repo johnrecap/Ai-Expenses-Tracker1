@@ -112,11 +112,24 @@ def _gemini_parse_expense(text: str) -> dict:
     )
 
     prompt = (
-        "You are an expense parser. Extract the following fields from the user text "
-        "and return ONLY a valid JSON object with these keys: "
-        "amount (number), currency (string, default 'USD'), category (string), "
-        "description (string), date (ISO 8601 string, use today if not specified). "
-        "No markdown, no extra text.\n\nUser text: \"" + text.replace('"', '\\"') + "\""
+        "You are an expert expense parser for Arabic and English text. "
+        "Extract the following fields from the user's text and return ONLY a valid JSON object:\n"
+        "{\n"
+        "  \"amount\": number (extract the numeric value, e.g., 200),\n"
+        "  \"currency\": string (e.g., 'EGP', 'USD', 'SAR', default 'EGP' for Arabic),\n"
+        "  \"category\": string (one of: food, transport, shopping, bills, entertainment, health, education, other),\n"
+        "  \"description\": string (brief description in the same language as input),\n"
+        "  \"date\": string (ISO 8601 date, use today's date if not specified, format: YYYY-MM-DD)\n"
+        "}\n\n"
+        "Examples:\n"
+        "Input: \"200 جنيه أكل امبارح\"\n"
+        "Output: {\"amount\": 200, \"currency\": \"EGP\", \"category\": \"food\", \"description\": \"أكل\", \"date\": \"2026-05-30\"}\n\n"
+        "Input: \"50 جنيه مواصلات\"\n"
+        "Output: {\"amount\": 50, \"currency\": \"EGP\", \"category\": \"transport\", \"description\": \"مواصلات\", \"date\": \"2026-05-30\"}\n\n"
+        "Input: \"اشتريت هدوم بـ 500 من المحل\"\n"
+        "Output: {\"amount\": 500, \"currency\": \"EGP\", \"category\": \"shopping\", \"description\": \"هدوم من المحل\", \"date\": \"2026-05-30\"}\n\n"
+        "Now parse this input:\n"
+        "\"" + text.replace('"', '\\"') + "\""
     )
 
     payload = {
@@ -148,8 +161,70 @@ def _gemini_parse_expense(text: str) -> dict:
     raw_text = re.sub(r'^```json\s*', '', raw_text)
     raw_text = re.sub(r'```\s*$', '', raw_text)
 
-    parsed = json.loads(raw_text)
+    try:
+        parsed = json.loads(raw_text)
+    except json.JSONDecodeError:
+        # Fallback: try to extract data using regex
+        parsed = _fallback_parse(text)
+    
+    # Ensure all required fields exist
+    if 'amount' not in parsed or parsed['amount'] is None:
+        parsed['amount'] = _extract_amount(text)
+    if 'currency' not in parsed or parsed['currency'] is None:
+        parsed['currency'] = 'EGP' if any('\u0600' <= c <= '\u06FF' for c in text) else 'USD'
+    if 'category' not in parsed or parsed['category'] is None:
+        parsed['category'] = _detect_category(text)
+    if 'description' not in parsed or parsed['description'] is None:
+        parsed['description'] = text
+    if 'date' not in parsed or parsed['date'] is None:
+        parsed['date'] = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+    
     return parsed
+
+def _fallback_parse(text: str) -> dict:
+    """Fallback parsing when JSON parsing fails."""
+    return {
+        'amount': _extract_amount(text),
+        'currency': 'EGP' if any('\u0600' <= c <= '\u06FF' for c in text) else 'USD',
+        'category': _detect_category(text),
+        'description': text,
+        'date': datetime.now(timezone.utc).strftime('%Y-%m-%d'),
+    }
+
+def _extract_amount(text: str) -> float | None:
+    """Extract numeric amount from text using regex."""
+    # Look for numbers followed by currency words or symbols
+    patterns = [
+        r'(\d+(?:\.\d+)?)\s*(?:جنيه|جنايح|ريال|ريالات|دولار|دولارات|يورو|يوروه|بوند|باوند|شيكل)',
+        r'(\d+(?:\.\d+)?)\s*(?:EGP|SAR|USD|EUR|GBP)',
+        r'(?:بـ|بي|في|\$|€|£)?\s*(\d+(?:\.\d+)?)',
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            try:
+                return float(match.group(1))
+            except (ValueError, IndexError):
+                continue
+    return None
+
+def _detect_category(text: str) -> str:
+    """Detect expense category from Arabic/English text."""
+    text_lower = text.lower()
+    categories = {
+        'food': ['أكل', 'اكل', 'طعام', 'فطار', 'عشاء', 'مطعم', 'ريستوران', 'كفتيريا', 'برجر', 'بيتزا', 'مكدونالدز', 'شاورما', 'كنتاكي', 'سبروماركت', 'كفتيريا', 'مطعم', 'طعام', 'food', 'eat', 'restaurant', 'cafe', 'burger', 'pizza', 'shawarma'],
+        'transport': ['مواصلات', 'تكسي', 'أوبر', 'كاريم', 'بنزين', 'مترو', 'باص', 'قطار', 'طياران', 'سفر', 'رحلة', 'توكتوك', 'transport', 'taxi', 'uber', 'car', 'bus', 'train', 'metro', 'fuel', 'gas'],
+        'shopping': ['هدوم', 'ملابس', 'حذاء', 'مستلزمات', 'مواد غذائية', 'سوبرماركت', 'بازار', 'سوق', 'شراء', 'تسوق', 'shopping', 'clothes', 'shoes', 'buy', 'purchase', 'market', 'mall', 'store'],
+        'bills': ['فاتورة', 'كهرباء', 'مايه', 'نت', 'إنترنت', 'تلفون', 'رصيد', 'فواتير', 'bills', 'electricity', 'water', 'internet', 'phone', 'gas', 'rent'],
+        'entertainment': ['سينما', 'فيلم', 'لعب', 'بلايستيشن', 'نادي', 'مقهى', 'ترفيه', 'فن', 'موسيقى', 'كونسيرت', 'حفلة', 'مسرح', 'مسراح', 'entertainment', 'cinema', 'movie', 'game', 'playstation', 'netflix', 'spotify', 'concert', 'party'],
+        'health': ['دكتور', 'صيدلية', 'عيادة', 'مستشفى', 'دواء', 'صحة', 'رياضة', 'جم', 'مصاب', 'health', 'doctor', 'pharmacy', 'medicine', 'hospital', 'gym', 'fitness'],
+        'education': ['كتب', 'كورس', 'دروس', 'جامعة', 'مدرسة', 'تعليم', 'دراسة', 'مذكرة', 'قلم', 'كراسة', 'education', 'book', 'course', 'school', 'university', 'tuition', 'learning'],
+    }
+    for category, keywords in categories.items():
+        for keyword in keywords:
+            if keyword in text_lower:
+                return category
+    return 'other'
 
 def _groq_get_advice(prompt: str) -> str:
     """Call Groq to get financial advice based on a prompt."""
