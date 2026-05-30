@@ -42,7 +42,7 @@ class _AiExpenseScreenState extends State<AiExpenseScreen> {
       backgroundColor: AppColors.background,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.background,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
@@ -264,7 +264,7 @@ class _ParsedExpenseCard extends StatelessWidget {
                 child: GradientButton(
                   label: 'تأكيد',
                   onPressed: onConfirm,
-                  height: 48,
+                  height: 56,
                   prefixIcon: const Icon(Icons.check, color: Colors.white, size: 20),
                 ),
               ),
