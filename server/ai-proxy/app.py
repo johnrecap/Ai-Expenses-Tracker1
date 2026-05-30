@@ -101,6 +101,80 @@ def rate_limit(f):
         return f(*args, **kwargs)
     return decorated
 
+def _groq_parse_expense(text: str) -> dict:
+    """Call Groq to parse free-form text into structured expense JSON (fallback)."""
+    if not GROQ_API_KEY:
+        raise RuntimeError('GROQ_API_KEY not configured on server')
+
+    url = 'https://api.groq.com/openai/v1/chat/completions'
+    headers = {
+        'Authorization': f'Bearer {GROQ_API_KEY}',
+        'Content-Type': 'application/json',
+    }
+    
+    prompt = (
+        "You are an expert expense parser for Arabic and English text. "
+        "Extract the following fields from the user's text and return ONLY a valid JSON object:\n"
+        "{\n"
+        "  \"amount\": number (extract the numeric value, e.g., 200),\n"
+        "  \"currency\": string (e.g., 'EGP', 'USD', 'SAR', default 'EGP' for Arabic),\n"
+        "  \"category\": string (one of: food, transport, shopping, bills, entertainment, health, education, other),\n"
+        "  \"description\": string (brief description in the same language as input),\n"
+        "  \"date\": string (ISO 8601 date, use today's date if not specified, format: YYYY-MM-DD)\n"
+        "}\n\n"
+        "Examples:\n"
+        "Input: \"200 جنيه أكل امبارح\"\n"
+        "Output: {\"amount\": 200, \"currency\": \"EGP\", \"category\": \"food\", \"description\": \"أكل\", \"date\": \"2026-05-30\"}\n\n"
+        "Input: \"50 جنيه مواصلات\"\n"
+        "Output: {\"amount\": 50, \"currency\": \"EGP\", \"category\": \"transport\", \"description\": \"مواصلات\", \"date\": \"2026-05-30\"}\n\n"
+        "Input: \"اشتريت هدوم بـ 500 من المحل\"\n"
+        "Output: {\"amount\": 500, \"currency\": \"EGP\", \"category\": \"shopping\", \"description\": \"هدوم من المحل\", \"date\": \"2026-05-30\"}\n\n"
+        "Now parse this input:\n"
+        "\"" + text.replace('"', '\\"') + "\""
+    )
+    
+    payload = {
+        'model': GROQ_MODEL,
+        'messages': [
+            {
+                'role': 'system',
+                'content': 'You are an expert expense parser. Return ONLY valid JSON.'
+            },
+            {'role': 'user', 'content': prompt}
+        ],
+        'temperature': 0.1,
+        'max_tokens': 1024,
+        'response_format': {'type': 'json_object'},
+    }
+
+    resp = requests.post(url, headers=headers, json=payload, timeout=30)
+    resp.raise_for_status()
+    data = resp.json()
+    choices = data.get('choices', [])
+    if not choices:
+        raise RuntimeError('No choices in Groq response')
+    
+    raw_text = choices[0].get('message', {}).get('content', '')
+    
+    try:
+        parsed = json.loads(raw_text)
+    except json.JSONDecodeError:
+        parsed = _fallback_parse(text)
+    
+    # Ensure all required fields exist
+    if 'amount' not in parsed or parsed['amount'] is None:
+        parsed['amount'] = _extract_amount(text)
+    if 'currency' not in parsed or parsed['currency'] is None:
+        parsed['currency'] = 'EGP' if any('\u0600' <= c <= '\u06FF' for c in text) else 'USD'
+    if 'category' not in parsed or parsed['category'] is None:
+        parsed['category'] = _detect_category(text)
+    if 'description' not in parsed or parsed['description'] is None:
+        parsed['description'] = text
+    if 'date' not in parsed or parsed['date'] is None:
+        parsed['date'] = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+    
+    return parsed
+
 def _gemini_parse_expense(text: str) -> dict:
     """Call Gemini to parse free-form text into structured expense JSON."""
     if not GEMINI_API_KEY:
@@ -298,18 +372,37 @@ def parse_expense():
         abort(400, description='Missing "text" field in JSON body')
 
     logger.info('parseExpense called by %s', _get_client_id())
-    try:
-        result = _gemini_parse_expense(text)
-        return jsonify({
-            'success': True,
-            'data': result,
-        })
-    except requests.HTTPError as e:
-        logger.error('Gemini HTTP error: %s', e)
-        abort(502, description=f'Upstream Gemini error: {e.response.status_code}')
-    except Exception as e:
-        logger.error('Gemini processing error: %s', e)
-        abort(500, description='Failed to parse expense')
+    
+    # Try Gemini first, fallback to Groq
+    errors = []
+    
+    if GEMINI_API_KEY:
+        try:
+            result = _gemini_parse_expense(text)
+            return jsonify({
+                'success': True,
+                'data': result,
+                'provider': 'gemini',
+            })
+        except Exception as e:
+            logger.warning('Gemini failed, trying Groq: %s', e)
+            errors.append(f'Gemini: {str(e)}')
+    
+    if GROQ_API_KEY:
+        try:
+            result = _groq_parse_expense(text)
+            return jsonify({
+                'success': True,
+                'data': result,
+                'provider': 'groq',
+            })
+        except Exception as e:
+            logger.error('Groq also failed: %s', e)
+            errors.append(f'Groq: {str(e)}')
+    
+    # Both failed
+    logger.error('All providers failed: %s', errors)
+    abort(500, description=f'All AI providers failed: {"; ".join(errors)}')
 
 @app.route('/getAdvice', methods=['POST'])
 @rate_limit
