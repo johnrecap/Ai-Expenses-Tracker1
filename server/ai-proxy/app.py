@@ -241,12 +241,21 @@ def parse_expense():
 def get_advice():
     body = request.get_json(silent=True) or {}
     prompt = body.get('prompt', '').strip()
+    expenses = body.get('expenses', [])
     if not prompt:
         abort(400, description='Missing "prompt" field in JSON body')
 
     logger.info('getAdvice called by %s', _get_client_id())
     try:
-        advice = _groq_get_advice(prompt)
+        # Build context from user expenses
+        expense_context = ""
+        if expenses:
+            expense_context = "User expenses:\n"
+            for exp in expenses:
+                expense_context += f"- {exp.get('amount', 0)} {exp.get('currency', 'USD')} for {exp.get('category', 'unknown')}: {exp.get('description', '')}\n"
+        
+        full_prompt = f"{expense_context}\n\n{prompt}"
+        advice = _groq_get_advice(full_prompt)
         return jsonify({
             'success': True,
             'advice': advice,
