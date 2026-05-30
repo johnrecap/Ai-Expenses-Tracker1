@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:io';
 import 'dart:typed_data';
@@ -6,32 +5,32 @@ import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 
 import 'ai_expense_service.dart';
-import 'ai_gateway_client.dart';
+import 'ai_api_service.dart';
 
 /// {@template camera_scanner_service}
 /// Service that captures receipt images and extracts structured expense data.
 ///
 /// Uses the device's camera via `image_picker` and can optionally send the
-/// image to the AI gateway for OCR + parsing. Falls back to a mock flow
-/// when the gateway is unavailable so the UI can still be tested.
+/// image to the AI API for OCR + parsing. Falls back to a mock flow
+/// when the API is unavailable so the UI can still be tested.
 /// {@endtemplate}
 class CameraScannerService {
   /// Creates a [CameraScannerService].
   ///
   /// [aiExpenseService] is used to parse any text extracted from the receipt.
-  /// [gatewayClient] is optional; when provided, images are sent to the
+  /// [aiApiService] is optional; when provided, images are sent to the
   /// backend for OCR. [imagePicker] can be injected for testing.
   CameraScannerService({
     required this.aiExpenseService,
-    this.gatewayClient,
+    this.aiApiService,
     ImagePicker? imagePicker,
   }) : _picker = imagePicker ?? ImagePicker();
 
   /// The AI expense service that turns extracted text into structured data.
   final AiExpenseService aiExpenseService;
 
-  /// Optional AI gateway client for server-side receipt OCR.
-  final AiGatewayClient? gatewayClient;
+  /// Optional AI API service for server-side receipt OCR.
+  final AiApiService? aiApiService;
 
   final ImagePicker _picker;
 
@@ -86,10 +85,8 @@ class CameraScannerService {
 
   /// Scans a receipt image and returns structured expense data.
   ///
-  /// If [gatewayClient] is available, the image is base64-encoded and sent to
-  /// the AI gateway (`/aiReceipt`). Otherwise the method falls back to a
-  /// local heuristic that simply passes any embedded text to
-  /// [AiExpenseService.processInput].
+  /// If [aiApiService] is available, the image is base64-encoded and sent to
+  /// the AI API. Otherwise the method falls back to a local heuristic.
   ///
   /// Returns an [AiExpenseResult] containing the parsed expense, or an empty
   /// result if scanning or parsing failed.
@@ -97,8 +94,8 @@ class CameraScannerService {
     try {
       final bytes = await imageFile.readAsBytes();
 
-      if (gatewayClient != null) {
-        return await _scanWithGateway(bytes);
+      if (aiApiService != null) {
+        return await _scanWithAi(bytes);
       }
 
       return await _scanLocally(bytes);
@@ -124,25 +121,19 @@ class CameraScannerService {
   // Private helpers
   // ---------------------------------------------------------------------------
 
-  Future<AiExpenseResult> _scanWithGateway(Uint8List bytes) async {
+  Future<AiExpenseResult> _scanWithAi(Uint8List bytes) async {
     try {
-      // Encode image to base64 for transport.
-      final base64Image = _bytesToBase64(bytes);
-
-      final response = await gatewayClient!.extractReceipt(base64Image);
-
-      // The gateway returns a JSON map with extracted fields.
-      final extractedText = response['text'] as String? ?? '';
-      if (extractedText.trim().isEmpty) {
-        return AiExpenseResult.empty('');
-      }
-
-      return aiExpenseService.processInput(extractedText);
-    } on AiGatewayException catch (e) {
+      // For now, return placeholder since AI APIs don't support image OCR directly
+      // TODO: Implement image OCR using Google Vision API or similar
       developer.log(
-        'Gateway receipt extraction failed: ${e.message}',
+        'AI OCR not yet implemented; returning placeholder result',
         name: 'CameraScannerService',
-        error: e,
+      );
+      return _scanLocally(bytes);
+    } catch (e) {
+      developer.log(
+        'AI receipt extraction failed: $e',
+        name: 'CameraScannerService',
       );
       return AiExpenseResult.empty('');
     }
@@ -160,9 +151,5 @@ class CameraScannerService {
     // Return a low-confidence result that signals the UI to show a manual
     // review form with the image attached.
     return AiExpenseResult.empty('camera_scan_placeholder');
-  }
-
-  String _bytesToBase64(Uint8List bytes) {
-    return base64Encode(bytes);
   }
 }

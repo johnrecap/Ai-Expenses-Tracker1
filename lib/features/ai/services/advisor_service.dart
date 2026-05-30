@@ -6,7 +6,7 @@ import '../../../core/ai/ai_prompts.dart';
 import '../../../core/ai/language_detector.dart';
 import '../../../core/ai/models/ai_insight.dart' as core;
 import '../../../core/ai/models/ai_recommendation.dart' as core;
-import 'ai_gateway_client.dart';
+import 'ai_api_service.dart';
 
 /// {@template advisor_service}
 /// Generates AI-driven financial insights and recommendations based on the
@@ -26,12 +26,12 @@ class AdvisorService {
   /// Creates an [AdvisorService].
   ///
   /// [store] provides synchronous access to the local Drift-backed data.
-  /// [gatewayClient] is optional; when `null` the service runs in offline
+  /// [aiApiService] is optional; when `null` the service runs in offline
   /// mode and generates insights locally.
   /// [languageDetector] decides whether to return Arabic or English content.
   AdvisorService({
     required this.store,
-    this.gatewayClient,
+    this.aiApiService,
     LanguageDetector? languageDetector,
   }) : _prompts = AiPrompts(
           languageDetector: languageDetector ?? const LanguageDetector(),
@@ -40,8 +40,8 @@ class AdvisorService {
   /// The local store interface backed by Drift (SQLite).
   final LocalStoreInterface store;
 
-  /// Optional AI gateway client for rich natural-language insights.
-  final AiGatewayClient? gatewayClient;
+  /// Optional AI API service for rich natural-language insights.
+  final AiApiService? aiApiService;
 
   final AiPrompts _prompts;
 
@@ -59,13 +59,13 @@ class AdvisorService {
     final context = _buildSpendingContext();
 
     try {
-      if (gatewayClient != null) {
-        final insights = await _fetchInsightsFromGateway(context, lang);
+      if (aiApiService != null) {
+        final insights = await _fetchInsightsFromAi(context, lang);
         if (insights.isNotEmpty) return insights;
       }
     } on Exception catch (e, stackTrace) {
       developer.log(
-        'AdvisorService gateway insights failed, falling back to local',
+        'AdvisorService AI insights failed, falling back to local',
         error: e,
         stackTrace: stackTrace,
         name: 'AdvisorService',
@@ -83,13 +83,13 @@ class AdvisorService {
     final context = _buildSpendingContext();
 
     try {
-      if (gatewayClient != null) {
-        final recommendations = await _fetchRecommendationsFromGateway(context, lang);
+      if (aiApiService != null) {
+        final recommendations = await _fetchRecommendationsFromAi(context, lang);
         if (recommendations.isNotEmpty) return recommendations;
       }
     } on Exception catch (e, stackTrace) {
       developer.log(
-        'AdvisorService gateway recommendations failed, falling back to local',
+        'AdvisorService AI recommendations failed, falling back to local',
         error: e,
         stackTrace: stackTrace,
         name: 'AdvisorService',
@@ -184,7 +184,7 @@ class AdvisorService {
   // Gateway integration
   // -------------------------------------------------------------------------
 
-  Future<List<core.AiInsight>> _fetchInsightsFromGateway(
+  Future<List<core.AiInsight>> _fetchInsightsFromAi(
     SpendingSummary context,
     String lang,
   ) async {
@@ -196,32 +196,36 @@ class AdvisorService {
       language: lang,
     );
 
-    final response = await gatewayClient!.getAdvice({
-      'prompt': prompt,
-      'monthlyTotal': context.monthlyTotal,
-      'categoryBreakdown': context.categoryBreakdown,
-      'monthlyBudget': context.monthlyBudget,
-      'dailyAverage': context.dailyAverage,
-      'language': lang,
-    });
+    final response = await aiApiService!.getAdvice(prompt);
+    if (response == null || response.isEmpty) return const [];
 
-    final insightsJson = response['insights'] as List<dynamic>?;
-    if (insightsJson == null || insightsJson.isEmpty) return const [];
-
-    return insightsJson.map((json) {
-      final map = json as Map<String, dynamic>;
-      return core.AiInsight(
-        id: 'ai-insight-${DateTime.now().millisecondsSinceEpoch}-${map['title']}',
-        title: map['title'] as String? ?? '',
-        summary: map['summary'] as String? ?? '',
-        severity: map['severity'] as String? ?? 'low',
-        relatedRoute: map['relatedRoute'] as String?,
-        generatedAt: DateTime.now(),
-      );
-    }).toList();
+    // Parse the response - AI returns text, we convert to insights
+    return _parseAiResponseToInsights(response, lang);
   }
 
-  Future<List<core.AiRecommendation>> _fetchRecommendationsFromGateway(
+  List<core.AiInsight> _parseAiResponseToInsights(String response, String lang) {
+    final insights = <core.AiInsight>[];
+    
+    // Simple parsing - split by lines and create insights
+    final lines = response.split('\n').where((l) => l.trim().isNotEmpty).toList();
+    
+    for (var i = 0; i < lines.length && i < 5; i++) {
+      final line = lines[i].trim();
+      if (line.length < 10) continue;
+      
+      insights.add(core.AiInsight(
+        id: 'ai-insight-${DateTime.now().millisecondsSinceEpoch}-$i',
+        title: line.length > 50 ? line.substring(0, 50) : line,
+        summary: line,
+        severity: i == 0 ? 'high' : 'medium',
+        generatedAt: DateTime.now(),
+      ));
+    }
+    
+    return insights;
+  }
+
+  Future<List<core.AiRecommendation>> _fetchRecommendationsFromAi(
     SpendingSummary context,
     String lang,
   ) async {
@@ -233,28 +237,31 @@ class AdvisorService {
       language: lang,
     );
 
-    final response = await gatewayClient!.getAdvice({
-      'prompt': prompt,
-      'monthlyTotal': context.monthlyTotal,
-      'categoryBreakdown': context.categoryBreakdown,
-      'monthlyBudget': context.monthlyBudget,
-      'dailyAverage': context.dailyAverage,
-      'language': lang,
-    });
+    final response = await aiApiService!.getAdvice(prompt);
+    if (response == null || response.isEmpty) return const [];
 
-    final recsJson = response['recommendations'] as List<dynamic>?;
-    if (recsJson == null || recsJson.isEmpty) return const [];
+    return _parseAiResponseToRecommendations(response, lang);
+  }
 
-    return recsJson.map((json) {
-      final map = json as Map<String, dynamic>;
-      return core.AiRecommendation(
-        id: 'ai-rec-${DateTime.now().millisecondsSinceEpoch}-${map['title']}',
-        title: map['title'] as String? ?? '',
-        body: map['body'] as String? ?? '',
-        potentialSavings: (map['potentialSavings'] as num?)?.toDouble() ?? 0.0,
+  List<core.AiRecommendation> _parseAiResponseToRecommendations(String response, String lang) {
+    final recommendations = <core.AiRecommendation>[];
+    
+    final lines = response.split('\n').where((l) => l.trim().isNotEmpty).toList();
+    
+    for (var i = 0; i < lines.length && i < 3; i++) {
+      final line = lines[i].trim();
+      if (line.length < 10) continue;
+      
+      recommendations.add(core.AiRecommendation(
+        id: 'ai-rec-${DateTime.now().millisecondsSinceEpoch}-$i',
+        title: line.length > 50 ? line.substring(0, 50) : line,
+        body: line,
+        potentialSavings: 0.0,
         generatedAt: DateTime.now(),
-      );
-    }).toList();
+      ));
+    }
+    
+    return recommendations;
   }
 
   // -------------------------------------------------------------------------
