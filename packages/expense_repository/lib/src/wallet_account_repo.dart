@@ -10,6 +10,20 @@ abstract class WalletAccountRepository {
 
 abstract class TransferRepository {
   Future<void> createTransfer(Transfer transfer);
+  Future<void> createTransferWithBalanceUpdate({
+    required Transfer transfer,
+    required WalletAccount source,
+    required WalletAccount destination,
+  });
   Future<List<Transfer>> getTransfers();
   Stream<List<Transfer>> watchTransfers();
+}
+
+class WalletTransferException implements Exception {
+  const WalletTransferException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
 }

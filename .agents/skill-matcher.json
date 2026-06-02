@@ -3,11 +3,11 @@
   "matchers": [
     {
       "keywords": ["flutter", "dart", "widget", "screen", "responsive", "layout", "overflow", "material 3"],
-      "skills": ["flutter-build-responsive-layout", "flutter-fix-layout-issues", "flutter-ui-from-design", "ui-only-prototype-guardrails", "dart-run-static-analysis"]
+      "skills": ["production-flutter-app-guardrails", "flutter-build-responsive-layout", "flutter-fix-layout-issues", "flutter-ui-from-design", "flutter-apply-architecture-best-practices", "dart-run-static-analysis"]
     },
     {
       "keywords": ["stitch", "figma", "screenshot", "ui only", "design", "screens", "design tokens"],
-      "skills": ["flutter-ui-from-design", "ui-only-prototype-guardrails", "flutter-add-widget-preview", "flutter-add-widget-test"]
+      "skills": ["production-flutter-app-guardrails", "flutter-ui-from-design", "flutter-build-responsive-layout", "flutter-add-widget-preview", "flutter-add-widget-test"]
     },
     {
       "keywords": ["test", "integration", "qa", "device", "adb", "emulator", "screenshot"],
@@ -24,6 +24,10 @@
     {
       "keywords": ["skill", "mcp", "tool", "install", "automation", "agent setup"],
       "skills": ["agent-tooling-audit"]
+    },
+    {
+      "keywords": ["second agent", "agent review", "solution review", "critique", "validate solution", "راجع الحل", "راجع الخطة", "ايجينت يراجع", "رأي ايجينت"],
+      "skills": ["second-agent-solution-review", "dispatching-parallel-agents"]
     },
     {
       "keywords": ["spec", "plan", "tasks", "feature", "build", "implement"],

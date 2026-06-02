@@ -12,10 +12,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'AI Expenses Tracker';
 
   @override
+  String get appSubtitle => 'Intelligent Financial Clarity';
+
+  @override
   String get splashLoading => 'Loading...';
 
   @override
-  String get onboardingLanguageTitle => 'Select Language';
+  String get splashInitializing => 'Initializing AI engine';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get onboardingLanguageTitle => 'Choose your app language';
+
+  @override
+  String get onboardingLanguageSubtitle => 'You can always change this later in settings.';
 
   @override
   String get onboardingLanguageEnglish => 'English';
@@ -24,17 +36,74 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingLanguageArabic => 'العربية';
 
   @override
-  String get onboardingCurrencyTitle => 'Choose Base Currency';
+  String get onboardingLanguageEnglishRegion => 'United States';
 
   @override
-  String get onboardingNotificationsTitle => 'Stay Informed';
+  String get onboardingLanguageArabicRegion => 'Middle East';
+
+  @override
+  String get onboardingCurrencyTitle => 'Base Currency';
+
+  @override
+  String get onboardingCurrencySubtitle => 'Select your primary currency.';
+
+  @override
+  String get onboardingCurrencyEgyptianPound => 'Egyptian Pound';
+
+  @override
+  String get onboardingCurrencyUsDollar => 'US Dollar';
+
+  @override
+  String get onboardingCurrencyEuro => 'Euro';
+
+  @override
+  String get onboardingCurrencyUaeDirham => 'UAE Dirham';
+
+  @override
+  String get onboardingCurrencyLivePreview => 'Live Preview';
+
+  @override
+  String get onboardingCurrencyEstimatedRate => 'Estimated rate';
+
+  @override
+  String get onboardingStepThree => 'Step 3 of 3';
+
+  @override
+  String get onboardingNotificationsTitle => 'Stay in the Loop';
 
   @override
   String get onboardingNotificationsSubtitle =>
-      'Allow notifications for budget alerts, reminders, and insights';
+      'Get gentle nudges and insightful summaries to keep your budget on track.';
 
   @override
-  String get onboardingEnableNotifications => 'Enable Notifications';
+  String get onboardingDailyReminderTitle => 'Daily Reminder';
+
+  @override
+  String get onboardingDailyReminderSubtitle => 'A quick prompt to log today\'s expenses.';
+
+  @override
+  String get onboardingWeeklyDigestTitle => 'Weekly Digest';
+
+  @override
+  String get onboardingWeeklyDigestSubtitle => 'Your financial health summary, every Sunday.';
+
+  @override
+  String get onboardingNotificationTime => 'Time';
+
+  @override
+  String get onboardingEnableNotifications => 'Allow Notifications';
+
+  @override
+  String get onboardingSaving => 'Saving...';
+
+  @override
+  String get skipForNow => 'Skip for now';
+
+  @override
+  String get expenseReminderTitle => 'Expense reminder';
+
+  @override
+  String get expenseReminderBody => 'Take a minute to log today\'s expenses.';
 
   @override
   String get continueButton => 'Continue';
@@ -46,13 +115,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginTitle => 'Welcome Back';
 
   @override
+  String get loginSubtitle => 'Log in to manage your financial insights.';
+
+  @override
   String get loginEmail => 'Email';
 
   @override
   String get loginPassword => 'Password';
 
   @override
-  String get loginButton => 'Sign In';
+  String get loginButton => 'Log In';
 
   @override
   String get loginGoogleButton => 'Continue with Google';
@@ -61,10 +133,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginNoAccount => 'Don\'t have an account? Sign Up';
 
   @override
+  String get loginFooterLabel => 'Don\'t have an account?';
+
+  @override
+  String get signUpAction => 'Sign up';
+
+  @override
+  String get forgotPassword => 'Forgot password?';
+
+  @override
+  String get securePrivateExpenseTracking => 'Secure private expense tracking.';
+
+  @override
   String get signUpTitle => 'Create Account';
 
   @override
+  String get signUpSubtitle => 'Join AI Expenses Tracker today.';
+
+  @override
   String get signUpName => 'Name';
+
+  @override
+  String get signUpFullName => 'Full Name';
 
   @override
   String get signUpEmail => 'Email';
@@ -82,7 +172,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signUpHaveAccount => 'Already have an account? Sign In';
 
   @override
+  String get signUpFooterLabel => 'Already have an account?';
+
+  @override
+  String get loginAction => 'Log in';
+
+  @override
+  String get signUpTermsPrivacy => 'By signing up, you agree to our Terms & Privacy Policy.';
+
+  @override
+  String get authEnterEmailPassword => 'Please enter email and password';
+
+  @override
+  String get authEnterEmailFirst => 'Enter your email first';
+
+  @override
+  String get authPasswordResetSent => 'Password reset email sent if account exists';
+
+  @override
+  String get authGoogleNotConfigured => 'Google auth is not configured yet';
+
+  @override
+  String get authOrEmail => 'Or email';
+
+  @override
   String get authErrorInvalidEmail => 'Enter a valid email address';
+
+  @override
+  String get authErrorUserDisabled => 'This account has been disabled';
 
   @override
   String get authErrorWrongPassword => 'Email or password is incorrect';
@@ -91,10 +208,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authErrorWeakPassword => 'Password is too weak';
 
   @override
+  String get authErrorWeakPasswordMin => 'Password must be at least 6 characters';
+
+  @override
   String get authErrorEmailInUse => 'An account already exists for this email';
 
   @override
   String get authErrorNetwork => 'Check your internet connection';
+
+  @override
+  String get authErrorOperationNotAllowed => 'This sign-in method is not enabled';
+
+  @override
+  String get authErrorTooManyRequests => 'Too many attempts. Try again later';
 
   @override
   String get authErrorGeneral => 'Authentication failed. Please try again.';
@@ -145,6 +271,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expensesNoResults => 'No expenses found';
 
   @override
+  String get smartAddButtonLabel => 'Add expense';
+
+  @override
+  String get smartAddSheetTitle => 'Add expense';
+
+  @override
+  String get smartAddSheetSubtitle => 'Choose how you want to record this expense.';
+
+  @override
+  String get smartAddClose => 'Close';
+
+  @override
+  String get smartAddAiTextTitle => 'AI text';
+
+  @override
+  String get smartAddAiTextSubtitle =>
+      'Describe the expense in a sentence and review it before saving.';
+
+  @override
+  String get smartAddQuickAddTitle => 'Quick add';
+
+  @override
+  String get smartAddQuickAddSubtitle => 'Enter the amount and details manually.';
+
+  @override
+  String get smartAddReceiptTitle => 'Receipt';
+
+  @override
+  String get smartAddReceiptSubtitle => 'Scan a receipt when the real scanner is ready.';
+
+  @override
+  String get smartAddReceiptUnavailable => 'Unavailable for now';
+
+  @override
   String get addExpenseQuick => 'Add Expense';
 
   @override
@@ -170,6 +330,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addExpenseSave => 'Save Expense';
+
+  @override
+  String get paymentMethodCash => 'Cash';
+
+  @override
+  String get paymentMethodVisaCard => 'Visa/Card';
+
+  @override
+  String get paymentMethodWallet => 'Wallet';
+
+  @override
+  String get paymentMethodBankTransfer => 'Bank Transfer';
+
+  @override
+  String get walletOptional => 'Wallet is optional';
 
   @override
   String get editExpenseTitle => 'Edit Expense';
@@ -301,6 +476,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsCurrency => 'Currency';
 
   @override
+  String get settingsDefaultPaymentMethod => 'Default payment method';
+
+  @override
   String get settingsLanguage => 'Language';
 
   @override
@@ -319,13 +497,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSupport => 'Support';
 
   @override
-  String get settingsExport => 'Export Data';
-
-  @override
   String get settingsAbout => 'About';
 
   @override
   String get settingsLogout => 'Sign Out';
+
+  @override
+  String get settingsLocalOnlyTitle => 'Local-only storage';
+
+  @override
+  String get settingsLocalOnlySubtitle =>
+      'Your financial data is stored on this device, not in cloud backup.';
+
+  @override
+  String get settingsLocalOnlyRisk => 'Deleting the app or losing this phone can remove your data.';
+
+  @override
+  String get aiSummaryConsentInfo =>
+      'AI receives only a small spending summary when you ask for advice.';
 
   @override
   String get profileEditName => 'Edit Name';
@@ -347,15 +536,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get premiumPurchase => 'Upgrade Now';
-
-  @override
-  String get exportCsv => 'Export CSV';
-
-  @override
-  String get exportExcel => 'Export Excel';
-
-  @override
-  String get exportPdf => 'Export PDF';
 
   @override
   String get notFound => 'Page not found';

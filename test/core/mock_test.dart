@@ -1,6 +1,6 @@
-﻿import 'package:flutter_test/flutter_test.dart';
-import 'package:expenses_tracker/core/mock/mock_models.dart';
-import 'package:expenses_tracker/core/mock/mock_data.dart';
+import 'package:flutter_test/flutter_test.dart';
+import '../fixtures/core_mock/mock_data.dart';
+import '../fixtures/core_mock/mock_models.dart';
 
 void main() {
   group('MockModels', () {
@@ -21,7 +21,13 @@ void main() {
     });
 
     test('MockGoal computes progress correctly', () {
-      const goal = MockGoal(id: 'g1', title: 'Car', targetAmount: 8000, savedAmount: 3200, deadlineLabel: 'Dec');
+      const goal = MockGoal(
+        id: 'g1',
+        title: 'Car',
+        targetAmount: 8000,
+        savedAmount: 3200,
+        deadlineLabel: 'Dec',
+      );
       expect(goal.progress, 0.4);
     });
   });

@@ -30,6 +30,8 @@ export interface ParseExpenseDependencies {
 }
 
 const requestType: AiRequestType = "parse_text";
+const maxParseInputChars = 2000;
+const maxParsePayloadBytes = 16 * 1024;
 
 export async function handleParseExpense(
   request: Request,
@@ -139,14 +141,27 @@ export async function handleParseExpense(
   }
 }
 
-export function validateParseRequestBody(body: unknown): AiGatewayRequestBody {
+export function validateParseRequestBody(
+  body: unknown,
+  limits: {
+    maxInputChars?: number;
+    maxPayloadBytes?: number;
+  } = {},
+): AiGatewayRequestBody {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     throw new AiGatewayError("invalid_request", "Request body is required.", 400);
   }
   const candidate = body as Record<string, unknown>;
+  const payloadBytes = new TextEncoder().encode(JSON.stringify(candidate)).length;
+  if (payloadBytes > (limits.maxPayloadBytes ?? maxParsePayloadBytes)) {
+    throw new AiGatewayError("invalid_request", "Parse payload is too large.", 413);
+  }
   const input = readTrimmedString(candidate.input);
   if (!input) {
     throw new AiGatewayError("invalid_request", "Input is required.", 400);
+  }
+  if (input.length > (limits.maxInputChars ?? maxParseInputChars)) {
+    throw new AiGatewayError("invalid_request", "Input is too large.", 413);
   }
 
   const now = readTrimmedString(candidate.now);

@@ -10,6 +10,7 @@ import 'package:expenses_tracker/core/widgets/glass_card.dart';
 import 'package:expenses_tracker/core/widgets/gradient_button.dart';
 import 'package:expenses_tracker/features/onboarding/onboarding_cubit/onboarding_cubit.dart';
 import 'package:expenses_tracker/app/routes.dart';
+import 'package:expenses_tracker/l10n/app_localizations.dart';
 
 class BaseCurrencyScreen extends StatefulWidget {
   const BaseCurrencyScreen({super.key});
@@ -22,14 +23,15 @@ class _BaseCurrencyScreenState extends State<BaseCurrencyScreen> {
   String _selectedCurrency = 'EGP';
 
   static const _currencies = [
-    _CurrencyOption(code: 'EGP', name: 'Egyptian Pound', flag: 'EG'),
-    _CurrencyOption(code: 'USD', name: 'US Dollar', flag: 'US'),
-    _CurrencyOption(code: 'EUR', name: 'Euro', flag: 'EU'),
-    _CurrencyOption(code: 'AED', name: 'UAE Dirham', flag: 'AE'),
+    _CurrencyOption(code: 'EGP', flag: 'EG'),
+    _CurrencyOption(code: 'USD', flag: 'US'),
+    _CurrencyOption(code: 'EUR', flag: 'EU'),
+    _CurrencyOption(code: 'AED', flag: 'AE'),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: AppBackground(
         child: SafeArea(
@@ -50,7 +52,11 @@ class _BaseCurrencyScreenState extends State<BaseCurrencyScreen> {
                           color: AppColors.surfaceContainerHigh,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.arrow_back, size: 20, color: AppColors.onSurfaceVariant),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          size: 20,
+                          color: AppColors.onSurfaceVariant,
+                        ),
                       ),
                     ),
                     const Spacer(),
@@ -70,13 +76,13 @@ class _BaseCurrencyScreenState extends State<BaseCurrencyScreen> {
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 Text(
-                  'Base Currency',
+                  l10n.onboardingCurrencyTitle,
                   style: AppTextStyles.displayMobile.copyWith(color: AppColors.onSurface),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  'Select your primary currency.',
+                  l10n.onboardingCurrencySubtitle,
                   style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant),
                   textAlign: TextAlign.center,
                 ),
@@ -121,8 +127,10 @@ class _BaseCurrencyScreenState extends State<BaseCurrencyScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              currency.name,
-                              style: AppTextStyles.labelCaps.copyWith(color: AppColors.onSurfaceVariant),
+                              currency.localizedName(l10n),
+                              style: AppTextStyles.labelCaps.copyWith(
+                                color: AppColors.onSurfaceVariant,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -136,7 +144,7 @@ class _BaseCurrencyScreenState extends State<BaseCurrencyScreen> {
                 _LivePreviewCard(selectedCurrency: _selectedCurrency),
                 const SizedBox(height: AppSpacing.lg),
                 GradientButton(
-                  label: 'Continue',
+                  label: l10n.continueButton,
                   onPressed: () {
                     context.read<OnboardingCubit>().setCurrency(_selectedCurrency);
                     context.go(AppRoutes.onboardingNotifications);
@@ -154,9 +162,23 @@ class _BaseCurrencyScreenState extends State<BaseCurrencyScreen> {
 
 class _CurrencyOption {
   final String code;
-  final String name;
   final String flag;
-  const _CurrencyOption({required this.code, required this.name, required this.flag});
+  const _CurrencyOption({required this.code, required this.flag});
+
+  String localizedName(AppLocalizations l10n) {
+    switch (code) {
+      case 'EGP':
+        return l10n.onboardingCurrencyEgyptianPound;
+      case 'USD':
+        return l10n.onboardingCurrencyUsDollar;
+      case 'EUR':
+        return l10n.onboardingCurrencyEuro;
+      case 'AED':
+        return l10n.onboardingCurrencyUaeDirham;
+      default:
+        return code;
+    }
+  }
 }
 
 class _ProgressDot extends StatelessWidget {
@@ -183,6 +205,7 @@ class _LivePreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return GlassCard(
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
@@ -190,7 +213,10 @@ class _LivePreviewCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text('Live Preview', style: AppTextStyles.labelCaps.copyWith(color: AppColors.onSurfaceVariant)),
+              Text(
+                l10n.onboardingCurrencyLivePreview,
+                style: AppTextStyles.labelCaps.copyWith(color: AppColors.onSurfaceVariant),
+              ),
               const Spacer(),
               const Icon(Icons.auto_awesome, size: 16, color: AppColors.secondaryContainer),
             ],
@@ -217,8 +243,10 @@ class _LivePreviewCard extends StatelessWidget {
           Align(
             alignment: AlignmentDirectional.centerEnd,
             child: Text(
-              'Estimated rate',
-              style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant.withAlpha(153)),
+              l10n.onboardingCurrencyEstimatedRate,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.onSurfaceVariant.withAlpha(153),
+              ),
             ),
           ),
         ],

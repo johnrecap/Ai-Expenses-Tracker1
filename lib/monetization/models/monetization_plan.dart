@@ -1,13 +1,21 @@
 import 'package:equatable/equatable.dart';
 
-enum PlanTier { free, premium, unknown, pending;
+enum PlanTier {
+  free,
+  premium,
+  unknown,
+  pending;
 
   String get label {
     switch (this) {
-      case PlanTier.free: return 'Free';
-      case PlanTier.premium: return 'Premium';
-      case PlanTier.unknown: return 'Unknown';
-      case PlanTier.pending: return 'Pending';
+      case PlanTier.free:
+        return 'Free';
+      case PlanTier.premium:
+        return 'Premium';
+      case PlanTier.unknown:
+        return 'Unknown';
+      case PlanTier.pending:
+        return 'Pending';
     }
   }
 
@@ -16,8 +24,12 @@ enum PlanTier { free, premium, unknown, pending;
 
 class MonetizationPlan extends Equatable {
   const MonetizationPlan({
-    required this.tier, required this.title, required this.summary,
-    required this.features, required this.adsEnabled, required this.premiumCtaEnabled,
+    required this.tier,
+    required this.title,
+    required this.summary,
+    required this.features,
+    required this.adsEnabled,
+    required this.premiumCtaEnabled,
   });
 
   final PlanTier tier;
@@ -28,27 +40,31 @@ class MonetizationPlan extends Equatable {
   final bool premiumCtaEnabled;
 
   static const free = MonetizationPlan(
-    tier: PlanTier.free, title: 'Free',
-    summary: 'Manual tracking, core reports, budgets, export, and limited AI.',
+    tier: PlanTier.free,
+    title: 'Free',
+    summary: 'Manual tracking, core reports, budgets, local storage, and limited AI.',
     features: [
       'Manual expense tracking stays available',
-      'Categories, budgets, basic reports, and offline sync',
+      'Categories, budgets, and basic reports stay on this device',
       'AI parse 5/day, receipts 3/day, advice 3/day',
-      'Polite ads after consent',
+      'Ads may appear only in non-blocking placements after a real ad provider is connected',
     ],
-    adsEnabled: true, premiumCtaEnabled: true,
+    adsEnabled: false,
+    premiumCtaEnabled: false,
   );
 
   static const premium = MonetizationPlan(
-    tier: PlanTier.premium, title: 'Premium',
-    summary: 'No ads, higher AI limits, deeper reports, and richer exports.',
+    tier: PlanTier.premium,
+    title: 'Premium',
+    summary: 'Planned upgrade after store billing and the local entitlement cache are connected.',
     features: [
-      'No ads after entitlement is confirmed',
+      'No ads while premium entitlement is active',
       'Higher AI limits, still finite and policy-backed',
       'Advanced reports and deeper month comparisons',
-      'Larger export ranges and premium insights later',
+      'Premium insights after store purchase state is connected',
     ],
-    adsEnabled: false, premiumCtaEnabled: false,
+    adsEnabled: false,
+    premiumCtaEnabled: false,
   );
 
   @override

@@ -159,6 +159,7 @@ service cloud.firestore {
     function validExpenseSource(value) {
       return value == 'manual'
         || value == 'ai'
+        || value == 'aiText'
         || value == 'recurring'
         || value == 'receipt';
     }
@@ -585,13 +586,30 @@ service cloud.firestore {
         && hasOnly(value, [
           'budgetAlerts',
           'recurringReminders',
+          'subscriptionRenewals',
+          'weeklyDigest',
+          'aiQuotaWarnings',
+          'dailyReminder',
+          'dailyReminderTime',
         ])
         && hasAll(value, [
           'budgetAlerts',
           'recurringReminders',
+          'subscriptionRenewals',
+          'weeklyDigest',
+          'aiQuotaWarnings',
+          'dailyReminder',
         ])
         && value.budgetAlerts is bool
-        && value.recurringReminders is bool;
+        && value.recurringReminders is bool
+        && value.subscriptionRenewals is bool
+        && value.weeklyDigest is bool
+        && value.aiQuotaWarnings is bool
+        && value.dailyReminder is bool
+        && (!('dailyReminderTime' in value)
+          || value.dailyReminderTime == null
+          || (value.dailyReminderTime is string
+            && value.dailyReminderTime.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$')));
     }
 
     function validSettings(data, userId) {

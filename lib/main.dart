@@ -2,42 +2,50 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:expense_repository/expense_repository.dart';
 import 'app/app.dart';
 import 'services/analytics/analytics_service.dart';
+import 'services/notifications/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // تحميل متغيرات البيئة
-  try {
-    await dotenv.load(fileName: '.env');
-  } catch (e) {
-    debugPrint('Warning: .env file not found. Using default values.');
-  }
 
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
   };
 
+  final runtimeMode = RepositoryRuntimeMode.fromEnvironment();
+  var firebaseInitialized = false;
   try {
     await Firebase.initializeApp();
+    firebaseInitialized = true;
   } catch (e) {
-    runApp(_FirebaseErrorApp(error: e));
-    return;
+    if (runtimeMode != RepositoryRuntimeMode.localOnly) {
+      runApp(_FirebaseErrorApp(error: e));
+      return;
+    }
+    debugPrint('Firebase init skipped in local-only mode: $e');
+  }
+
+  if (firebaseInitialized) {
+    try {
+      await AnalyticsService.instance.initialize();
+    } catch (e) {
+      debugPrint('Analytics init failed (403 likely = API not enabled in console): $e');
+    }
   }
 
   try {
-    await AnalyticsService.instance.initialize();
+    await NotificationService.instance.initialize();
   } catch (e) {
-    debugPrint('Analytics init failed (403 likely = API not enabled in console): $e');
+    debugPrint('Notification init failed: $e');
   }
 
   if (kDebugMode) {
     Bloc.observer = DebugBlocObserver();
   }
 
-  runApp(const App());
+  runApp(App(firebaseInitialized: firebaseInitialized));
 }
 
 class _FirebaseErrorApp extends StatelessWidget {
@@ -56,13 +64,22 @@ class _FirebaseErrorApp extends StatelessWidget {
               children: [
                 const Icon(Icons.cloud_off, size: 64, color: Colors.red),
                 const SizedBox(height: 24),
-                const Text('Connection Failed', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                const Text(
+                  'Connection Failed',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 12),
-                Text('Could not connect to Firebase. Check your internet connection.',
+                Text(
+                  'Could not connect to Firebase. Check your internet connection.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                ),
                 const SizedBox(height: 8),
-                Text('$error', style: TextStyle(color: Colors.grey[400], fontSize: 12), textAlign: TextAlign.center),
+                Text(
+                  '$error',
+                  style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: 32),
                 ElevatedButton.icon(
                   onPressed: () async {
@@ -70,7 +87,9 @@ class _FirebaseErrorApp extends StatelessWidget {
                       await Firebase.initializeApp();
                       if (context.mounted) {
                         Navigator.of(context).pushReplacement(
-                          MaterialPageRoute<void>(builder: (_) => const App()),
+                          MaterialPageRoute<void>(
+                            builder: (_) => const App(firebaseInitialized: true),
+                          ),
                         );
                       }
                     } catch (_) {}

@@ -13,18 +13,25 @@ void main() {
   test('GetExpensesBloc refresh emits success', () async {
     final bloc = GetExpensesBloc(_MockExpenseRepo());
     bloc.add(RefreshExpenses());
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     expect(bloc.state, isA<GetExpensesSuccess>());
     bloc.close();
   });
 }
 
 class _MockExpenseRepo implements ExpenseRepository {
-  @override Future<void> createExpense(Expense e) async {}
-  @override Future<void> updateExpense(Expense e) async {}
-  @override Future<void> deleteExpense(String id) async {}
-  @override Future<Expense?> getExpenseById(String id) async => null;
-  @override Future<List<Expense>> getExpenses() async => [];
-  @override Stream<List<Expense>> watchExpenses() => Stream.value([]);
-  @override Future<List<Expense>> getExpensesByFilter(ExpenseFilter f) async => [];
+  @override
+  Future<void> createExpense(Expense e) async {}
+  @override
+  Future<void> updateExpense(Expense e) async {}
+  @override
+  Future<void> deleteExpense(String id) async {}
+  @override
+  Future<Expense?> getExpenseById(String id) async => null;
+  @override
+  Future<List<Expense>> getExpenses() async => [];
+  @override
+  Stream<List<Expense>> watchExpenses() => Stream.value([]);
+  @override
+  Future<List<Expense>> getExpensesByFilter(ExpenseFilter f) async => [];
 }

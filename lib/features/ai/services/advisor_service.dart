@@ -1,8 +1,5 @@
-import 'dart:developer' as developer;
-
 import 'package:expense_repository/expense_repository.dart';
 
-import '../../../core/ai/ai_prompts.dart';
 import '../../../core/ai/language_detector.dart';
 import '../../../core/ai/models/ai_insight.dart' as core;
 import '../../../core/ai/models/ai_recommendation.dart' as core;
@@ -13,11 +10,9 @@ import 'ai_api_service.dart';
 /// user's actual spending history stored in the local Drift database.
 ///
 /// The service calculates aggregates (monthly totals, category breakdowns,
-/// daily averages) from existing [expenses] and [budget] tables, then either:
-///
-/// 1. Sends a structured prompt to the AI gateway for rich, natural-language
-///    insights, or
-/// 2. Falls back to locally-generated insights when the gateway is unavailable.
+/// daily averages) from existing [expenses] and [budget] tables, then returns
+/// locally-generated insights. Legacy prompt-based remote advice is disabled;
+/// production remote advice must use the compact-summary `AiAdviceScreen` flow.
 ///
 /// All insights include a confidence / severity score and an estimated
 /// potential savings amount.
@@ -26,25 +21,24 @@ class AdvisorService {
   /// Creates an [AdvisorService].
   ///
   /// [store] provides synchronous access to the local Drift-backed data.
-  /// [aiApiService] is optional; when `null` a default [AiApiService] is
-  /// created so the service always attempts to route through the proxy.
+  /// [aiApiService] is retained only for older callers. It is not used for
+  /// prompt-based remote advice.
   /// [languageDetector] decides whether to return Arabic or English content.
   AdvisorService({
     required this.store,
     AiApiService? aiApiService,
     LanguageDetector? languageDetector,
-  })  : aiApiService = aiApiService ?? AiApiService(),
-        _prompts = AiPrompts(
-          languageDetector: languageDetector ?? const LanguageDetector(),
-        );
+  })  : legacyAiApiService = aiApiService,
+        legacyLanguageDetector = languageDetector;
 
   /// The local store interface backed by Drift (SQLite).
   final LocalStoreInterface store;
 
-  /// Optional AI API service for rich natural-language insights.
-  final AiApiService? aiApiService;
+  /// Retained for compatibility; prompt-based remote advice is disabled.
+  final AiApiService? legacyAiApiService;
 
-  final AiPrompts _prompts;
+  /// Retained for compatibility with older constructors.
+  final LanguageDetector? legacyLanguageDetector;
 
   // -------------------------------------------------------------------------
   // Public API
@@ -58,21 +52,6 @@ class AdvisorService {
   Future<List<core.AiInsight>> getInsights({String? language}) async {
     final lang = language ?? _detectUserLanguage();
     final context = _buildSpendingContext();
-
-    try {
-      if (aiApiService != null) {
-        final insights = await _fetchInsightsFromAi(context, lang);
-        if (insights.isNotEmpty) return insights;
-      }
-    } on Exception catch (e, stackTrace) {
-      developer.log(
-        'AdvisorService AI insights failed, falling back to local',
-        error: e,
-        stackTrace: stackTrace,
-        name: 'AdvisorService',
-      );
-    }
-
     return _generateLocalInsights(context, lang);
   }
 
@@ -82,25 +61,8 @@ class AdvisorService {
   Future<List<core.AiRecommendation>> getRecommendations({String? language}) async {
     final lang = language ?? _detectUserLanguage();
     final context = _buildSpendingContext();
-
-    try {
-      if (aiApiService != null) {
-        final recommendations = await _fetchRecommendationsFromAi(context, lang);
-        if (recommendations.isNotEmpty) return recommendations;
-      }
-    } on Exception catch (e, stackTrace) {
-      developer.log(
-        'AdvisorService AI recommendations failed, falling back to local',
-        error: e,
-        stackTrace: stackTrace,
-        name: 'AdvisorService',
-      );
-    }
-
     return _generateLocalRecommendations(context, lang);
   }
-
-  /// Returns a quick spending summary suitable for displaying in a dashboard
   /// card or chat bubble.
   SpendingSummary getSpendingSummary() {
     return _buildSpendingContext();
@@ -179,90 +141,6 @@ class AdvisorService {
       allTimeTotal: allTimeTotal,
       expenseCount: monthlyExpenses.length,
     );
-  }
-
-  // -------------------------------------------------------------------------
-  // Gateway integration
-  // -------------------------------------------------------------------------
-
-  Future<List<core.AiInsight>> _fetchInsightsFromAi(
-    SpendingSummary context,
-    String lang,
-  ) async {
-    final prompt = _prompts.advisor(
-      monthlyTotal: context.monthlyTotal,
-      categoryBreakdown: context.categoryBreakdown,
-      monthlyBudget: context.monthlyBudget,
-      dailyAverage: context.dailyAverage,
-      language: lang,
-    );
-
-    final response = await aiApiService!.getAdvice(prompt);
-    if (response == null || response.isEmpty) return const [];
-
-    // Parse the response - AI returns text, we convert to insights
-    return _parseAiResponseToInsights(response, lang);
-  }
-
-  List<core.AiInsight> _parseAiResponseToInsights(String response, String lang) {
-    final insights = <core.AiInsight>[];
-    
-    // Simple parsing - split by lines and create insights
-    final lines = response.split('\n').where((l) => l.trim().isNotEmpty).toList();
-    
-    for (var i = 0; i < lines.length && i < 5; i++) {
-      final line = lines[i].trim();
-      if (line.length < 10) continue;
-      
-      insights.add(core.AiInsight(
-        id: 'ai-insight-${DateTime.now().millisecondsSinceEpoch}-$i',
-        title: line.length > 50 ? line.substring(0, 50) : line,
-        summary: line,
-        severity: i == 0 ? 'high' : 'medium',
-        generatedAt: DateTime.now(),
-      ));
-    }
-    
-    return insights;
-  }
-
-  Future<List<core.AiRecommendation>> _fetchRecommendationsFromAi(
-    SpendingSummary context,
-    String lang,
-  ) async {
-    final prompt = _prompts.advisor(
-      monthlyTotal: context.monthlyTotal,
-      categoryBreakdown: context.categoryBreakdown,
-      monthlyBudget: context.monthlyBudget,
-      dailyAverage: context.dailyAverage,
-      language: lang,
-    );
-
-    final response = await aiApiService!.getAdvice(prompt);
-    if (response == null || response.isEmpty) return const [];
-
-    return _parseAiResponseToRecommendations(response, lang);
-  }
-
-  List<core.AiRecommendation> _parseAiResponseToRecommendations(String response, String lang) {
-    final recommendations = <core.AiRecommendation>[];
-    
-    final lines = response.split('\n').where((l) => l.trim().isNotEmpty).toList();
-    
-    for (var i = 0; i < lines.length && i < 3; i++) {
-      final line = lines[i].trim();
-      if (line.length < 10) continue;
-      
-      recommendations.add(core.AiRecommendation(
-        id: 'ai-rec-${DateTime.now().millisecondsSinceEpoch}-$i',
-        title: line.length > 50 ? line.substring(0, 50) : line,
-        body: line,
-        potentialSavings: 0.0,
-        generatedAt: DateTime.now(),
-      ));
-    }
-    
-    return recommendations;
   }
 
   // -------------------------------------------------------------------------

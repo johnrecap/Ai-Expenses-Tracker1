@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:expenses_tracker/core/theme/app_colors.dart';
@@ -9,6 +9,7 @@ import 'package:expenses_tracker/core/widgets/glass_card.dart';
 import 'package:expenses_tracker/core/widgets/gradient_button.dart';
 import 'package:expenses_tracker/features/onboarding/onboarding_cubit/onboarding_cubit.dart';
 import 'package:expenses_tracker/app/routes.dart';
+import 'package:expenses_tracker/l10n/app_localizations.dart';
 
 class OnboardingLanguageScreen extends StatefulWidget {
   const OnboardingLanguageScreen({super.key});
@@ -22,6 +23,7 @@ class _OnboardingLanguageScreenState extends State<OnboardingLanguageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: AppBackground(
         child: SafeArea(
@@ -42,13 +44,13 @@ class _OnboardingLanguageScreenState extends State<OnboardingLanguageScreen> {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Text(
-                  'Choose your app language',
+                  l10n.onboardingLanguageTitle,
                   style: AppTextStyles.headlineMedium.copyWith(color: AppColors.onSurface),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  'You can always change this later in settings.',
+                  l10n.onboardingLanguageSubtitle,
                   style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurfaceVariant),
                   textAlign: TextAlign.center,
                 ),
@@ -57,16 +59,16 @@ class _OnboardingLanguageScreenState extends State<OnboardingLanguageScreen> {
                   child: ListView(
                     children: [
                       _LanguageCard(
-                        title: 'English',
-                        subtitle: 'United States',
+                        title: l10n.onboardingLanguageEnglish,
+                        subtitle: l10n.onboardingLanguageEnglishRegion,
                         iconData: Icons.language,
                         isSelected: _isEnglish,
                         onTap: () => setState(() => _isEnglish = true),
                       ),
                       const SizedBox(height: AppSpacing.md),
                       _LanguageCard(
-                        title: 'العربية',
-                        subtitle: 'الشرق الأوسط',
+                        title: l10n.onboardingLanguageArabic,
+                        subtitle: l10n.onboardingLanguageArabicRegion,
                         iconData: Icons.language,
                         isSelected: !_isEnglish,
                         onTap: () => setState(() => _isEnglish = false),
@@ -77,7 +79,7 @@ class _OnboardingLanguageScreenState extends State<OnboardingLanguageScreen> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.xl),
                   child: GradientButton(
-                    label: 'Continue',
+                    label: l10n.continueButton,
                     onPressed: () {
                       context.read<OnboardingCubit>().setLanguage(_isEnglish ? 'en' : 'ar');
                       context.go(AppRoutes.onboardingCurrency);
@@ -112,9 +114,7 @@ class _LanguageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GlassCard(
       onTap: onTap,
-      fillColor: isSelected
-          ? AppColors.primaryContainer.withAlpha(25)
-          : AppColors.glassCardFill,
+      fillColor: isSelected ? AppColors.primaryContainer.withAlpha(25) : AppColors.glassCardFill,
       borderColor: isSelected ? AppColors.primary : AppColors.glassCardBorder,
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),

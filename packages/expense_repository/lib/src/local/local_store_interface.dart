@@ -8,10 +8,12 @@ import 'package:expense_repository/expense_repository.dart';
 abstract class LocalStoreInterface {
   String get userId;
   int get expensesLoadedVersion;
+  Future<void> get ready;
 
   // -- properties
   List<Expense> get expenses;
   List<Category> get categories;
+  List<Budget> get budgets;
   Budget? get budget;
   UserSettings? get settings;
   List<SavingGoal> get goals;
@@ -38,21 +40,22 @@ abstract class LocalStoreInterface {
   Stream<List<SyncChange>> watchPendingChanges();
 
   // -- mutations
-  void upsertExpense(Expense e);
-  void deleteExpense(String id);
-  void upsertCategory(Category c);
-  void upsertBudget(Budget b);
-  void upsertSettings(UserSettings s);
-  void upsertGoal(SavingGoal g);
-  void deleteGoal(String id);
-  void upsertWallet(WalletAccount w);
-  void upsertTransfer(Transfer t);
-  void upsertCategoryBudget(CategoryBudget b);
-  void upsertCategoryAlias(CategoryAlias a);
-  void deleteCategoryAlias(String id);
-  void upsertRecurringExpense(RecurringExpense e);
-  void deleteRecurringExpense(String id);
-  void upsertAiActionLog(AiActionLog l);
+  Future<void> upsertExpense(Expense e);
+  Future<void> deleteExpense(String id);
+  Future<void> upsertCategory(Category c);
+  Future<void> upsertBudget(Budget b);
+  Future<void> upsertSettings(UserSettings s);
+  Future<void> upsertGoal(SavingGoal g);
+  Future<void> deleteGoal(String id);
+  Future<void> upsertWallet(WalletAccount w);
+  Future<void> upsertTransfer(Transfer t);
+  Future<void> upsertCategoryBudget(CategoryBudget b);
+  Future<void> upsertCategoryAlias(CategoryAlias a);
+  Future<void> deleteCategoryAlias(String id);
+  Future<void> upsertRecurringExpense(RecurringExpense e);
+  Future<void> deleteRecurringExpense(String id);
+  Future<void> upsertAiActionLog(AiActionLog l);
+  Future<void> applyRemoteChange(SyncChange change);
   void markUploadedChanges(List<String> ids);
   void markSyncChangesUpdated();
 }

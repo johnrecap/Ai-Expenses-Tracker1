@@ -99,17 +99,41 @@ abstract class AppLocalizations {
   /// **'AI Expenses Tracker'**
   String get appTitle;
 
+  /// No description provided for @appSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Intelligent Financial Clarity'**
+  String get appSubtitle;
+
   /// No description provided for @splashLoading.
   ///
   /// In en, this message translates to:
   /// **'Loading...'**
   String get splashLoading;
 
+  /// No description provided for @splashInitializing.
+  ///
+  /// In en, this message translates to:
+  /// **'Initializing AI engine'**
+  String get splashInitializing;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
   /// No description provided for @onboardingLanguageTitle.
   ///
   /// In en, this message translates to:
-  /// **'Select Language'**
+  /// **'Choose your app language'**
   String get onboardingLanguageTitle;
+
+  /// No description provided for @onboardingLanguageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You can always change this later in settings.'**
+  String get onboardingLanguageSubtitle;
 
   /// No description provided for @onboardingLanguageEnglish.
   ///
@@ -123,29 +147,143 @@ abstract class AppLocalizations {
   /// **'العربية'**
   String get onboardingLanguageArabic;
 
+  /// No description provided for @onboardingLanguageEnglishRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'United States'**
+  String get onboardingLanguageEnglishRegion;
+
+  /// No description provided for @onboardingLanguageArabicRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle East'**
+  String get onboardingLanguageArabicRegion;
+
   /// No description provided for @onboardingCurrencyTitle.
   ///
   /// In en, this message translates to:
-  /// **'Choose Base Currency'**
+  /// **'Base Currency'**
   String get onboardingCurrencyTitle;
+
+  /// No description provided for @onboardingCurrencySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select your primary currency.'**
+  String get onboardingCurrencySubtitle;
+
+  /// No description provided for @onboardingCurrencyEgyptianPound.
+  ///
+  /// In en, this message translates to:
+  /// **'Egyptian Pound'**
+  String get onboardingCurrencyEgyptianPound;
+
+  /// No description provided for @onboardingCurrencyUsDollar.
+  ///
+  /// In en, this message translates to:
+  /// **'US Dollar'**
+  String get onboardingCurrencyUsDollar;
+
+  /// No description provided for @onboardingCurrencyEuro.
+  ///
+  /// In en, this message translates to:
+  /// **'Euro'**
+  String get onboardingCurrencyEuro;
+
+  /// No description provided for @onboardingCurrencyUaeDirham.
+  ///
+  /// In en, this message translates to:
+  /// **'UAE Dirham'**
+  String get onboardingCurrencyUaeDirham;
+
+  /// No description provided for @onboardingCurrencyLivePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Live Preview'**
+  String get onboardingCurrencyLivePreview;
+
+  /// No description provided for @onboardingCurrencyEstimatedRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated rate'**
+  String get onboardingCurrencyEstimatedRate;
+
+  /// No description provided for @onboardingStepThree.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 3 of 3'**
+  String get onboardingStepThree;
 
   /// No description provided for @onboardingNotificationsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Stay Informed'**
+  /// **'Stay in the Loop'**
   String get onboardingNotificationsTitle;
 
   /// No description provided for @onboardingNotificationsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Allow notifications for budget alerts, reminders, and insights'**
+  /// **'Get gentle nudges and insightful summaries to keep your budget on track.'**
   String get onboardingNotificationsSubtitle;
+
+  /// No description provided for @onboardingDailyReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Reminder'**
+  String get onboardingDailyReminderTitle;
+
+  /// No description provided for @onboardingDailyReminderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A quick prompt to log today\'s expenses.'**
+  String get onboardingDailyReminderSubtitle;
+
+  /// No description provided for @onboardingWeeklyDigestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Digest'**
+  String get onboardingWeeklyDigestTitle;
+
+  /// No description provided for @onboardingWeeklyDigestSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your financial health summary, every Sunday.'**
+  String get onboardingWeeklyDigestSubtitle;
+
+  /// No description provided for @onboardingNotificationTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get onboardingNotificationTime;
 
   /// No description provided for @onboardingEnableNotifications.
   ///
   /// In en, this message translates to:
-  /// **'Enable Notifications'**
+  /// **'Allow Notifications'**
   String get onboardingEnableNotifications;
+
+  /// No description provided for @onboardingSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get onboardingSaving;
+
+  /// No description provided for @skipForNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get skipForNow;
+
+  /// No description provided for @expenseReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense reminder'**
+  String get expenseReminderTitle;
+
+  /// No description provided for @expenseReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a minute to log today\'s expenses.'**
+  String get expenseReminderBody;
 
   /// No description provided for @continueButton.
   ///
@@ -165,6 +303,12 @@ abstract class AppLocalizations {
   /// **'Welcome Back'**
   String get loginTitle;
 
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to manage your financial insights.'**
+  String get loginSubtitle;
+
   /// No description provided for @loginEmail.
   ///
   /// In en, this message translates to:
@@ -180,7 +324,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginButton.
   ///
   /// In en, this message translates to:
-  /// **'Sign In'**
+  /// **'Log In'**
   String get loginButton;
 
   /// No description provided for @loginGoogleButton.
@@ -195,17 +339,53 @@ abstract class AppLocalizations {
   /// **'Don\'t have an account? Sign Up'**
   String get loginNoAccount;
 
+  /// No description provided for @loginFooterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account?'**
+  String get loginFooterLabel;
+
+  /// No description provided for @signUpAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up'**
+  String get signUpAction;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPassword;
+
+  /// No description provided for @securePrivateExpenseTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure private expense tracking.'**
+  String get securePrivateExpenseTracking;
+
   /// No description provided for @signUpTitle.
   ///
   /// In en, this message translates to:
   /// **'Create Account'**
   String get signUpTitle;
 
+  /// No description provided for @signUpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join AI Expenses Tracker today.'**
+  String get signUpSubtitle;
+
   /// No description provided for @signUpName.
   ///
   /// In en, this message translates to:
   /// **'Name'**
   String get signUpName;
+
+  /// No description provided for @signUpFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get signUpFullName;
 
   /// No description provided for @signUpEmail.
   ///
@@ -237,11 +417,65 @@ abstract class AppLocalizations {
   /// **'Already have an account? Sign In'**
   String get signUpHaveAccount;
 
+  /// No description provided for @signUpFooterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account?'**
+  String get signUpFooterLabel;
+
+  /// No description provided for @loginAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in'**
+  String get loginAction;
+
+  /// No description provided for @signUpTermsPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'By signing up, you agree to our Terms & Privacy Policy.'**
+  String get signUpTermsPrivacy;
+
+  /// No description provided for @authEnterEmailPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter email and password'**
+  String get authEnterEmailPassword;
+
+  /// No description provided for @authEnterEmailFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email first'**
+  String get authEnterEmailFirst;
+
+  /// No description provided for @authPasswordResetSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset email sent if account exists'**
+  String get authPasswordResetSent;
+
+  /// No description provided for @authGoogleNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Google auth is not configured yet'**
+  String get authGoogleNotConfigured;
+
+  /// No description provided for @authOrEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Or email'**
+  String get authOrEmail;
+
   /// No description provided for @authErrorInvalidEmail.
   ///
   /// In en, this message translates to:
   /// **'Enter a valid email address'**
   String get authErrorInvalidEmail;
+
+  /// No description provided for @authErrorUserDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'This account has been disabled'**
+  String get authErrorUserDisabled;
 
   /// No description provided for @authErrorWrongPassword.
   ///
@@ -255,6 +489,12 @@ abstract class AppLocalizations {
   /// **'Password is too weak'**
   String get authErrorWeakPassword;
 
+  /// No description provided for @authErrorWeakPasswordMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get authErrorWeakPasswordMin;
+
   /// No description provided for @authErrorEmailInUse.
   ///
   /// In en, this message translates to:
@@ -266,6 +506,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check your internet connection'**
   String get authErrorNetwork;
+
+  /// No description provided for @authErrorOperationNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'This sign-in method is not enabled'**
+  String get authErrorOperationNotAllowed;
+
+  /// No description provided for @authErrorTooManyRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Try again later'**
+  String get authErrorTooManyRequests;
 
   /// No description provided for @authErrorGeneral.
   ///
@@ -363,6 +615,72 @@ abstract class AppLocalizations {
   /// **'No expenses found'**
   String get expensesNoResults;
 
+  /// No description provided for @smartAddButtonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add expense'**
+  String get smartAddButtonLabel;
+
+  /// No description provided for @smartAddSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add expense'**
+  String get smartAddSheetTitle;
+
+  /// No description provided for @smartAddSheetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how you want to record this expense.'**
+  String get smartAddSheetSubtitle;
+
+  /// No description provided for @smartAddClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get smartAddClose;
+
+  /// No description provided for @smartAddAiTextTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI text'**
+  String get smartAddAiTextTitle;
+
+  /// No description provided for @smartAddAiTextSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the expense in a sentence and review it before saving.'**
+  String get smartAddAiTextSubtitle;
+
+  /// No description provided for @smartAddQuickAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick add'**
+  String get smartAddQuickAddTitle;
+
+  /// No description provided for @smartAddQuickAddSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the amount and details manually.'**
+  String get smartAddQuickAddSubtitle;
+
+  /// No description provided for @smartAddReceiptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get smartAddReceiptTitle;
+
+  /// No description provided for @smartAddReceiptSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a receipt when the real scanner is ready.'**
+  String get smartAddReceiptSubtitle;
+
+  /// No description provided for @smartAddReceiptUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable for now'**
+  String get smartAddReceiptUnavailable;
+
   /// No description provided for @addExpenseQuick.
   ///
   /// In en, this message translates to:
@@ -416,6 +734,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save Expense'**
   String get addExpenseSave;
+
+  /// No description provided for @paymentMethodCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get paymentMethodCash;
+
+  /// No description provided for @paymentMethodVisaCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Visa/Card'**
+  String get paymentMethodVisaCard;
+
+  /// No description provided for @paymentMethodWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get paymentMethodWallet;
+
+  /// No description provided for @paymentMethodBankTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank Transfer'**
+  String get paymentMethodBankTransfer;
+
+  /// No description provided for @walletOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet is optional'**
+  String get walletOptional;
 
   /// No description provided for @editExpenseTitle.
   ///
@@ -675,6 +1023,12 @@ abstract class AppLocalizations {
   /// **'Currency'**
   String get settingsCurrency;
 
+  /// No description provided for @settingsDefaultPaymentMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Default payment method'**
+  String get settingsDefaultPaymentMethod;
+
   /// No description provided for @settingsLanguage.
   ///
   /// In en, this message translates to:
@@ -711,12 +1065,6 @@ abstract class AppLocalizations {
   /// **'Support'**
   String get settingsSupport;
 
-  /// No description provided for @settingsExport.
-  ///
-  /// In en, this message translates to:
-  /// **'Export Data'**
-  String get settingsExport;
-
   /// No description provided for @settingsAbout.
   ///
   /// In en, this message translates to:
@@ -728,6 +1076,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign Out'**
   String get settingsLogout;
+
+  /// No description provided for @settingsLocalOnlyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Local-only storage'**
+  String get settingsLocalOnlyTitle;
+
+  /// No description provided for @settingsLocalOnlySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your financial data is stored on this device, not in cloud backup.'**
+  String get settingsLocalOnlySubtitle;
+
+  /// No description provided for @settingsLocalOnlyRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting the app or losing this phone can remove your data.'**
+  String get settingsLocalOnlyRisk;
+
+  /// No description provided for @aiSummaryConsentInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'AI receives only a small spending summary when you ask for advice.'**
+  String get aiSummaryConsentInfo;
 
   /// No description provided for @profileEditName.
   ///
@@ -770,24 +1142,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upgrade Now'**
   String get premiumPurchase;
-
-  /// No description provided for @exportCsv.
-  ///
-  /// In en, this message translates to:
-  /// **'Export CSV'**
-  String get exportCsv;
-
-  /// No description provided for @exportExcel.
-  ///
-  /// In en, this message translates to:
-  /// **'Export Excel'**
-  String get exportExcel;
-
-  /// No description provided for @exportPdf.
-  ///
-  /// In en, this message translates to:
-  /// **'Export PDF'**
-  String get exportPdf;
 
   /// No description provided for @notFound.
   ///

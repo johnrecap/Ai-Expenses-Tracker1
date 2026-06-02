@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:expenses_tracker/features/auth/presentation/widgets/auth_panel.dart';
 
@@ -22,9 +22,13 @@ void main() {
             footerActionLabel: 'Sign up',
             onPrimaryAction: () {},
             children: [
-              AuthTextField(hintText: 'Email', prefixIcon: Icons.mail_outline),
+              const AuthTextField(hintText: 'Email', prefixIcon: Icons.mail_outline),
               const SizedBox(height: 16),
-              AuthTextField(hintText: 'Password', prefixIcon: Icons.lock_outline, obscureText: true),
+              const AuthTextField(
+                hintText: 'Password',
+                prefixIcon: Icons.lock_outline,
+                obscureText: true,
+              ),
             ],
           ),
         ),
@@ -35,7 +39,7 @@ void main() {
       expect(find.text("Don't have an account?"), findsOneWidget);
       expect(find.text('Sign up'), findsOneWidget);
       expect(find.text('Continue with Google'), findsOneWidget);
-      expect(find.text('OR EMAIL'), findsOneWidget);
+      expect(find.text('Or email'), findsOneWidget);
     });
 
     testWidgets('renders sign-up variant', (tester) async {
@@ -50,7 +54,7 @@ void main() {
             onPrimaryAction: () {},
             headerIcon: const Icon(Icons.person_add, size: 32),
             children: [
-              AuthTextField(hintText: 'Full Name', prefixIcon: Icons.person_outline),
+              const AuthTextField(hintText: 'Full Name', prefixIcon: Icons.person_outline),
             ],
           ),
         ),

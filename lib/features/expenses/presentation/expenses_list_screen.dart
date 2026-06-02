@@ -13,24 +13,39 @@ import 'package:expenses_tracker/core/widgets/empty_state.dart';
 import 'package:expenses_tracker/app/routes.dart';
 import 'package:expenses_tracker/features/expenses/get_expenses_bloc/get_expenses_bloc.dart';
 import 'package:expenses_tracker/features/expenses/expense_filter_cubit/expense_filter_cubit.dart';
+import 'package:expenses_tracker/monetization/widgets/app_ad_slot.dart';
 import 'widgets/transaction_section.dart';
 import 'expense_filters_sheet.dart';
 
 class ExpensesListScreen extends StatefulWidget {
   const ExpensesListScreen({super.key});
 
+  static const addExpenseButtonKey = Key('expenses-list-add-button');
+  static const addExpenseFabPaddingKey = Key('expenses-list-add-fab-padding');
+
   @override
   State<ExpensesListScreen> createState() => _ExpensesListScreenState();
 }
 
 class _ExpensesListScreenState extends State<ExpensesListScreen> {
+  static const double _fabBottomLift = 72;
+  static const int _inlineAdThreshold = 6;
+
   final _searchController = TextEditingController();
-  int _activeChip = 0;
+  bool _syncedInitialExpenses = false;
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_syncedInitialExpenses) return;
+    _syncedInitialExpenses = true;
+    _syncFilterFromExpensesState(context.read<GetExpensesBloc>().state);
   }
 
   void _onSearchChanged() {
@@ -47,10 +62,16 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go(AppRoutes.expensesNewQuick),
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: Padding(
+        key: ExpensesListScreen.addExpenseFabPaddingKey,
+        padding: const EdgeInsets.only(bottom: _fabBottomLift),
+        child: FloatingActionButton(
+          key: ExpensesListScreen.addExpenseButtonKey,
+          onPressed: () => context.go(AppRoutes.expensesNewQuick),
+          backgroundColor: AppColors.primary,
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
       ),
       body: AppBackground(
         child: SafeArea(
@@ -78,40 +99,46 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
                       hintText: 'Search transactions...',
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    SizedBox(
-                      height: 40,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          _FilterChip(
-                            icon: Icons.calendar_today,
-                            label: 'This Month',
-                            isActive: _activeChip == 0,
-                            onTap: () => setState(() => _activeChip = 0),
+                    BlocBuilder<ExpenseFilterCubit, ExpenseFilterState>(
+                      builder: (context, filterState) {
+                        final thisMonthActive = _isThisMonthFilter(filterState.filter);
+                        return SizedBox(
+                          height: 40,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: [
+                              _FilterChip(
+                                icon: Icons.calendar_today,
+                                label: 'This Month',
+                                isActive: thisMonthActive,
+                                onTap: () => _toggleThisMonth(context, thisMonthActive),
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              _FilterChip(
+                                icon: Icons.category,
+                                label: 'Category',
+                                isActive: filterState.filter.categoryId != null,
+                                onTap: () => _showFilterSheet(context),
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              _FilterChip(
+                                icon: Icons.payments,
+                                label: 'Amount',
+                                isActive:
+                                    filterState.minAmount != null || filterState.maxAmount != null,
+                                onTap: () => _showFilterSheet(context),
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              _FilterChip(
+                                icon: Icons.tune,
+                                label: 'More Filters',
+                                isActive: filterState.hasActiveFilters,
+                                onTap: () => _showFilterSheet(context),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: AppSpacing.sm),
-                          _FilterChip(
-                            icon: Icons.category,
-                            label: 'Category',
-                            isActive: _activeChip == 1,
-                            onTap: () => setState(() => _activeChip = 1),
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          _FilterChip(
-                            icon: Icons.payments,
-                            label: 'Amount',
-                            isActive: _activeChip == 2,
-                            onTap: () => setState(() => _activeChip = 2),
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          _FilterChip(
-                            icon: Icons.tune,
-                            label: 'More Filters',
-                            isActive: _activeChip == 3,
-                            onTap: () => _showFilterSheet(context),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                     const SizedBox(height: AppSpacing.sm),
                   ],
@@ -120,9 +147,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
               Expanded(
                 child: BlocConsumer<GetExpensesBloc, GetExpensesState>(
                   listener: (context, expensesState) {
-                    if (expensesState is GetExpensesSuccess && expensesState.expenses.isNotEmpty) {
-                      context.read<ExpenseFilterCubit>().replaceExpenses(expensesState.expenses);
-                    }
+                    _syncFilterFromExpensesState(expensesState);
                   },
                   builder: (context, expensesState) {
                     if (expensesState is GetExpensesLoading) {
@@ -132,20 +157,15 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
                       builder: (context, filterState) {
                         final filtered = filterState.filteredExpenses;
                         if (filtered.isEmpty) {
-                          return const EmptyState(icon: Icons.receipt_long, title: 'No transactions found', subtitle: 'Tap + to add your first expense');
+                          return const EmptyState(
+                            icon: Icons.receipt_long,
+                            title: 'No transactions found',
+                            subtitle: 'Tap + to add your first expense',
+                          );
                         }
-                        final grouped = _groupByDate(filtered);
                         return ListView(
                           padding: const EdgeInsets.only(bottom: 80),
-                          children: grouped.entries.map((entry) {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                              child: TransactionSection(
-                                dateLabel: entry.key,
-                                expenses: entry.value,
-                              ),
-                            );
-                          }).toList(),
+                          children: _buildTransactionListChildren(filtered),
                         );
                       },
                     );
@@ -178,13 +198,59 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
     );
   }
 
-  Map<String, List<Expense>> _groupByDate(List<Expense> expenses) {
-    final map = <String, List<Expense>>{};
-    for (final e in expenses) {
-      final key = _formatSectionDate(e.date);
-      map.putIfAbsent(key, () => []).add(e);
+  void _syncFilterFromExpensesState(GetExpensesState expensesState) {
+    if (expensesState is GetExpensesSuccess) {
+      context.read<ExpenseFilterCubit>().replaceExpenses(expensesState.expenses);
     }
-    return map;
+  }
+
+  List<Widget> _buildTransactionListChildren(List<Expense> expenses) {
+    final children = <Widget>[];
+    var currentSectionExpenses = <Expense>[];
+    var currentSectionLabel = '';
+    var expenseRowsSeen = 0;
+    var insertedInlineAd = false;
+
+    void flushSection() {
+      if (currentSectionLabel.isEmpty || currentSectionExpenses.isEmpty) {
+        return;
+      }
+      children.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+          child: TransactionSection(
+            dateLabel: currentSectionLabel,
+            expenses: List<Expense>.unmodifiable(currentSectionExpenses),
+          ),
+        ),
+      );
+      currentSectionExpenses = <Expense>[];
+    }
+
+    for (final expense in expenses) {
+      final dateLabel = _formatSectionDate(expense.date);
+      if (currentSectionLabel.isNotEmpty && currentSectionLabel != dateLabel) {
+        flushSection();
+        currentSectionLabel = dateLabel;
+      } else {
+        currentSectionLabel = dateLabel;
+      }
+
+      currentSectionExpenses.add(expense);
+      expenseRowsSeen += 1;
+
+      if (!insertedInlineAd &&
+          expenses.length > _inlineAdThreshold &&
+          expenseRowsSeen == _inlineAdThreshold) {
+        flushSection();
+        children.add(const AppAdSlot.expensesInline());
+        insertedInlineAd = true;
+        currentSectionLabel = '';
+      }
+    }
+
+    flushSection();
+    return children;
   }
 
   String _formatSectionDate(DateTime date) {
@@ -197,18 +263,57 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
 
   String _monthLabel(DateTime date) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return months[date.month - 1];
   }
 
+  bool _isThisMonthFilter(ExpenseFilter filter) {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month);
+    final end = DateTime(now.year, now.month + 1).subtract(
+      const Duration(microseconds: 1),
+    );
+    return filter.startDate == start && filter.endDate == end;
+  }
+
+  void _toggleThisMonth(BuildContext context, bool isActive) {
+    final cubit = context.read<ExpenseFilterCubit>();
+    if (isActive) {
+      cubit.updateDateRange(null, null);
+      return;
+    }
+
+    final now = DateTime.now();
+    cubit.updateDateRange(
+      DateTime(now.year, now.month),
+      DateTime(now.year, now.month + 1).subtract(
+        const Duration(microseconds: 1),
+      ),
+    );
+  }
+
   void _showFilterSheet(BuildContext context) {
+    final filterCubit = context.read<ExpenseFilterCubit>();
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => const ExpenseFiltersSheet(),
+      builder: (_) => BlocProvider.value(
+        value: filterCubit,
+        child: const ExpenseFiltersSheet(),
+      ),
     );
   }
 }
@@ -236,9 +341,7 @@ class _FilterChip extends StatelessWidget {
           vertical: AppSpacing.sm,
         ),
         decoration: BoxDecoration(
-          color: isActive
-              ? AppColors.primaryContainer.withAlpha(30)
-              : AppColors.glassCardFill,
+          color: isActive ? AppColors.primaryContainer.withAlpha(30) : AppColors.glassCardFill,
           borderRadius: BorderRadius.circular(999),
           border: isActive
               ? Border.all(color: AppColors.primary, width: 1)

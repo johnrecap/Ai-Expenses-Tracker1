@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:expense_repository/expense_repository.dart';
 import 'package:expenses_tracker/core/theme/app_colors.dart';
 import 'package:expenses_tracker/core/theme/app_spacing.dart';
 import 'package:expenses_tracker/core/theme/app_text_styles.dart';
@@ -8,6 +9,7 @@ import 'package:expenses_tracker/core/widgets/app_background.dart';
 import 'package:expenses_tracker/core/widgets/app_top_bar.dart';
 import 'package:expenses_tracker/core/widgets/glass_card.dart';
 import 'package:expenses_tracker/features/reports/report_cubit/report_cubit.dart';
+import 'package:expenses_tracker/features/settings/settings_cubit/settings_cubit.dart';
 
 class MonthlyFinancialStoryScreen extends StatelessWidget {
   const MonthlyFinancialStoryScreen({super.key});
@@ -15,6 +17,7 @@ class MonthlyFinancialStoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reportState = context.read<ReportCubit>().state;
+    final currency = _displayCurrency(context);
     final totalSpent = reportState.totalSpent;
     final categories = reportState.categoryTotals.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
@@ -31,7 +34,10 @@ class MonthlyFinancialStoryScreen extends StatelessWidget {
             children: [
               AppTopBar(
                 title: 'Monthly Story',
-                leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => context.pop(),
+                ),
               ),
               Expanded(
                 child: SingleChildScrollView(
@@ -44,15 +50,16 @@ class MonthlyFinancialStoryScreen extends StatelessWidget {
                         title: 'This Month Summary',
                         body: reportState.loading
                             ? 'Loading...'
-                            : 'Your total spending this month is ${totalSpent.toStringAsFixed(3)} KWD'
-                                '${comparison != null ? ' - ${comparison.changePercent > 0 ? "up" : "down"} ${comparison.changePercent.abs().toStringAsFixed(1)}% vs last month' : ''}.',
+                            : 'Your total spending this month is ${totalSpent.toStringAsFixed(2)} $currency'
+                                  '${comparison != null ? ' - ${comparison.changePercent > 0 ? "up" : "down"} ${comparison.changePercent.abs().toStringAsFixed(1)}% vs last month' : ''}.',
                       ),
                       if (topCategory != null) ...[
                         const SizedBox(height: AppSpacing.md),
                         _StoryPanel(
                           icon: Icons.pie_chart,
                           title: 'Top Category: ${topCategory.key}',
-                          body: '${topCategory.key} at ${topCategory.value.toStringAsFixed(3)} KWD makes up ${totalSpent > 0 ? (topCategory.value / totalSpent * 100).toStringAsFixed(0) : "0"}% of your monthly spend.',
+                          body:
+                              '${topCategory.key} at ${topCategory.value.toStringAsFixed(2)} $currency makes up ${totalSpent > 0 ? (topCategory.value / totalSpent * 100).toStringAsFixed(0) : "0"}% of your monthly spend.',
                         ),
                       ],
                       if (topExpense != null) ...[
@@ -60,7 +67,8 @@ class MonthlyFinancialStoryScreen extends StatelessWidget {
                         _StoryPanel(
                           icon: Icons.trending_up,
                           title: 'Biggest Single Expense',
-                          body: 'Your largest single expense was ${topExpense.merchant ?? topExpense.description} for ${topExpense.amount.toStringAsFixed(3)} KWD on ${topExpense.date.day}/${topExpense.date.month}.',
+                          body:
+                              'Your largest single expense was ${topExpense.merchant ?? topExpense.description} for ${topExpense.amount.toStringAsFixed(2)} ${topExpense.currency} on ${topExpense.date.day}/${topExpense.date.month}.',
                         ),
                       ],
                       if (categories.length >= 2) ...[
@@ -68,7 +76,10 @@ class MonthlyFinancialStoryScreen extends StatelessWidget {
                         _StoryPanel(
                           icon: Icons.category,
                           title: 'Your Top Categories',
-                          body: categories.take(3).map((e) => '${e.key} (${e.value.toStringAsFixed(1)} KWD)').join(', '),
+                          body: categories
+                              .take(3)
+                              .map((e) => '${e.key} (${e.value.toStringAsFixed(1)} $currency)')
+                              .join(', '),
                         ),
                       ],
                       if (reportState.expenses.isEmpty && !reportState.loading) ...[
@@ -76,7 +87,8 @@ class MonthlyFinancialStoryScreen extends StatelessWidget {
                         const _StoryPanel(
                           icon: Icons.add_circle,
                           title: 'No expenses yet',
-                          body: 'Start tracking your expenses to see your monthly financial story come to life.',
+                          body:
+                              'Start tracking your expenses to see your monthly financial story come to life.',
                         ),
                       ],
                       const SizedBox(height: 80),
@@ -89,6 +101,14 @@ class MonthlyFinancialStoryScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _displayCurrency(BuildContext context) {
+    try {
+      final state = context.watch<SettingsCubit>().state;
+      if (state is SettingsSuccess) return state.settings.baseCurrency;
+    } catch (_) {}
+    return UserSettings.defaultBaseCurrency;
   }
 }
 
@@ -107,13 +127,19 @@ class _StoryPanel extends StatelessWidget {
           Container(
             width: 44,
             height: 44,
-            decoration: BoxDecoration(color: AppColors.primaryContainer.withAlpha(30), shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: AppColors.primaryContainer.withAlpha(30),
+              shape: BoxShape.circle,
+            ),
             child: Icon(icon, size: 22, color: AppColors.primary),
           ),
           const SizedBox(height: AppSpacing.md),
           Text(title, style: AppTextStyles.titleMedium.copyWith(color: AppColors.onSurface)),
           const SizedBox(height: AppSpacing.sm),
-          Text(body, style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant, height: 1.6)),
+          Text(
+            body,
+            style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant, height: 1.6),
+          ),
         ],
       ),
     );

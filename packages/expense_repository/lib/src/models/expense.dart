@@ -56,23 +56,23 @@ class Expense {
     this.moneySnapshot,
     SyncStatus? syncStatus,
     SyncStatusReason? syncStatusReason,
-  })  : userId = userId ?? '',
-        _category = category,
-        categoryId = categoryId ?? category.categoryId,
-        categoryName = categoryName ?? category.name,
-        categoryIcon = categoryIcon ?? category.icon,
-        categoryColor = categoryColor ?? category.color,
-        amount = amount.toDouble(),
-        description = description ?? '',
-        merchant = _normalizeMerchant(merchant),
-        tags = _normalizeTags(tags),
-        paymentMethod = paymentMethod ?? PaymentMethod.cash,
-        currency = currency ?? 'EGP',
-        createdAt = createdAt ?? date,
-        updatedAt = updatedAt ?? date,
-        source = source ?? ExpenseSource.manual,
-        syncStatus = syncStatus ?? SyncStatus.synced,
-        syncStatusReason = syncStatusReason ?? SyncStatusReason.queued;
+  }) : userId = userId ?? '',
+       _category = category,
+       categoryId = categoryId ?? category.categoryId,
+       categoryName = categoryName ?? category.name,
+       categoryIcon = categoryIcon ?? category.icon,
+       categoryColor = categoryColor ?? category.color,
+       amount = amount.toDouble(),
+       description = description ?? '',
+       merchant = _normalizeMerchant(merchant),
+       tags = _normalizeTags(tags),
+       paymentMethod = paymentMethod ?? PaymentMethod.cash,
+       currency = currency ?? 'EGP',
+       createdAt = createdAt ?? date,
+       updatedAt = updatedAt ?? date,
+       source = source ?? ExpenseSource.manual,
+       syncStatus = syncStatus ?? SyncStatus.synced,
+       syncStatusReason = syncStatusReason ?? SyncStatusReason.queued;
 
   Category get category => _category;
   set category(Category value) {
@@ -84,34 +84,69 @@ class Expense {
   }
 
   static final empty = Expense(
-    expenseId: '', category: Category.empty, date: DateTime.now(),
-    amount: 0, userId: '', description: '', tags: const [],
-    paymentMethod: PaymentMethod.cash, currency: 'EGP', source: ExpenseSource.manual,
+    expenseId: '',
+    category: Category.empty,
+    date: DateTime.now(),
+    amount: 0,
+    userId: '',
+    description: '',
+    tags: const [],
+    paymentMethod: PaymentMethod.cash,
+    currency: 'EGP',
+    source: ExpenseSource.manual,
   );
 
   ExpenseEntity toEntity() => ExpenseEntity(
-    expenseId: expenseId, userId: userId, categoryId: categoryId,
-    categoryName: categoryName, categoryIcon: categoryIcon, categoryColor: categoryColor,
-    date: date, amount: amount, description: description, merchant: merchant,
-    tags: tags, paymentMethod: paymentMethod.storageValue, currency: currency,
-    createdAt: createdAt, updatedAt: updatedAt, source: source.name,
-    walletAccountId: walletAccountId, walletAccountName: walletAccountName,
-    recurringExpenseId: recurringExpenseId, aiActionId: aiActionId,
+    expenseId: expenseId,
+    userId: userId,
+    categoryId: categoryId,
+    categoryName: categoryName,
+    categoryIcon: categoryIcon,
+    categoryColor: categoryColor,
+    date: date,
+    amount: amount,
+    description: description,
+    merchant: merchant,
+    tags: tags,
+    paymentMethod: paymentMethod.storageValue,
+    currency: currency,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    source: source.name,
+    walletAccountId: walletAccountId,
+    walletAccountName: walletAccountName,
+    recurringExpenseId: recurringExpenseId,
+    aiActionId: aiActionId,
     moneySnapshot: moneySnapshot,
   );
 
   static Expense fromEntity(ExpenseEntity entity) => Expense(
-    expenseId: entity.expenseId, userId: entity.userId,
-    category: Category.empty.copyWith(categoryId: entity.categoryId, name: entity.categoryName, icon: entity.categoryIcon, color: entity.categoryColor),
-    categoryId: entity.categoryId, categoryName: entity.categoryName,
-    categoryIcon: entity.categoryIcon, categoryColor: entity.categoryColor,
-    date: entity.date, amount: entity.amount, description: entity.description,
-    merchant: entity.merchant, tags: entity.tags,
+    expenseId: entity.expenseId,
+    userId: entity.userId,
+    category: Category.empty.copyWith(
+      categoryId: entity.categoryId,
+      name: entity.categoryName,
+      icon: entity.categoryIcon,
+      color: entity.categoryColor,
+    ),
+    categoryId: entity.categoryId,
+    categoryName: entity.categoryName,
+    categoryIcon: entity.categoryIcon,
+    categoryColor: entity.categoryColor,
+    date: entity.date,
+    amount: entity.amount,
+    description: entity.description,
+    merchant: entity.merchant,
+    tags: entity.tags,
     paymentMethod: PaymentMethod.fromStorageValue(entity.paymentMethod),
-    currency: entity.currency, createdAt: entity.createdAt, updatedAt: entity.updatedAt,
-    source: ExpenseSource.values.firstWhere((e) => e.name == entity.source, orElse: () => ExpenseSource.manual),
-    walletAccountId: entity.walletAccountId, walletAccountName: entity.walletAccountName,
-    recurringExpenseId: entity.recurringExpenseId, aiActionId: entity.aiActionId,
+    currency: entity.currency,
+    createdAt: entity.createdAt,
+    updatedAt: entity.updatedAt,
+    source: _sourceFromStorageValue(entity.source),
+    walletAccountId: entity.walletAccountId,
+    walletAccountName: entity.walletAccountName,
+    recurringExpenseId: entity.recurringExpenseId,
+    aiActionId: entity.aiActionId,
     moneySnapshot: entity.moneySnapshot,
   );
 
@@ -130,6 +165,14 @@ class Expense {
       if (seen.add(key)) normalized.add(tag);
     }
     return List.unmodifiable(normalized);
+  }
+
+  static ExpenseSource _sourceFromStorageValue(String value) {
+    if (value == 'ai') return ExpenseSource.aiText;
+    return ExpenseSource.values.firstWhere(
+      (source) => source.name == value,
+      orElse: () => ExpenseSource.manual,
+    );
   }
 
   Expense copyWith({

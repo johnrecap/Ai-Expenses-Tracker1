@@ -1,9 +1,8 @@
-library expense_repository;
-
 export 'src/entities/entities.dart';
 export 'src/models/models.dart';
 export 'src/auth/auth_repository.dart';
 export 'src/auth/firebase_auth_repository.dart';
+export 'src/auth/local_auth_repository.dart';
 export 'src/ai_action_log_repo.dart';
 export 'src/budget_repo.dart';
 export 'src/category_alias_repo.dart';

@@ -1,15 +1,38 @@
 part of 'account_profile_cubit.dart';
 
 enum AccountProfileStatus {
-  initial, loading, ready, savingDisplayName, sendingPasswordReset,
-  updatingEmail, reauthenticating, deletingAccount, deleted, failure,
+  initial,
+  loading,
+  ready,
+  savingDisplayName,
+  sendingPasswordReset,
+  updatingEmail,
+  reauthenticating,
+  deletingAccount,
+  deleted,
+  failure,
 }
 
 enum AccountProfileMessageKey {
-  loadFailed, displayNameInvalid, displayNameUpdated, displayNameUpdateFailed,
-  passwordResetSent, passwordResetFailed, emailInvalid, emailUpdated, emailUpdateFailed,
-  reauthRequired, reauthSucceeded, reauthFailed, reauthCanceled, reauthUnavailable,
-  deleteConfirmationRequired, dataDeleteFailed, authDeleteFailed, accountDeleted, accountDeleteFailed,
+  loadFailed,
+  displayNameInvalid,
+  displayNameUpdated,
+  displayNameUpdateFailed,
+  passwordResetSent,
+  passwordResetFailed,
+  emailInvalid,
+  emailUpdated,
+  emailUpdateFailed,
+  reauthRequired,
+  reauthSucceeded,
+  reauthFailed,
+  reauthCanceled,
+  reauthUnavailable,
+  deleteConfirmationRequired,
+  dataDeleteFailed,
+  authDeleteFailed,
+  accountDeleted,
+  accountDeleteFailed,
 }
 
 class AccountProfileState extends Equatable {
@@ -22,8 +45,11 @@ class AccountProfileState extends Equatable {
     this.reauthRequest,
   });
 
-  factory AccountProfileState.initial(AppUser user) =>
-      AccountProfileState(user: user, status: AccountProfileStatus.initial, capabilities: AccountProfileCapabilities.unknown);
+  factory AccountProfileState.initial(AppUser user) => AccountProfileState(
+    user: user,
+    status: AccountProfileStatus.initial,
+    capabilities: AccountProfileCapabilities.unknown,
+  );
 
   final AppUser user;
   final AccountProfileStatus status;
@@ -32,14 +58,24 @@ class AccountProfileState extends Equatable {
   final AccountProfileMessageKey? messageKey;
   final ReauthRequest? reauthRequest;
 
-  bool get isBusy => [AccountProfileStatus.loading, AccountProfileStatus.savingDisplayName,
-      AccountProfileStatus.sendingPasswordReset, AccountProfileStatus.updatingEmail,
-      AccountProfileStatus.reauthenticating, AccountProfileStatus.deletingAccount].contains(status);
+  bool get isBusy => [
+    AccountProfileStatus.loading,
+    AccountProfileStatus.savingDisplayName,
+    AccountProfileStatus.sendingPasswordReset,
+    AccountProfileStatus.updatingEmail,
+    AccountProfileStatus.reauthenticating,
+    AccountProfileStatus.deletingAccount,
+  ].contains(status);
 
   AccountProfileState copyWith({
-    AppUser? user, AccountProfileStatus? status, AccountProfileCapabilities? capabilities,
-    String? localDisplayName, AccountProfileMessageKey? messageKey, ReauthRequest? reauthRequest,
-    bool clearMessage = false, bool clearReauthRequest = false,
+    AppUser? user,
+    AccountProfileStatus? status,
+    AccountProfileCapabilities? capabilities,
+    String? localDisplayName,
+    AccountProfileMessageKey? messageKey,
+    ReauthRequest? reauthRequest,
+    bool clearMessage = false,
+    bool clearReauthRequest = false,
   }) {
     return AccountProfileState(
       user: user ?? this.user,
@@ -52,5 +88,15 @@ class AccountProfileState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [user.userId, user.email, status, capabilities.providerType, localDisplayName, messageKey];
+  List<Object?> get props => [
+    user.userId,
+    user.email,
+    status,
+    capabilities.providerType,
+    localDisplayName,
+    messageKey,
+    reauthRequest?.providerType,
+    reauthRequest?.action,
+    reauthRequest?.newEmail,
+  ];
 }

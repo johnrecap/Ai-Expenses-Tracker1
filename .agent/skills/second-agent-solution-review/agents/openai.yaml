@@ -1,0 +1,7 @@
+interface:
+  display_name: "Second Agent Solution Review"
+  short_description: "Debate a solution with a second agent"
+  default_prompt: "Use $second-agent-solution-review after we agree on a tentative solution and before implementation."
+
+policy:
+  allow_implicit_invocation: true

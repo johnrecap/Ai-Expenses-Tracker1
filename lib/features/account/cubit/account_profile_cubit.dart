@@ -13,26 +13,34 @@ class AccountProfileCubit extends Cubit<AccountProfileState> {
     required AppUser user,
     required AccountProfileService profileService,
     required AccountDeletionService deletionService,
-  })  : _profile = profileService,
-        _deletion = deletionService,
-        super(AccountProfileState.initial(user));
+  }) : _profile = profileService,
+       _deletion = deletionService,
+       super(AccountProfileState.initial(user));
 
   final AccountProfileService _profile;
   final AccountDeletionService _deletion;
+  bool _deleteReauthenticated = false;
 
   Future<void> load() async {
     emit(state.copyWith(status: AccountProfileStatus.loading));
     try {
       final localDisplayName = await _profile.loadLocalDisplayName(state.user);
       final capabilities = await _profile.loadCapabilities(state.user);
-      emit(state.copyWith(
-        status: AccountProfileStatus.ready,
-        localDisplayName: localDisplayName,
-        capabilities: capabilities,
-        clearMessage: true,
-      ));
+      emit(
+        state.copyWith(
+          status: AccountProfileStatus.ready,
+          localDisplayName: localDisplayName,
+          capabilities: capabilities,
+          clearMessage: true,
+        ),
+      );
     } catch (_) {
-      emit(state.copyWith(status: AccountProfileStatus.failure, messageKey: AccountProfileMessageKey.loadFailed));
+      emit(
+        state.copyWith(
+          status: AccountProfileStatus.failure,
+          messageKey: AccountProfileMessageKey.loadFailed,
+        ),
+      );
     }
   }
 
@@ -45,13 +53,20 @@ class AccountProfileCubit extends Cubit<AccountProfileState> {
     emit(state.copyWith(status: AccountProfileStatus.savingDisplayName));
     try {
       await _profile.saveLocalDisplayName(state.user, trimmed);
-      emit(state.copyWith(
-        status: AccountProfileStatus.ready,
-        localDisplayName: trimmed,
-        messageKey: AccountProfileMessageKey.displayNameUpdated,
-      ));
+      emit(
+        state.copyWith(
+          status: AccountProfileStatus.ready,
+          localDisplayName: trimmed,
+          messageKey: AccountProfileMessageKey.displayNameUpdated,
+        ),
+      );
     } catch (_) {
-      emit(state.copyWith(status: AccountProfileStatus.ready, messageKey: AccountProfileMessageKey.displayNameUpdateFailed));
+      emit(
+        state.copyWith(
+          status: AccountProfileStatus.ready,
+          messageKey: AccountProfileMessageKey.displayNameUpdateFailed,
+        ),
+      );
     }
   }
 
@@ -59,27 +74,72 @@ class AccountProfileCubit extends Cubit<AccountProfileState> {
     emit(state.copyWith(status: AccountProfileStatus.sendingPasswordReset));
     try {
       await _profile.sendPasswordReset(state.user);
-      emit(state.copyWith(status: AccountProfileStatus.ready, messageKey: AccountProfileMessageKey.passwordResetSent));
+      emit(
+        state.copyWith(
+          status: AccountProfileStatus.ready,
+          messageKey: AccountProfileMessageKey.passwordResetSent,
+        ),
+      );
     } on AccountActionException catch (e) {
-      emit(state.copyWith(
-        status: AccountProfileStatus.ready,
-        messageKey: e.requiresRecentLogin ? AccountProfileMessageKey.reauthRequired : AccountProfileMessageKey.passwordResetFailed,
-      ));
+      emit(
+        state.copyWith(
+          status: AccountProfileStatus.ready,
+          messageKey: e.requiresRecentLogin
+              ? AccountProfileMessageKey.reauthRequired
+              : AccountProfileMessageKey.passwordResetFailed,
+        ),
+      );
     } catch (_) {
-      emit(state.copyWith(status: AccountProfileStatus.ready, messageKey: AccountProfileMessageKey.passwordResetFailed));
+      emit(
+        state.copyWith(
+          status: AccountProfileStatus.ready,
+          messageKey: AccountProfileMessageKey.passwordResetFailed,
+        ),
+      );
     }
   }
 
   Future<void> deleteAccount({required bool warningConfirmed}) async {
+    if (!_deleteReauthenticated && _requiresReauthBeforeDelete) {
+      emit(
+        state.copyWith(
+          status: AccountProfileStatus.ready,
+          messageKey: AccountProfileMessageKey.reauthRequired,
+          reauthRequest: _reauthFor(AccountSensitiveAction.deleteAccount),
+        ),
+      );
+      return;
+    }
     emit(state.copyWith(status: AccountProfileStatus.deletingAccount));
     try {
       await _deletion.deleteAccount(user: state.user, warningConfirmed: warningConfirmed);
-      emit(state.copyWith(status: AccountProfileStatus.deleted, messageKey: AccountProfileMessageKey.accountDeleted));
+      _deleteReauthenticated = false;
+      emit(
+        state.copyWith(
+          status: AccountProfileStatus.deleted,
+          messageKey: AccountProfileMessageKey.accountDeleted,
+        ),
+      );
     } on AccountDeletionException catch (e) {
-      final reauth = e.requiresRecentLogin ? _reauthFor(AccountSensitiveAction.deleteAccount) : null;
-      emit(state.copyWith(status: AccountProfileStatus.ready, messageKey: _deleteMsg(e), reauthRequest: reauth));
+      _deleteReauthenticated = false;
+      final reauth = e.requiresRecentLogin
+          ? _reauthFor(AccountSensitiveAction.deleteAccount)
+          : null;
+      emit(
+        state.copyWith(
+          status: AccountProfileStatus.ready,
+          messageKey: _deleteMsg(e),
+          reauthRequest: reauth,
+        ),
+      );
     } catch (_) {
-      emit(state.copyWith(status: AccountProfileStatus.ready, messageKey: AccountProfileMessageKey.accountDeleteFailed));
+      _deleteReauthenticated = false;
+      emit(
+        state.copyWith(
+          status: AccountProfileStatus.ready,
+          messageKey: AccountProfileMessageKey.accountDeleteFailed,
+        ),
+      );
     }
   }
 
@@ -92,12 +152,32 @@ class AccountProfileCubit extends Cubit<AccountProfileState> {
     emit(state.copyWith(status: AccountProfileStatus.updatingEmail));
     try {
       await _profile.updateEmail(state.user, trimmed);
-      emit(state.copyWith(status: AccountProfileStatus.ready, messageKey: AccountProfileMessageKey.emailUpdated));
+      emit(
+        state.copyWith(
+          status: AccountProfileStatus.ready,
+          messageKey: AccountProfileMessageKey.emailUpdated,
+        ),
+      );
     } on AccountActionException catch (e) {
-      final reauth = e.requiresRecentLogin ? _reauthFor(AccountSensitiveAction.updateEmail, newEmail: trimmed) : null;
-      emit(state.copyWith(status: AccountProfileStatus.ready, messageKey: e.requiresRecentLogin ? AccountProfileMessageKey.reauthRequired : AccountProfileMessageKey.emailUpdateFailed, reauthRequest: reauth));
+      final reauth = e.requiresRecentLogin
+          ? _reauthFor(AccountSensitiveAction.updateEmail, newEmail: trimmed)
+          : null;
+      emit(
+        state.copyWith(
+          status: AccountProfileStatus.ready,
+          messageKey: e.requiresRecentLogin
+              ? AccountProfileMessageKey.reauthRequired
+              : AccountProfileMessageKey.emailUpdateFailed,
+          reauthRequest: reauth,
+        ),
+      );
     } catch (_) {
-      emit(state.copyWith(status: AccountProfileStatus.ready, messageKey: AccountProfileMessageKey.emailUpdateFailed));
+      emit(
+        state.copyWith(
+          status: AccountProfileStatus.ready,
+          messageKey: AccountProfileMessageKey.emailUpdateFailed,
+        ),
+      );
     }
   }
 
@@ -108,43 +188,93 @@ class AccountProfileCubit extends Cubit<AccountProfileState> {
     try {
       if (request.requiresPassword) {
         if (password == null || password.trim().isEmpty) {
-          emit(state.copyWith(status: AccountProfileStatus.ready, messageKey: AccountProfileMessageKey.reauthFailed));
+          emit(
+            state.copyWith(
+              status: AccountProfileStatus.ready,
+              messageKey: AccountProfileMessageKey.reauthFailed,
+            ),
+          );
           return;
         }
         await _profile.reauthenticateWithPassword(state.user, password.trim());
       } else if (request.usesGoogle) {
         await _profile.reauthenticateWithGoogle(state.user);
       } else {
-        emit(state.copyWith(status: AccountProfileStatus.ready, messageKey: AccountProfileMessageKey.reauthUnavailable, clearReauthRequest: true));
+        emit(
+          state.copyWith(
+            status: AccountProfileStatus.ready,
+            messageKey: AccountProfileMessageKey.reauthUnavailable,
+            clearReauthRequest: true,
+          ),
+        );
         return;
       }
       final retry = request;
-      emit(state.copyWith(status: AccountProfileStatus.ready, messageKey: AccountProfileMessageKey.reauthSucceeded, clearReauthRequest: true));
+      if (retry.action == AccountSensitiveAction.deleteAccount) {
+        _deleteReauthenticated = true;
+      }
+      emit(
+        state.copyWith(
+          status: AccountProfileStatus.ready,
+          messageKey: AccountProfileMessageKey.reauthSucceeded,
+          clearReauthRequest: true,
+        ),
+      );
       await _retryAfterReauth(retry);
     } on AccountActionException catch (e) {
-      final clear = ['canceled', 'user-cancelled', 'user-canceled', 'provider-unavailable', 'action-unavailable'].contains(e.code);
-      emit(state.copyWith(status: AccountProfileStatus.ready, messageKey: AccountProfileMessageKey.reauthFailed, clearReauthRequest: clear));
+      final clear = [
+        'canceled',
+        'user-cancelled',
+        'user-canceled',
+        'provider-unavailable',
+        'action-unavailable',
+      ].contains(e.code);
+      emit(
+        state.copyWith(
+          status: AccountProfileStatus.ready,
+          messageKey: AccountProfileMessageKey.reauthFailed,
+          clearReauthRequest: clear,
+        ),
+      );
     } catch (_) {
-      emit(state.copyWith(status: AccountProfileStatus.ready, messageKey: AccountProfileMessageKey.reauthFailed));
+      emit(
+        state.copyWith(
+          status: AccountProfileStatus.ready,
+          messageKey: AccountProfileMessageKey.reauthFailed,
+        ),
+      );
     }
   }
 
   void cancelReauthentication() {
-    emit(state.copyWith(status: AccountProfileStatus.ready, messageKey: AccountProfileMessageKey.reauthCanceled, clearReauthRequest: true));
+    emit(
+      state.copyWith(
+        status: AccountProfileStatus.ready,
+        messageKey: AccountProfileMessageKey.reauthCanceled,
+        clearReauthRequest: true,
+      ),
+    );
   }
 
   AccountProfileMessageKey _deleteMsg(AccountDeletionException e) {
     if (e.requiresRecentLogin) return AccountProfileMessageKey.reauthRequired;
     switch (e.code) {
-      case 'confirmation-required': return AccountProfileMessageKey.deleteConfirmationRequired;
-      case 'data-delete-failed': return AccountProfileMessageKey.dataDeleteFailed;
-      case 'auth-delete-failed': return AccountProfileMessageKey.authDeleteFailed;
-      default: return AccountProfileMessageKey.accountDeleteFailed;
+      case 'confirmation-required':
+        return AccountProfileMessageKey.deleteConfirmationRequired;
+      case 'data-delete-failed':
+        return AccountProfileMessageKey.dataDeleteFailed;
+      case 'auth-delete-failed':
+        return AccountProfileMessageKey.authDeleteFailed;
+      default:
+        return AccountProfileMessageKey.accountDeleteFailed;
     }
   }
 
-  ReauthRequest _reauthFor(AccountSensitiveAction action, {String? newEmail}) =>
-      ReauthRequest(providerType: state.capabilities.providerType, action: action, newEmail: newEmail);
+  ReauthRequest _reauthFor(AccountSensitiveAction action, {String? newEmail}) => ReauthRequest(
+    providerType: state.capabilities.providerType,
+    action: action,
+    newEmail: newEmail,
+  );
 
   Future<void> _retryAfterReauth(ReauthRequest request) async {
     switch (request.action) {
@@ -156,4 +286,8 @@ class AccountProfileCubit extends Cubit<AccountProfileState> {
         await deleteAccount(warningConfirmed: true);
     }
   }
+
+  bool get _requiresReauthBeforeDelete =>
+      state.capabilities.providerType == AccountProviderType.emailPassword ||
+      state.capabilities.providerType == AccountProviderType.google;
 }

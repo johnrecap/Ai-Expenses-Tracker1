@@ -1,6 +1,5 @@
 import 'dart:developer' as developer;
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:image_picker/image_picker.dart';
 
@@ -10,9 +9,8 @@ import 'ai_api_service.dart';
 /// {@template camera_scanner_service}
 /// Service that captures receipt images and extracts structured expense data.
 ///
-/// Uses the device's camera via `image_picker` and can optionally send the
-/// image to the AI API for OCR + parsing. Falls back to a mock flow
-/// when the API is unavailable so the UI can still be tested.
+/// Uses the device's camera via `image_picker`.
+/// Receipt OCR is not enabled until a real server-side OCR path exists.
 /// {@endtemplate}
 class CameraScannerService {
   /// Creates a [CameraScannerService].
@@ -85,20 +83,17 @@ class CameraScannerService {
 
   /// Scans a receipt image and returns structured expense data.
   ///
-  /// If [aiApiService] is available, the image is base64-encoded and sent to
-  /// the AI API. Otherwise the method falls back to a local heuristic.
+  /// Returns an empty result until receipt OCR is connected to a real service.
   ///
   /// Returns an [AiExpenseResult] containing the parsed expense, or an empty
   /// result if scanning or parsing failed.
   Future<AiExpenseResult> scanReceipt(File imageFile) async {
     try {
-      final bytes = await imageFile.readAsBytes();
-
-      if (aiApiService != null) {
-        return await _scanWithAi(bytes);
-      }
-
-      return await _scanLocally(bytes);
+      developer.log(
+        'Receipt OCR is not connected; returning no parsed data',
+        name: 'CameraScannerService',
+      );
+      return AiExpenseResult.empty('');
     } on Exception catch (e, stackTrace) {
       developer.log(
         'Receipt scan failed',
@@ -115,41 +110,5 @@ class CameraScannerService {
     final image = await capturePhoto();
     if (image == null) return AiExpenseResult.empty('');
     return scanReceipt(image);
-  }
-
-  // ---------------------------------------------------------------------------
-  // Private helpers
-  // ---------------------------------------------------------------------------
-
-  Future<AiExpenseResult> _scanWithAi(Uint8List bytes) async {
-    try {
-      // For now, return placeholder since AI APIs don't support image OCR directly
-      // TODO: Implement image OCR using Google Vision API or similar
-      developer.log(
-        'AI OCR not yet implemented; returning placeholder result',
-        name: 'CameraScannerService',
-      );
-      return _scanLocally(bytes);
-    } catch (e) {
-      developer.log(
-        'AI receipt extraction failed: $e',
-        name: 'CameraScannerService',
-      );
-      return AiExpenseResult.empty('');
-    }
-  }
-
-  Future<AiExpenseResult> _scanLocally(Uint8List bytes) async {
-    // Without a local OCR engine we fall back to a mock / placeholder
-    // behaviour: create a placeholder note so the user can manually fill
-    // the amount and category while the image is preserved as attachment.
-    developer.log(
-      'No OCR engine available; returning placeholder result',
-      name: 'CameraScannerService',
-    );
-
-    // Return a low-confidence result that signals the UI to show a manual
-    // review form with the image attached.
-    return AiExpenseResult.empty('camera_scan_placeholder');
   }
 }

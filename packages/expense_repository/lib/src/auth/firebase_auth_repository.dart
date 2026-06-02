@@ -12,18 +12,21 @@ class FirebaseAuthRepository implements AuthRepository {
   FirebaseAuthRepository({
     FirebaseAuth? firebaseAuth,
     GoogleSignIn? googleSignIn,
-  })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-        _googleSignIn = googleSignIn ?? GoogleSignIn();
+  }) : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
+       _googleSignIn = googleSignIn ?? GoogleSignIn();
 
   @override
   Stream<AppUser> get user {
-    return _firebaseAuth.userChanges().map((user) {
-      if (user == null) return AppUser.empty;
-      return AppUser.fromFirebaseUser(user);
-    }).handleError((Object error) {
-      debugPrint('FirebaseAuthRepository.user stream error: $error');
-      return AppUser.empty;
-    });
+    return _firebaseAuth
+        .userChanges()
+        .map((user) {
+          if (user == null) return AppUser.empty;
+          return AppUser.fromFirebaseUser(user);
+        })
+        .handleError((Object error) {
+          debugPrint('FirebaseAuthRepository.user stream error: $error');
+          return AppUser.empty;
+        });
   }
 
   @override
@@ -176,6 +179,34 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<AppUser> updateEmail(String email) async {
+    final trimmed = email.trim();
+    if (!trimmed.contains('@')) {
+      throw const AuthRepositoryException(
+        code: 'invalid-email',
+        message: 'The email address is not valid.',
+      );
+    }
+    final user = _firebaseAuth.currentUser;
+    if (user == null) {
+      throw const AuthRepositoryException(
+        code: 'missing-user',
+        message: 'No signed-in user is available.',
+      );
+    }
+    try {
+      await user.verifyBeforeUpdateEmail(trimmed);
+      await user.reload();
+      return AppUser.fromFirebaseUser(_firebaseAuth.currentUser ?? user);
+    } on FirebaseAuthException catch (error) {
+      throw AuthRepositoryException(
+        code: error.code,
+        message: error.message ?? 'Email update failed.',
+      );
+    }
+  }
+
+  @override
   Future<void> deleteAccount() async {
     final user = _firebaseAuth.currentUser;
     if (user == null) {
@@ -214,6 +245,46 @@ class FirebaseAuthRepository implements AuthRepository {
       throw AuthRepositoryException(
         code: error.code,
         message: error.message ?? 'Reauthentication failed.',
+      );
+    }
+  }
+
+  @override
+  Future<AppUser> reauthenticateWithGoogle() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) {
+      throw const AuthRepositoryException(
+        code: 'missing-user',
+        message: 'No signed-in user is available.',
+      );
+    }
+    try {
+      final googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        throw const AuthRepositoryException(
+          code: 'canceled',
+          message: 'Google verification was canceled.',
+        );
+      }
+
+      final googleAuth = await googleUser.authentication;
+      if (googleAuth.idToken == null && googleAuth.accessToken == null) {
+        throw const AuthRepositoryException(
+          code: 'missing-google-token',
+          message: 'Google sign-in did not return an authentication token.',
+        );
+      }
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      await user.reauthenticateWithCredential(credential);
+      return AppUser.fromFirebaseUser(_firebaseAuth.currentUser ?? user);
+    } on FirebaseAuthException catch (error) {
+      throw AuthRepositoryException(
+        code: error.code,
+        message: error.message ?? 'Google verification failed.',
       );
     }
   }

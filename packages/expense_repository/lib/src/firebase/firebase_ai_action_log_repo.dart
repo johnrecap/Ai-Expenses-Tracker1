@@ -14,19 +14,26 @@ class FirebaseAiActionLogRepository implements AiActionLogRepository {
 
   @override
   Future<void> logAction(AiActionLog log) async {
-    await _col.doc(log.actionId).set(_toDoc(log));
+    final safeLog = AiActionLogPrivacy.sanitize(log);
+    await _col.doc(safeLog.actionId).set(_toDoc(safeLog));
   }
 
   @override
   Future<List<AiActionLog>> getLogs({int limit = 50}) async {
     final snapshot = await _col.orderBy('createdAt', descending: true).limit(limit).get();
-    return snapshot.docs.map((d) => _fromDoc(d.data())).toList().cast<AiActionLog>();
+    return snapshot.docs
+        .map((d) => AiActionLogPrivacy.sanitize(_fromDoc(d.data())))
+        .toList()
+        .cast<AiActionLog>();
   }
 
   @override
   Stream<List<AiActionLog>> watchLogs({int limit = 50}) {
     return _col.orderBy('createdAt', descending: true).limit(limit).snapshots().map(
-      (snap) => snap.docs.map((d) => _fromDoc(d.data())).toList().cast<AiActionLog>(),
+      (snap) => snap.docs
+          .map((d) => AiActionLogPrivacy.sanitize(_fromDoc(d.data())))
+          .toList()
+          .cast<AiActionLog>(),
     );
   }
 

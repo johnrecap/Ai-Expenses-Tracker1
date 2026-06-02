@@ -12,11 +12,21 @@ void main() {
 
   test('SavingGoalBloc create validates empty name', () async {
     final bloc = SavingGoalBloc(_MockGoalRepo());
-    bloc.add(SavingGoalCreate(SavingGoal(
-      goalId: 'g1', userId: 'u1', name: '', targetAmount: 0,
-      currency: 'USD', color: 0xFF0000, createdAt: DateTime.now(), updatedAt: DateTime.now(),
-    )));
-    await Future.delayed(const Duration(milliseconds: 100));
+    bloc.add(
+      SavingGoalCreate(
+        SavingGoal(
+          goalId: 'g1',
+          userId: 'u1',
+          name: '',
+          targetAmount: 0,
+          currency: 'USD',
+          color: 0xFF0000,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      ),
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     expect(bloc.state, isA<SavingGoalFailure>());
     expect((bloc.state as SavingGoalFailure).message, contains('name'));
     bloc.close();
@@ -24,9 +34,14 @@ void main() {
 }
 
 class _MockGoalRepo implements SavingGoalRepository {
-  @override Future<void> createSavingGoal(SavingGoal g) async {}
-  @override Future<void> updateSavingGoal(SavingGoal g) async {}
-  @override Future<void> deleteSavingGoal(String id) async {}
-  @override Future<List<SavingGoal>> getSavingGoals() async => [];
-  @override Stream<List<SavingGoal>> watchSavingGoals() => Stream.value([]);
+  @override
+  Future<void> createSavingGoal(SavingGoal g) async {}
+  @override
+  Future<void> updateSavingGoal(SavingGoal g) async {}
+  @override
+  Future<void> deleteSavingGoal(String id) async {}
+  @override
+  Future<List<SavingGoal>> getSavingGoals() async => [];
+  @override
+  Stream<List<SavingGoal>> watchSavingGoals() => Stream.value([]);
 }

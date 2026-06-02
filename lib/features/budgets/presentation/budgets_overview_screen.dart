@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:expense_repository/expense_repository.dart';
 import 'package:expenses_tracker/core/theme/app_colors.dart';
 import 'package:expenses_tracker/core/theme/app_spacing.dart';
 import 'package:expenses_tracker/core/theme/app_text_styles.dart';
@@ -22,7 +23,7 @@ class BudgetsOverviewScreen extends StatelessWidget {
       final s = context.read<SettingsCubit>().state;
       if (s is SettingsSuccess) return s.settings.baseCurrency;
     } catch (_) {}
-    return 'KWD';
+    return UserSettings.defaultBaseCurrency;
   }
 
   @override
@@ -39,81 +40,123 @@ class BudgetsOverviewScreen extends StatelessWidget {
                   final spent = reportCubitState.totalSpent;
                   final progress = totalBudget > 0 ? (spent / totalBudget).clamp(0.0, 1.0) : 0.0;
 
-              return Column(
-                children: [
-                  AppTopBar(
-                    title: 'Budgets',
-                    trailing: IconButton(
-                      icon: const Icon(Icons.edit, color: AppColors.onSurface),
-                      onPressed: () => context.go(AppRoutes.budgetsMonthlyEdit),
-                    ),
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(AppSpacing.containerPadding),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          GlassCard(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('THIS MONTH', style: AppTextStyles.labelCaps.copyWith(color: AppColors.onSurfaceVariant)),
-                                const SizedBox(height: AppSpacing.md),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
+                  return Column(
+                    children: [
+                      AppTopBar(
+                        title: 'Budgets',
+                        trailing: IconButton(
+                          icon: const Icon(Icons.edit, color: AppColors.onSurface),
+                          onPressed: () => context.go(AppRoutes.budgetsMonthlyEdit),
+                        ),
+                      ),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(AppSpacing.containerPadding),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              GlassCard(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(spent.toStringAsFixed(2), style: AppTextStyles.displayMobile.copyWith(color: AppColors.onSurface)),
-                                    Text(' / ${totalBudget.toStringAsFixed(2)} ${_displayCurrency(context)}', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+                                    Text(
+                                      'THIS MONTH',
+                                      style: AppTextStyles.labelCaps.copyWith(
+                                        color: AppColors.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    const SizedBox(height: AppSpacing.md),
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          spent.toStringAsFixed(2),
+                                          style: AppTextStyles.displayMobile.copyWith(
+                                            color: AppColors.onSurface,
+                                          ),
+                                        ),
+                                        Text(
+                                          ' / ${totalBudget.toStringAsFixed(2)} ${_displayCurrency(context)}',
+                                          style: AppTextStyles.bodySmall.copyWith(
+                                            color: AppColors.onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: AppSpacing.md),
+                                    ProgressBar(
+                                      progress: progress,
+                                      progressColor: progress > 0.9
+                                          ? AppColors.error
+                                          : AppColors.primary,
+                                    ),
+                                    const SizedBox(height: AppSpacing.sm),
+                                    Text(
+                                      '${(progress * 100).toStringAsFixed(0)}% used',
+                                      style: AppTextStyles.bodySmall.copyWith(
+                                        color: AppColors.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    const SizedBox(height: AppSpacing.sm),
+                                    Text(
+                                      '${(totalBudget - spent).clamp(0, double.infinity).toStringAsFixed(2)} ${_displayCurrency(context)} remaining',
+                                      style: AppTextStyles.bodySmall.copyWith(
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
                                   ],
                                 ),
-                                const SizedBox(height: AppSpacing.md),
-                                ProgressBar(progress: progress, progressColor: progress > 0.9 ? AppColors.error : AppColors.primary),
-                                const SizedBox(height: AppSpacing.sm),
-                                Text('${(progress * 100).toStringAsFixed(0)}% used', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
-                                const SizedBox(height: AppSpacing.sm),
-                                Text('${(totalBudget - spent).clamp(0, double.infinity).toStringAsFixed(2)} ${_displayCurrency(context)} remaining', style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary)),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.xl),
-                          Text('Category Breakdown', style: AppTextStyles.labelCaps.copyWith(color: AppColors.onSurfaceVariant)),
-                          const SizedBox(height: AppSpacing.sm),
-                          if (!reportCubitState.loading)
-                            ...reportCubitState.categoryTotals.entries.take(6).map((entry) {
-                              final catProgress = totalBudget > 0 ? (entry.value / totalBudget).clamp(0.0, 1.0) : 0.0;
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                                child: _CategoryBudgetTile(
-                                  label: entry.key,
-                                  spent: entry.value,
-                                  cap: totalBudget,
-                                  progress: catProgress,
-                                  color: AppColors.primary,
+                              ),
+                              const SizedBox(height: AppSpacing.xl),
+                              Text(
+                                'Category Breakdown',
+                                style: AppTextStyles.labelCaps.copyWith(
+                                  color: AppColors.onSurfaceVariant,
                                 ),
-                              );
-                            }),
-                          const SizedBox(height: 80),
-                        ],
+                              ),
+                              const SizedBox(height: AppSpacing.sm),
+                              if (!reportCubitState.loading)
+                                ...reportCubitState.categoryTotals.entries.take(6).map((entry) {
+                                  final catProgress = totalBudget > 0
+                                      ? (entry.value / totalBudget).clamp(0.0, 1.0)
+                                      : 0.0;
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                                    child: _CategoryBudgetTile(
+                                      label: entry.key,
+                                      spent: entry.value,
+                                      cap: totalBudget,
+                                      progress: catProgress,
+                                      color: AppColors.primary,
+                                    ),
+                                  );
+                                }),
+                              const SizedBox(height: 80),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  AppBottomNav(
-                    selectedIndex: 2,
-                    onDestinationSelected: (i) {
-                      switch (i) {
-                        case 0: context.go(AppRoutes.home);
-                        case 1: context.go(AppRoutes.reports);
-                        case 2: context.go(AppRoutes.budgets);
-                        case 3: context.go(AppRoutes.wallets);
-                        case 4: context.go(AppRoutes.settings);
-                        default:
-                          break;
-                      }
-                    },
-                  ),
-                ],
-              );
+                      AppBottomNav(
+                        selectedIndex: 2,
+                        onDestinationSelected: (i) {
+                          switch (i) {
+                            case 0:
+                              context.go(AppRoutes.home);
+                            case 1:
+                              context.go(AppRoutes.reports);
+                            case 2:
+                              context.go(AppRoutes.budgets);
+                            case 3:
+                              context.go(AppRoutes.wallets);
+                            case 4:
+                              context.go(AppRoutes.settings);
+                            default:
+                              break;
+                          }
+                        },
+                      ),
+                    ],
+                  );
                 },
               );
             },
@@ -130,7 +173,13 @@ class _CategoryBudgetTile extends StatelessWidget {
   final double cap;
   final double progress;
   final Color color;
-  const _CategoryBudgetTile({required this.label, required this.spent, required this.cap, required this.progress, required this.color});
+  const _CategoryBudgetTile({
+    required this.label,
+    required this.spent,
+    required this.cap,
+    required this.progress,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -140,9 +189,18 @@ class _CategoryBudgetTile extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(label, style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurface, fontWeight: FontWeight.w600)),
+              Text(
+                label,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const Spacer(),
-              Text('${spent.toStringAsFixed(2)} / ${cap.toStringAsFixed(2)}', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
+              Text(
+                '${spent.toStringAsFixed(2)} / ${cap.toStringAsFixed(2)}',
+                style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),

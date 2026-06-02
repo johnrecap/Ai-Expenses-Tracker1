@@ -12,10 +12,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appTitle => 'متتبع المصروفات الذكي';
 
   @override
+  String get appSubtitle => 'وضوح مالي ذكي';
+
+  @override
   String get splashLoading => 'جار التحميل...';
 
   @override
-  String get onboardingLanguageTitle => 'اختر اللغة';
+  String get splashInitializing => 'جاري تجهيز المحرك الذكي';
+
+  @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
+  String get onboardingLanguageTitle => 'اختار لغة التطبيق';
+
+  @override
+  String get onboardingLanguageSubtitle => 'تقدر تغيرها لاحقا من الإعدادات.';
 
   @override
   String get onboardingLanguageEnglish => 'English';
@@ -24,17 +36,74 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboardingLanguageArabic => 'العربية';
 
   @override
-  String get onboardingCurrencyTitle => 'اختر العملة الأساسية';
+  String get onboardingLanguageEnglishRegion => 'الولايات المتحدة';
 
   @override
-  String get onboardingNotificationsTitle => 'ابق على اطلاع';
+  String get onboardingLanguageArabicRegion => 'الشرق الأوسط';
+
+  @override
+  String get onboardingCurrencyTitle => 'العملة الأساسية';
+
+  @override
+  String get onboardingCurrencySubtitle => 'اختار العملة الرئيسية لحسابك.';
+
+  @override
+  String get onboardingCurrencyEgyptianPound => 'الجنيه المصري';
+
+  @override
+  String get onboardingCurrencyUsDollar => 'الدولار الأمريكي';
+
+  @override
+  String get onboardingCurrencyEuro => 'اليورو';
+
+  @override
+  String get onboardingCurrencyUaeDirham => 'الدرهم الإماراتي';
+
+  @override
+  String get onboardingCurrencyLivePreview => 'معاينة مباشرة';
+
+  @override
+  String get onboardingCurrencyEstimatedRate => 'سعر تقريبي';
+
+  @override
+  String get onboardingStepThree => 'الخطوة ٣ من ٣';
+
+  @override
+  String get onboardingNotificationsTitle => 'خليك متابع';
 
   @override
   String get onboardingNotificationsSubtitle =>
-      'اسمح بالإشعارات لتنبيهات الميزانية والتذكيرات والرؤى';
+      'استقبل تذكيرات بسيطة وملخصات تساعدك تتابع ميزانيتك.';
 
   @override
-  String get onboardingEnableNotifications => 'تفعيل الإشعارات';
+  String get onboardingDailyReminderTitle => 'تذكير يومي';
+
+  @override
+  String get onboardingDailyReminderSubtitle => 'تنبيه سريع لتسجيل مصروفات اليوم.';
+
+  @override
+  String get onboardingWeeklyDigestTitle => 'ملخص أسبوعي';
+
+  @override
+  String get onboardingWeeklyDigestSubtitle => 'ملخص صحتك المالية كل يوم أحد.';
+
+  @override
+  String get onboardingNotificationTime => 'الوقت';
+
+  @override
+  String get onboardingEnableNotifications => 'السماح بالإشعارات';
+
+  @override
+  String get onboardingSaving => 'جاري الحفظ...';
+
+  @override
+  String get skipForNow => 'تخطي الآن';
+
+  @override
+  String get expenseReminderTitle => 'تذكير بالمصروفات';
+
+  @override
+  String get expenseReminderBody => 'خد دقيقة وسجل مصروفات اليوم.';
 
   @override
   String get continueButton => 'متابعة';
@@ -43,7 +112,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get skipButton => 'تخطي';
 
   @override
-  String get loginTitle => 'مرحبًا بعودتك';
+  String get loginTitle => 'أهلا برجوعك';
+
+  @override
+  String get loginSubtitle => 'سجل دخولك لإدارة رؤيتك المالية.';
 
   @override
   String get loginEmail => 'البريد الإلكتروني';
@@ -55,16 +127,34 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loginButton => 'تسجيل الدخول';
 
   @override
-  String get loginGoogleButton => 'المتابعة باستخدام Google';
+  String get loginGoogleButton => 'المتابعة بجوجل';
 
   @override
-  String get loginNoAccount => 'ليس لديك حساب؟ سجل الآن';
+  String get loginNoAccount => 'معندكش حساب؟ سجل الآن';
+
+  @override
+  String get loginFooterLabel => 'معندكش حساب؟';
+
+  @override
+  String get signUpAction => 'إنشاء حساب';
+
+  @override
+  String get forgotPassword => 'نسيت كلمة المرور؟';
+
+  @override
+  String get securePrivateExpenseTracking => 'تتبع مصروفات آمن وخاص.';
 
   @override
   String get signUpTitle => 'إنشاء حساب';
 
   @override
+  String get signUpSubtitle => 'انضم إلى متتبع المصروفات الذكي.';
+
+  @override
   String get signUpName => 'الاسم';
+
+  @override
+  String get signUpFullName => 'الاسم بالكامل';
 
   @override
   String get signUpEmail => 'البريد الإلكتروني';
@@ -79,25 +169,61 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signUpButton => 'إنشاء حساب';
 
   @override
-  String get signUpHaveAccount => 'لديك حساب بالفعل؟ تسجيل الدخول';
+  String get signUpHaveAccount => 'عندك حساب بالفعل؟ سجل دخولك';
 
   @override
-  String get authErrorInvalidEmail => 'أدخل بريدًا إلكترونيًا صالحًا';
+  String get signUpFooterLabel => 'عندك حساب بالفعل؟';
+
+  @override
+  String get loginAction => 'تسجيل الدخول';
+
+  @override
+  String get signUpTermsPrivacy => 'بإنشاء الحساب، أنت توافق على الشروط وسياسة الخصوصية.';
+
+  @override
+  String get authEnterEmailPassword => 'اكتب البريد الإلكتروني وكلمة المرور';
+
+  @override
+  String get authEnterEmailFirst => 'اكتب بريدك الإلكتروني الأول';
+
+  @override
+  String get authPasswordResetSent => 'لو الحساب موجود، هنبعتلك رسالة إعادة التعيين';
+
+  @override
+  String get authGoogleNotConfigured => 'تسجيل الدخول بجوجل غير جاهز حاليا';
+
+  @override
+  String get authOrEmail => 'أو بالبريد الإلكتروني';
+
+  @override
+  String get authErrorInvalidEmail => 'اكتب بريد إلكتروني صحيح';
+
+  @override
+  String get authErrorUserDisabled => 'الحساب ده متوقف';
 
   @override
   String get authErrorWrongPassword => 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
 
   @override
-  String get authErrorWeakPassword => 'كلمة المرور ضعيفة جدًا';
+  String get authErrorWeakPassword => 'كلمة المرور ضعيفة';
 
   @override
-  String get authErrorEmailInUse => 'يوجد حساب بالفعل لهذا البريد الإلكتروني';
+  String get authErrorWeakPasswordMin => 'كلمة المرور لازم تكون ٦ أحرف على الأقل';
 
   @override
-  String get authErrorNetwork => 'تحقق من اتصالك بالإنترنت';
+  String get authErrorEmailInUse => 'في حساب موجود بالفعل بالبريد الإلكتروني ده';
 
   @override
-  String get authErrorGeneral => 'فشلت المصادقة. حاول مرة أخرى.';
+  String get authErrorNetwork => 'راجع اتصالك بالإنترنت';
+
+  @override
+  String get authErrorOperationNotAllowed => 'طريقة تسجيل الدخول دي غير مفعلة';
+
+  @override
+  String get authErrorTooManyRequests => 'محاولات كتير. حاول مرة تانية بعد شوية';
+
+  @override
+  String get authErrorGeneral => 'فشل تسجيل الدخول. حاول مرة تانية.';
 
   @override
   String get homeTitle => 'لوحة التحكم';
@@ -130,10 +256,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get expensesTitle => 'المصروفات';
 
   @override
-  String get expensesSearch => 'البحث عن مصروفات...';
+  String get expensesSearch => 'ابحث في المصروفات...';
 
   @override
-  String get expensesFilter => 'تصفية';
+  String get expensesFilter => 'الفلاتر';
 
   @override
   String get expensesClearFilters => 'مسح';
@@ -143,6 +269,39 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get expensesNoResults => 'لا توجد مصروفات';
+
+  @override
+  String get smartAddButtonLabel => 'إضافة مصروف';
+
+  @override
+  String get smartAddSheetTitle => 'إضافة مصروف';
+
+  @override
+  String get smartAddSheetSubtitle => 'اختار طريقة تسجيل المصروف.';
+
+  @override
+  String get smartAddClose => 'إغلاق';
+
+  @override
+  String get smartAddAiTextTitle => 'نص ذكي';
+
+  @override
+  String get smartAddAiTextSubtitle => 'اكتب المصروف في جملة وراجعه قبل الحفظ.';
+
+  @override
+  String get smartAddQuickAddTitle => 'إضافة سريعة';
+
+  @override
+  String get smartAddQuickAddSubtitle => 'اكتب المبلغ والتفاصيل يدويا.';
+
+  @override
+  String get smartAddReceiptTitle => 'إيصال';
+
+  @override
+  String get smartAddReceiptSubtitle => 'مسح الإيصال هيظهر لما الماسح الحقيقي يكون جاهز.';
+
+  @override
+  String get smartAddReceiptUnavailable => 'غير متاح حاليا';
 
   @override
   String get addExpenseQuick => 'إضافة مصروف';
@@ -170,6 +329,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get addExpenseSave => 'حفظ المصروف';
+
+  @override
+  String get paymentMethodCash => 'كاش';
+
+  @override
+  String get paymentMethodVisaCard => 'فيزا/كارت';
+
+  @override
+  String get paymentMethodWallet => 'محفظة';
+
+  @override
+  String get paymentMethodBankTransfer => 'تحويل بنكي';
+
+  @override
+  String get walletOptional => 'المحفظة اختيارية';
 
   @override
   String get editExpenseTitle => 'تعديل المصروف';
@@ -205,7 +379,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reportsDrilldown => 'تفاصيل الفئة';
 
   @override
-  String get reportsMonthlyStory => 'القصة الشهرية';
+  String get reportsMonthlyStory => 'قصة الشهر';
 
   @override
   String get budgetsTitle => 'الميزانيات';
@@ -268,10 +442,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get aiAdviceTitle => 'نصائح الذكاء الاصطناعي';
 
   @override
-  String get aiAdviceRequest => 'احصل على نصائح الإنفاق';
+  String get aiAdviceRequest => 'اطلب نصيحة للإنفاق';
 
   @override
-  String get aiAdviceLoading => 'جار تحليل إنفاقك...';
+  String get aiAdviceLoading => 'جاري تحليل إنفاقك...';
 
   @override
   String get aiHistoryTitle => 'سجل الذكاء الاصطناعي';
@@ -289,7 +463,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get aiQuotaRemaining => 'طلبات الذكاء الاصطناعي المتبقية اليوم';
 
   @override
-  String get aiQuotaExceeded => 'تم تجاوز الحد اليومي. حاول غدًا أو قم بالترقية إلى Premium.';
+  String get aiQuotaExceeded => 'تجاوزت الحد اليومي. حاول غدا أو اشترك في Premium.';
 
   @override
   String get settingsTitle => 'الإعدادات';
@@ -299,6 +473,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settingsCurrency => 'العملة';
+
+  @override
+  String get settingsDefaultPaymentMethod => 'طريقة الدفع الافتراضية';
 
   @override
   String get settingsLanguage => 'اللغة';
@@ -313,13 +490,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsAiQuota => 'استخدام الذكاء الاصطناعي';
 
   @override
-  String get settingsMonetization => 'النسخة المميزة';
+  String get settingsMonetization => 'Premium';
 
   @override
   String get settingsSupport => 'الدعم';
-
-  @override
-  String get settingsExport => 'تصدير البيانات';
 
   @override
   String get settingsAbout => 'حول';
@@ -328,13 +502,26 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsLogout => 'تسجيل الخروج';
 
   @override
+  String get settingsLocalOnlyTitle => 'تخزين محلي فقط';
+
+  @override
+  String get settingsLocalOnlySubtitle =>
+      'بياناتك المالية محفوظة على هذا الجهاز، وليست في نسخة احتياطية سحابية.';
+
+  @override
+  String get settingsLocalOnlyRisk => 'حذف التطبيق أو فقدان هذا الهاتف قد يحذف بياناتك.';
+
+  @override
+  String get aiSummaryConsentInfo => 'الذكاء الاصطناعي يستقبل ملخصا صغيرا فقط عند طلب النصيحة.';
+
+  @override
   String get profileEditName => 'تعديل الاسم';
 
   @override
   String get profileDeleteAccount => 'حذف الحساب';
 
   @override
-  String get premiumTitle => 'الترقية إلى النسخة المميزة';
+  String get premiumTitle => 'الترقية إلى Premium';
 
   @override
   String get premiumFeature1 => 'حدود أعلى للذكاء الاصطناعي';
@@ -346,16 +533,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get premiumFeature3 => 'تقارير متقدمة';
 
   @override
-  String get premiumPurchase => 'ترقية الآن';
-
-  @override
-  String get exportCsv => 'تصدير CSV';
-
-  @override
-  String get exportExcel => 'تصدير Excel';
-
-  @override
-  String get exportPdf => 'تصدير PDF';
+  String get premiumPurchase => 'الترقية الآن';
 
   @override
   String get notFound => 'الصفحة غير موجودة';

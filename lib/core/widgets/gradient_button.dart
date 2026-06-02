@@ -15,7 +15,7 @@ class GradientButton extends StatelessWidget {
   });
 
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final LinearGradient? gradient;
   final double? width;
   final double height;
@@ -23,11 +23,13 @@ class GradientButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final disabled = onPressed == null;
     return Container(
       width: width ?? double.infinity,
       height: height,
       decoration: BoxDecoration(
-        gradient: gradient ?? AppGradients.primaryAction,
+        gradient: disabled ? null : gradient ?? AppGradients.primaryAction,
+        color: disabled ? AppColors.surfaceContainerHigh : null,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Material(
@@ -50,7 +52,7 @@ class GradientButton extends StatelessWidget {
                     Text(
                       label,
                       style: AppTextStyles.titleMedium.copyWith(
-                        color: AppColors.onPrimary,
+                        color: disabled ? AppColors.onSurfaceVariant : AppColors.onPrimary,
                       ),
                     ),
                   ],

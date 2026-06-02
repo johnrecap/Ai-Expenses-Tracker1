@@ -109,11 +109,15 @@ class CategoriesScreen extends StatelessWidget {
   }
 
   Future<void> _showCategoryForm(BuildContext context, {Category? existingCategory}) async {
+    final aliasRepository = existingCategory == null ? null : _readCategoryAliasRepository(context);
     final result = await showModalBottomSheet<Category>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (_) => _CategoryFormDialog(existingCategory: existingCategory),
+      builder: (_) => _CategoryFormDialog(
+        existingCategory: existingCategory,
+        aliasRepository: aliasRepository,
+      ),
     );
 
     if (result != null && context.mounted) {
@@ -123,6 +127,14 @@ class CategoriesScreen extends StatelessWidget {
       } else {
         bloc.add(CreateCategory(result));
       }
+    }
+  }
+
+  CategoryAliasRepository? _readCategoryAliasRepository(BuildContext context) {
+    try {
+      return context.read<CategoryAliasRepository>();
+    } catch (_) {
+      return null;
     }
   }
 
@@ -294,8 +306,13 @@ class _CategoryCard extends StatelessWidget {
 }
 
 class _CategoryFormDialog extends StatefulWidget {
-  const _CategoryFormDialog({this.existingCategory});
+  const _CategoryFormDialog({
+    this.existingCategory,
+    this.aliasRepository,
+  });
+
   final Category? existingCategory;
+  final CategoryAliasRepository? aliasRepository;
 
   @override
   State<_CategoryFormDialog> createState() => _CategoryFormDialogState();
@@ -303,11 +320,38 @@ class _CategoryFormDialog extends StatefulWidget {
 
 class _CategoryFormDialogState extends State<_CategoryFormDialog> {
   final _nameCtrl = TextEditingController();
+  final _aliasCtrl = TextEditingController();
+  Future<List<CategoryAlias>>? _aliasesFuture;
   String _icon = 'restaurant';
   int _color = 0xFFFF7043;
+  String? _aliasError;
+  bool _aliasSaving = false;
+  String? _deletingAliasId;
 
-  static const _icons = ['restaurant', 'local_taxi', 'shopping_bag', 'home', 'movie', 'local_hospital', 'school', 'bolt', 'flight', 'more_horiz'];
-  static const _colors = [0xFFFF7043, 0xFF42A5F5, 0xFFAB47BC, 0xFF66BB6A, 0xFFFFCA28, 0xFFEF5350, 0xFF78909C, 0xFF8D6E63, 0xFF26C6DA, 0xFFBDBDBD];
+  static const _icons = [
+    'restaurant',
+    'local_taxi',
+    'shopping_bag',
+    'home',
+    'movie',
+    'local_hospital',
+    'school',
+    'bolt',
+    'flight',
+    'more_horiz',
+  ];
+  static const _colors = [
+    0xFFFF7043,
+    0xFF42A5F5,
+    0xFFAB47BC,
+    0xFF66BB6A,
+    0xFFFFCA28,
+    0xFFEF5350,
+    0xFF78909C,
+    0xFF8D6E63,
+    0xFF26C6DA,
+    0xFFBDBDBD,
+  ];
 
   @override
   void initState() {
@@ -316,73 +360,479 @@ class _CategoryFormDialogState extends State<_CategoryFormDialog> {
       _nameCtrl.text = widget.existingCategory!.name;
       _icon = widget.existingCategory!.icon;
       _color = widget.existingCategory!.color;
+      _aliasesFuture = _loadAliases();
     }
   }
 
   @override
-  void dispose() { _nameCtrl.dispose(); super.dispose(); }
+  void dispose() {
+    _nameCtrl.dispose();
+    _aliasCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.9,
+      ),
       decoration: const BoxDecoration(
         color: AppColors.surfaceContainerLowest,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.containerPadding),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.outlineVariant, borderRadius: BorderRadius.circular(2)))),
-          const SizedBox(height: AppSpacing.lg),
-          Text(widget.existingCategory != null ? 'Edit Category' : 'New Category', style: AppTextStyles.titleMedium.copyWith(color: AppColors.onSurface)),
-          const SizedBox(height: AppSpacing.md),
-          TextField(controller: _nameCtrl, decoration: const InputDecoration(labelText: 'Name', filled: true, fillColor: AppColors.surfaceContainerLow, border: OutlineInputBorder(borderSide: BorderSide.none))),
-          const SizedBox(height: AppSpacing.md),
-          Text('Icon', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
-          const SizedBox(height: AppSpacing.sm),
-          Wrap(spacing: 8, runSpacing: 8, children: _icons.map((i) => GestureDetector(
-            onTap: () => setState(() => _icon = i),
-            child: Container(
-              width: 40, height: 40,
-              decoration: BoxDecoration(
-                color: _icon == i ? AppColors.primaryContainer : AppColors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(8),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.containerPadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
               ),
-              child: Icon(_CategoryCard.iconMap[i] ?? Icons.circle, size: 20, color: _icon == i ? AppColors.primary : AppColors.onSurfaceVariant),
-            ),
-          )).toList()),
-          const SizedBox(height: AppSpacing.md),
-          Text('Color', style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant)),
-          const SizedBox(height: AppSpacing.sm),
-          Wrap(spacing: 8, runSpacing: 8, children: _colors.map((c) => GestureDetector(
-            onTap: () => setState(() => _color = c),
-            child: Container(
-              width: 32, height: 32, decoration: BoxDecoration(color: Color(c), shape: BoxShape.circle),
-              foregroundDecoration: _color == c ? BoxDecoration(border: Border.all(color: AppColors.onSurface, width: 2), shape: BoxShape.circle) : null,
-            ),
-          )).toList()),
-          const SizedBox(height: AppSpacing.lg),
-          ElevatedButton(
-            onPressed: _save,
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: AppColors.onPrimary, padding: const EdgeInsets.symmetric(vertical: 14)),
-            child: Text(widget.existingCategory != null ? 'Update' : 'Create'),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                widget.existingCategory != null ? 'Edit Category' : 'New Category',
+                style: AppTextStyles.titleMedium.copyWith(color: AppColors.onSurface),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              TextField(
+                controller: _nameCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Name',
+                  filled: true,
+                  fillColor: AppColors.surfaceContainerLow,
+                  border: OutlineInputBorder(borderSide: BorderSide.none),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                'Icon',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _icons.map((i) {
+                  final selected = _icon == i;
+                  return GestureDetector(
+                    onTap: () => setState(() => _icon = i),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? AppColors.primaryContainer
+                            : AppColors.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        _CategoryCard.iconMap[i] ?? Icons.circle,
+                        size: 20,
+                        color: selected ? AppColors.primary : AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                'Color',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _colors.map((c) {
+                  return GestureDetector(
+                    onTap: () => setState(() => _color = c),
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(color: Color(c), shape: BoxShape.circle),
+                      foregroundDecoration: _color == c
+                          ? BoxDecoration(
+                              border: Border.all(color: AppColors.onSurface, width: 2),
+                              shape: BoxShape.circle,
+                            )
+                          : null,
+                    ),
+                  );
+                }).toList(),
+              ),
+              if (widget.existingCategory != null) ...[
+                const SizedBox(height: AppSpacing.lg),
+                _buildAliasSection(),
+              ],
+              const SizedBox(height: AppSpacing.lg),
+              ElevatedButton(
+                onPressed: _save,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.onPrimary,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: Text(widget.existingCategory != null ? 'Update' : 'Create'),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
           ),
-          const SizedBox(height: AppSpacing.sm),
-        ]),
+        ),
       ),
     );
   }
 
+  Widget _buildAliasSection() {
+    final category = widget.existingCategory!;
+    final repo = widget.aliasRepository;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Aliases',
+          style: AppTextStyles.titleMedium.copyWith(color: AppColors.onSurface),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          'Merchant names or keywords that should match this category.',
+          style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        if (repo == null)
+          const _AliasMessage(
+            icon: Icons.sync_problem,
+            text: 'Alias management is unavailable for this account.',
+          )
+        else ...[
+          FutureBuilder<List<CategoryAlias>>(
+            future: _aliasesFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+
+              if (snapshot.hasError) {
+                return _AliasError(onRetry: _refreshAliases);
+              }
+
+              final aliases = snapshot.data ?? const <CategoryAlias>[];
+              if (aliases.isEmpty) {
+                return const _AliasMessage(
+                  icon: Icons.label_outline,
+                  text: 'No aliases yet.',
+                );
+              }
+
+              return Column(
+                children: aliases.map((alias) {
+                  return _AliasTile(
+                    alias: alias,
+                    isDeleting: _deletingAliasId == alias.aliasId,
+                    onDelete: () => _deleteAlias(alias),
+                  );
+                }).toList(),
+              );
+            },
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          if (category.isArchived)
+            const _AliasMessage(
+              icon: Icons.archive_outlined,
+              text: 'Archived categories cannot receive new aliases.',
+            )
+          else
+            TextField(
+              key: const Key('category_alias_input'),
+              controller: _aliasCtrl,
+              enabled: !_aliasSaving,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _addAlias(),
+              decoration: InputDecoration(
+                labelText: 'Add alias',
+                hintText: 'Merchant or keyword',
+                errorText: _aliasError,
+                filled: true,
+                fillColor: AppColors.surfaceContainerLow,
+                border: const OutlineInputBorder(borderSide: BorderSide.none),
+                suffixIcon: IconButton(
+                  key: const Key('add_category_alias_button'),
+                  tooltip: 'Add alias',
+                  onPressed: _aliasSaving ? null : _addAlias,
+                  icon: _aliasSaving
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.add_circle_outline),
+                ),
+              ),
+            ),
+        ],
+      ],
+    );
+  }
+
+  Future<List<CategoryAlias>> _loadAliases() async {
+    final repo = widget.aliasRepository;
+    final categoryId = widget.existingCategory?.categoryId;
+    if (repo == null || categoryId == null) {
+      return const [];
+    }
+
+    final aliases = await repo.getAliases();
+    return aliases.where((alias) => alias.categoryId == categoryId).toList()
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+  }
+
+  void _refreshAliases() {
+    setState(() {
+      _aliasesFuture = _loadAliases();
+    });
+  }
+
+  Future<void> _addAlias() async {
+    final repo = widget.aliasRepository;
+    final category = widget.existingCategory;
+    if (repo == null || category == null || category.isArchived || _aliasSaving) {
+      return;
+    }
+
+    final name = _aliasCtrl.text.trim();
+    if (name.isEmpty) {
+      setState(() => _aliasError = 'Alias cannot be empty.');
+      return;
+    }
+
+    setState(() {
+      _aliasSaving = true;
+      _aliasError = null;
+    });
+
+    try {
+      final aliases = await repo.getAliases();
+      final normalizedName = _normalizeAlias(name);
+      final duplicate = aliases.any((alias) {
+        return _normalizeAlias(alias.name) == normalizedName;
+      });
+      if (duplicate) {
+        if (mounted) {
+          setState(() {
+            _aliasSaving = false;
+            _aliasError = 'This alias already exists.';
+          });
+        }
+        return;
+      }
+
+      final now = DateTime.now();
+      await repo.createAlias(
+        CategoryAlias(
+          aliasId: '${category.categoryId}-${now.microsecondsSinceEpoch}',
+          userId: category.userId,
+          name: name,
+          categoryId: category.categoryId,
+          createdAt: now,
+        ),
+      );
+
+      if (!mounted) return;
+      _aliasCtrl.clear();
+      setState(() {
+        _aliasSaving = false;
+        _aliasesFuture = _loadAliases();
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _aliasSaving = false;
+        _aliasError = 'Alias could not be saved.';
+      });
+    }
+  }
+
+  Future<void> _deleteAlias(CategoryAlias alias) async {
+    final repo = widget.aliasRepository;
+    if (repo == null || _deletingAliasId != null) return;
+
+    setState(() => _deletingAliasId = alias.aliasId);
+    try {
+      await repo.deleteAlias(alias.aliasId);
+      if (!mounted) return;
+      setState(() {
+        _deletingAliasId = null;
+        _aliasesFuture = _loadAliases();
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _deletingAliasId = null;
+        _aliasError = 'Alias could not be deleted.';
+      });
+    }
+  }
+
+  String _normalizeAlias(String value) => value.trim().toLowerCase();
+
   void _save() {
     final name = _nameCtrl.text.trim();
     if (name.isEmpty) return;
+    final existing = widget.existingCategory;
     final category = Category(
-      categoryId: widget.existingCategory?.categoryId ?? DateTime.now().millisecondsSinceEpoch.toString(),
-      name: name, icon: _icon, color: _color,
-      totalExpenses: widget.existingCategory?.totalExpenses ?? 0,
-      isArchived: widget.existingCategory?.isArchived ?? false,
+      categoryId: existing?.categoryId ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      userId: existing?.userId,
+      name: name,
+      icon: _icon,
+      color: _color,
+      totalExpenses: existing?.totalExpenses ?? 0,
+      isArchived: existing?.isArchived ?? false,
+      createdAt: existing?.createdAt,
+      updatedAt: DateTime.now(),
     );
     Navigator.pop(context, category);
+  }
+}
+
+class _AliasTile extends StatelessWidget {
+  const _AliasTile({
+    required this.alias,
+    required this.isDeleting,
+    required this.onDelete,
+  });
+
+  final CategoryAlias alias;
+  final bool isDeleting;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xs),
+      child: Container(
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          AppSpacing.md,
+          AppSpacing.xs,
+          AppSpacing.xs,
+          AppSpacing.xs,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.label_outline, size: 18, color: AppColors.outline),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                alias.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurface),
+              ),
+            ),
+            IconButton(
+              key: Key('delete_category_alias_${alias.aliasId}'),
+              tooltip: 'Delete alias',
+              onPressed: isDeleting ? null : onDelete,
+              icon: isDeleting
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.delete_outline, color: AppColors.error),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AliasMessage extends StatelessWidget {
+  const _AliasMessage({
+    required this.icon,
+    required this.text,
+  });
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: AppColors.outline),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              text,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AliasError extends StatelessWidget {
+  const _AliasError({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.errorContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, size: 18, color: AppColors.error),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              'Aliases could not be loaded.',
+              style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
+            ),
+          ),
+          TextButton(
+            onPressed: onRetry,
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
   }
 }

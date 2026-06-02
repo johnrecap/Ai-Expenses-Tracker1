@@ -133,7 +133,7 @@ class AiExpenseService {
       description: completed.note ?? completed.originalInput,
       currency: completed.currency ?? 'EGP',
       source: ExpenseSource.aiText,
-      paymentMethod: PaymentMethod.cash,
+      paymentMethod: smartCompletion.store.settings?.defaultPaymentMethod ?? PaymentMethod.cash,
     );
   }
 

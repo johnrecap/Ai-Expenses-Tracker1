@@ -1,6 +1,9 @@
+// ignore_for_file: annotate_overrides, unnecessary_import
+
 import 'dart:async';
 import 'package:expense_repository/expense_repository.dart';
 import 'local_store_interface.dart';
+import '../sync/sync_entity_codec.dart';
 
 class LocalRepositoryStore implements LocalStoreInterface {
   final String userId;
@@ -18,6 +21,7 @@ class LocalRepositoryStore implements LocalStoreInterface {
 
   final List<SyncChange> pendingChanges = [];
   int _changeCounter = 0;
+  bool _suppressSyncQueue = false;
 
   final _expenseController = StreamController<List<Expense>>.broadcast();
   final _categoryController = StreamController<List<Category>>.broadcast();
@@ -26,19 +30,16 @@ class LocalRepositoryStore implements LocalStoreInterface {
   final _goalController = StreamController<List<SavingGoal>>.broadcast();
   final _walletController = StreamController<List<WalletAccount>>.broadcast();
   final _transferController = StreamController<List<Transfer>>.broadcast();
-  final _categoryBudgetController =
-      StreamController<List<CategoryBudget>>.broadcast();
-  final _categoryAliasController =
-      StreamController<List<CategoryAlias>>.broadcast();
-  final _recurringExpenseController =
-      StreamController<List<RecurringExpense>>.broadcast();
-  final _aiActionLogController =
-      StreamController<List<AiActionLog>>.broadcast();
+  final _categoryBudgetController = StreamController<List<CategoryBudget>>.broadcast();
+  final _categoryAliasController = StreamController<List<CategoryAlias>>.broadcast();
+  final _recurringExpenseController = StreamController<List<RecurringExpense>>.broadcast();
+  final _aiActionLogController = StreamController<List<AiActionLog>>.broadcast();
   final _pendingController = StreamController<List<SyncChange>>.broadcast();
 
   LocalRepositoryStore({required this.userId});
 
   int get expensesLoadedVersion => _expenses.length;
+  Future<void> get ready => Future.value();
 
   void _emitExpenses() {
     final list = _expenses.values.toList()..sort((a, b) => b.date.compareTo(a.date));
@@ -46,25 +47,43 @@ class LocalRepositoryStore implements LocalStoreInterface {
   }
 
   void _enqueue(String entityType, String entityId, Map<String, dynamic> data) {
-    pendingChanges.add(SyncChange(
-      id: 'change-${++_changeCounter}', entityType: entityType, entityId: entityId,
-      changeType: SyncChangeType.upsert, data: data, clientChangeId: '$entityType-$entityId-$_changeCounter',
-      deviceId: 'flutter-$userId', userId: userId, timestamp: DateTime.now(),
-    ));
+    if (_suppressSyncQueue) return;
+    pendingChanges.add(
+      SyncChange(
+        id: 'change-${++_changeCounter}',
+        entityType: entityType,
+        entityId: entityId,
+        changeType: SyncChangeType.upsert,
+        data: data,
+        clientChangeId: '$entityType-$entityId-$_changeCounter',
+        deviceId: 'flutter-$userId',
+        userId: userId,
+        timestamp: DateTime.now(),
+      ),
+    );
     _pendingController.add(List.unmodifiable(pendingChanges));
   }
 
   void _enqueueDelete(String entityType, String entityId, Map<String, dynamic> data) {
-    pendingChanges.add(SyncChange(
-      id: 'change-${++_changeCounter}', entityType: entityType, entityId: entityId,
-      changeType: SyncChangeType.delete, data: data, clientChangeId: '$entityType-$entityId-$_changeCounter',
-      deviceId: 'flutter-$userId', userId: userId, timestamp: DateTime.now(),
-    ));
+    if (_suppressSyncQueue) return;
+    pendingChanges.add(
+      SyncChange(
+        id: 'change-${++_changeCounter}',
+        entityType: entityType,
+        entityId: entityId,
+        changeType: SyncChangeType.delete,
+        data: data,
+        clientChangeId: '$entityType-$entityId-$_changeCounter',
+        deviceId: 'flutter-$userId',
+        userId: userId,
+        timestamp: DateTime.now(),
+      ),
+    );
     _pendingController.add(List.unmodifiable(pendingChanges));
   }
 
   void markUploadedChanges(List<String> ids) {
-    pendingChanges.removeWhere((c) => ids.contains(c.id));
+    pendingChanges.removeWhere((c) => ids.contains(c.id) || ids.contains(c.clientChangeId));
     _pendingController.add(List.unmodifiable(pendingChanges));
   }
 
@@ -79,93 +98,200 @@ class LocalRepositoryStore implements LocalStoreInterface {
   Stream<List<SavingGoal>> watchGoals() => _goalController.stream;
   Stream<List<WalletAccount>> watchWallets() => _walletController.stream;
   Stream<List<Transfer>> watchTransfers() => _transferController.stream;
-  Stream<List<CategoryBudget>> watchCategoryBudgets() =>
-      _categoryBudgetController.stream;
-  Stream<List<CategoryAlias>> watchCategoryAliases() =>
-      _categoryAliasController.stream;
-  Stream<List<RecurringExpense>> watchRecurringExpenses() =>
-      _recurringExpenseController.stream;
-  Stream<List<AiActionLog>> watchAiActionLogs() =>
-      _aiActionLogController.stream;
+  Stream<List<CategoryBudget>> watchCategoryBudgets() => _categoryBudgetController.stream;
+  Stream<List<CategoryAlias>> watchCategoryAliases() => _categoryAliasController.stream;
+  Stream<List<RecurringExpense>> watchRecurringExpenses() => _recurringExpenseController.stream;
+  Stream<List<AiActionLog>> watchAiActionLogs() => _aiActionLogController.stream;
   Stream<List<SyncChange>> watchPendingChanges() => _pendingController.stream;
 
-  void upsertExpense(Expense e) { _expenses[e.expenseId] = e; _emitExpenses(); _enqueue('expense', e.expenseId, e.toEntity().toDocument()); }
-  void deleteExpense(String id) { _expenses.remove(id); _emitExpenses(); _enqueueDelete('expense', id, {}); }
+  Future<void> upsertExpense(Expense e) async {
+    _expenses[e.expenseId] = e;
+    _emitExpenses();
+    _enqueue('expense', e.expenseId, e.toEntity().toDocument());
+  }
+
+  Future<void> deleteExpense(String id) async {
+    _expenses.remove(id);
+    _emitExpenses();
+    _enqueueDelete('expense', id, {});
+  }
+
   List<Expense> get expenses => _expenses.values.toList();
 
-  void upsertCategory(Category c) { _categories[c.categoryId] = c; _categoryController.add(_categories.values.toList()); _enqueue('category', c.categoryId, c.toEntity().toDocument()); }
+  Future<void> upsertCategory(Category c) async {
+    _categories[c.categoryId] = c;
+    _categoryController.add(_categories.values.toList());
+    _enqueue('category', c.categoryId, c.toEntity().toDocument());
+  }
+
   List<Category> get categories => _categories.values.toList();
 
-  void upsertBudget(Budget b) { _budgets[b.budgetId] = b; _budgetController.add(b); _enqueue('budget', b.budgetId, b.toEntity().toDocument()); }
-  Budget? get budget => _budgets.values.isNotEmpty ? _budgets.values.first : null;
+  Future<void> upsertBudget(Budget b) async {
+    _budgets[b.budgetId] = b;
+    _budgetController.add(b);
+    _enqueue('budget', b.budgetId, b.toEntity().toDocument());
+  }
 
-  void upsertSettings(UserSettings s) { _settings['profile'] = s; _settingsController.add(s); _enqueue('settings', 'profile', s.toEntity().toDocument()); }
+  Budget? get budget => _budgets.values.isNotEmpty ? _budgets.values.first : null;
+  List<Budget> get budgets => _budgets.values.toList();
+
+  Future<void> upsertSettings(UserSettings s) async {
+    _settings['profile'] = s;
+    _settingsController.add(s);
+    _enqueue('settings', 'profile', s.toEntity().toDocument());
+  }
+
   UserSettings? get settings => _settings['profile'];
 
-  void upsertGoal(SavingGoal g) { _goals[g.goalId] = g; _goalController.add(_goals.values.toList()); _enqueue('savingGoal', g.goalId, _goalToDoc(g)); }
-  void deleteGoal(String id) { _goals.remove(id); _goalController.add(_goals.values.toList()); _enqueueDelete('savingGoal', id, {}); }
+  Future<void> upsertGoal(SavingGoal g) async {
+    _goals[g.goalId] = g;
+    _goalController.add(_goals.values.toList());
+    _enqueue('savingGoal', g.goalId, _goalToDoc(g));
+  }
+
+  Future<void> deleteGoal(String id) async {
+    _goals.remove(id);
+    _goalController.add(_goals.values.toList());
+    _enqueueDelete('savingGoal', id, {});
+  }
+
   List<SavingGoal> get goals => _goals.values.toList();
 
-  void upsertWallet(WalletAccount w) { _wallets[w.walletId] = w; _walletController.add(_wallets.values.toList()); _enqueue('wallet', w.walletId, _walletToDoc(w)); }
+  Future<void> upsertWallet(WalletAccount w) async {
+    _wallets[w.walletId] = w;
+    _walletController.add(_wallets.values.toList());
+    _enqueue('walletAccount', w.walletId, _walletToDoc(w));
+  }
+
   List<WalletAccount> get wallets => _wallets.values.toList();
 
-  void upsertTransfer(Transfer t) { _transfers[t.transferId] = t; _transferController.add(_transfers.values.toList()); _enqueue('transfer', t.transferId, _transferToDoc(t)); }
+  Future<void> upsertTransfer(Transfer t) async {
+    _transfers[t.transferId] = t;
+    _transferController.add(_transfers.values.toList());
+    _enqueue('transfer', t.transferId, _transferToDoc(t));
+  }
+
   List<Transfer> get transfers => _transfers.values.toList();
 
-  void upsertCategoryBudget(CategoryBudget b) { _categoryBudgets[b.budgetId] = b; _categoryBudgetController.add(_categoryBudgets.values.toList()); _enqueue('categoryBudget', b.budgetId, _categoryBudgetToDoc(b)); }
+  Future<void> upsertCategoryBudget(CategoryBudget b) async {
+    _categoryBudgets[b.budgetId] = b;
+    _categoryBudgetController.add(_categoryBudgets.values.toList());
+    _enqueue('categoryBudget', b.budgetId, _categoryBudgetToDoc(b));
+  }
+
   List<CategoryBudget> get categoryBudgets => _categoryBudgets.values.toList();
 
-  void upsertCategoryAlias(CategoryAlias a) { _categoryAliases[a.aliasId] = a; _categoryAliasController.add(_categoryAliases.values.toList()); _enqueue('categoryAlias', a.aliasId, _categoryAliasToDoc(a)); }
-  void deleteCategoryAlias(String id) { _categoryAliases.remove(id); _categoryAliasController.add(_categoryAliases.values.toList()); _enqueueDelete('categoryAlias', id, {}); }
+  Future<void> upsertCategoryAlias(CategoryAlias a) async {
+    _categoryAliases[a.aliasId] = a;
+    _categoryAliasController.add(_categoryAliases.values.toList());
+    _enqueue('categoryAlias', a.aliasId, _categoryAliasToDoc(a));
+  }
+
+  Future<void> deleteCategoryAlias(String id) async {
+    _categoryAliases.remove(id);
+    _categoryAliasController.add(_categoryAliases.values.toList());
+    _enqueueDelete('categoryAlias', id, {});
+  }
+
   List<CategoryAlias> get categoryAliases => _categoryAliases.values.toList();
 
-  void upsertRecurringExpense(RecurringExpense e) { _recurringExpenses[e.recurringExpenseId] = e; _recurringExpenseController.add(_recurringExpenses.values.toList()); _enqueue('recurringExpense', e.recurringExpenseId, _recurringExpenseToDoc(e)); }
-  void deleteRecurringExpense(String id) { _recurringExpenses.remove(id); _recurringExpenseController.add(_recurringExpenses.values.toList()); _enqueueDelete('recurringExpense', id, {}); }
+  Future<void> upsertRecurringExpense(RecurringExpense e) async {
+    _recurringExpenses[e.recurringExpenseId] = e;
+    _recurringExpenseController.add(_recurringExpenses.values.toList());
+    _enqueue('recurringExpense', e.recurringExpenseId, _recurringExpenseToDoc(e));
+  }
+
+  Future<void> deleteRecurringExpense(String id) async {
+    _recurringExpenses.remove(id);
+    _recurringExpenseController.add(_recurringExpenses.values.toList());
+    _enqueueDelete('recurringExpense', id, {});
+  }
+
   List<RecurringExpense> get recurringExpenses => _recurringExpenses.values.toList();
 
-  void upsertAiActionLog(AiActionLog l) { _aiActionLogs.add(l); _aiActionLogController.add(List.unmodifiable(_aiActionLogs)); _enqueue('aiActionLog', l.actionId, _aiActionLogToDoc(l)); }
+  Future<void> upsertAiActionLog(AiActionLog l) async {
+    final safeLog = AiActionLogPrivacy.sanitize(l);
+    _aiActionLogs.add(safeLog);
+    _aiActionLogController.add(List.unmodifiable(_aiActionLogs));
+    _enqueue('aiActionLog', safeLog.actionId, _aiActionLogToDoc(safeLog));
+  }
+
   List<AiActionLog> get aiActionLogs => List.unmodifiable(_aiActionLogs);
 
+  Future<void> applyRemoteChange(SyncChange change) async {
+    _suppressSyncQueue = true;
+    try {
+      await SyncEntityCodec.applyToStore(this, change);
+    } finally {
+      _suppressSyncQueue = false;
+    }
+  }
+
   Map<String, dynamic> _goalToDoc(SavingGoal g) => {
-    'goalId': g.goalId, 'userId': g.userId, 'name': g.name,
-    'targetAmount': g.targetAmount, 'currentAmount': g.currentAmount,
-    'currency': g.currency, 'color': g.color,
+    'goalId': g.goalId,
+    'userId': g.userId,
+    'name': g.name,
+    'targetAmount': g.targetAmount,
+    'currentAmount': g.currentAmount,
+    'currency': g.currency,
+    'color': g.color,
     if (g.deadline != null) 'deadline': g.deadline!.toIso8601String(),
   };
-  Map<String, dynamic> _walletToDoc(WalletAccount w) => {'walletId': w.walletId, 'name': w.name, 'balance': w.balance, 'currency': w.currency, 'type': w.type, 'icon': w.icon, 'color': w.color};
+  Map<String, dynamic> _walletToDoc(WalletAccount w) => w.toEntity().toDocument();
 
   Map<String, dynamic> _transferToDoc(Transfer t) => {
-    'transferId': t.transferId, 'userId': t.userId,
-    'fromWalletId': t.fromWalletId, 'toWalletId': t.toWalletId,
-    'amount': t.amount, if (t.note != null) 'note': t.note,
-    'date': t.date.toIso8601String(), 'createdAt': t.createdAt.toIso8601String(),
+    'transferId': t.transferId,
+    'userId': t.userId,
+    'fromWalletId': t.fromWalletId,
+    'toWalletId': t.toWalletId,
+    'amount': t.amount,
+    if (t.note != null) 'note': t.note,
+    'date': t.date.toIso8601String(),
+    'createdAt': t.createdAt.toIso8601String(),
   };
 
   Map<String, dynamic> _categoryBudgetToDoc(CategoryBudget b) => {
-    'budgetId': b.budgetId, 'userId': b.userId, 'categoryId': b.categoryId,
-    'amount': b.amount, 'month': b.month, 'year': b.year,
-    'createdAt': b.createdAt.toIso8601String(), 'updatedAt': b.updatedAt.toIso8601String(),
+    'budgetId': b.budgetId,
+    'userId': b.userId,
+    'categoryId': b.categoryId,
+    'amount': b.amount,
+    'month': b.month,
+    'year': b.year,
+    'createdAt': b.createdAt.toIso8601String(),
+    'updatedAt': b.updatedAt.toIso8601String(),
   };
 
   Map<String, dynamic> _categoryAliasToDoc(CategoryAlias a) => {
-    'aliasId': a.aliasId, 'userId': a.userId, 'name': a.name,
-    'categoryId': a.categoryId, 'createdAt': a.createdAt.toIso8601String(),
+    'aliasId': a.aliasId,
+    'userId': a.userId,
+    'name': a.name,
+    'categoryId': a.categoryId,
+    'createdAt': a.createdAt.toIso8601String(),
   };
 
   Map<String, dynamic> _recurringExpenseToDoc(RecurringExpense e) => {
-    'recurringExpenseId': e.recurringExpenseId, 'userId': e.userId,
-    'name': e.name, 'amount': e.amount, 'currency': e.currency,
-    'categoryId': e.categoryId, 'frequency': e.frequency,
+    'recurringExpenseId': e.recurringExpenseId,
+    'userId': e.userId,
+    'name': e.name,
+    'amount': e.amount,
+    'currency': e.currency,
+    'categoryId': e.categoryId,
+    'frequency': e.frequency,
     'startDate': e.startDate.toIso8601String(),
     if (e.endDate != null) 'endDate': e.endDate!.toIso8601String(),
     if (e.lastGeneratedDate != null) 'lastGeneratedDate': e.lastGeneratedDate!.toIso8601String(),
-    'createdAt': e.createdAt.toIso8601String(), 'updatedAt': e.updatedAt.toIso8601String(),
+    'createdAt': e.createdAt.toIso8601String(),
+    'updatedAt': e.updatedAt.toIso8601String(),
   };
 
   Map<String, dynamic> _aiActionLogToDoc(AiActionLog l) => {
-    'actionId': l.actionId, 'userId': l.userId, 'actionType': l.actionType,
-    'input': l.input, if (l.output != null) 'output': l.output,
-    'success': l.success, 'quotaUsed': l.quotaUsed,
+    'actionId': l.actionId,
+    'userId': l.userId,
+    'actionType': l.actionType,
+    'input': l.input,
+    if (l.output != null) 'output': l.output,
+    'success': l.success,
+    'quotaUsed': l.quotaUsed,
     'createdAt': l.createdAt.toIso8601String(),
   };
 }

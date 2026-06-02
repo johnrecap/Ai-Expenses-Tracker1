@@ -16,10 +16,11 @@ void main() {
       expect(cubit.state.isPremium, true);
     });
 
-    test('load sets initialized', () async {
-      final cubit = MonetizationCubit(adService: NoOpAdService());
+    test('load sets initialized without enabling unavailable ads', () async {
+      final cubit = MonetizationCubit(adService: const UnavailableAdService());
       await cubit.load();
       expect(cubit.state.initialized, true);
+      expect(cubit.state.showAds, false);
     });
   });
 }

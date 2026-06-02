@@ -4,6 +4,7 @@ import 'package:expenses_tracker/core/theme/app_gradients.dart';
 import 'package:expenses_tracker/core/theme/app_radii.dart';
 import 'package:expenses_tracker/core/theme/app_spacing.dart';
 import 'package:expenses_tracker/core/theme/app_text_styles.dart';
+import 'package:expenses_tracker/core/widgets/app_toast.dart';
 import 'package:expenses_tracker/core/widgets/glass_card.dart';
 
 class AuthPanel extends StatelessWidget {
@@ -18,6 +19,9 @@ class AuthPanel extends StatelessWidget {
     this.onFooterAction,
     this.showGoogleButton = false,
     this.onGoogleSignIn,
+    this.googleButtonLabel,
+    this.googleUnavailableMessage,
+    this.emailDividerLabel,
     required this.children,
     this.headerIcon,
   });
@@ -31,6 +35,9 @@ class AuthPanel extends StatelessWidget {
   final VoidCallback? onFooterAction;
   final bool showGoogleButton;
   final VoidCallback? onGoogleSignIn;
+  final String? googleButtonLabel;
+  final String? googleUnavailableMessage;
+  final String? emailDividerLabel;
   final List<Widget> children;
   final Widget? headerIcon;
 
@@ -61,11 +68,16 @@ class AuthPanel extends StatelessWidget {
             const SizedBox(height: AppSpacing.lg),
             if (showGoogleButton) ...[
               _GoogleButton(
-                onPressed: onGoogleSignIn ?? () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Google auth not configured')),
-                  );
-                },
+                label: googleButtonLabel ?? 'Continue with Google',
+                onPressed:
+                    onGoogleSignIn ??
+                    () {
+                      showAppToast(
+                        context,
+                        googleUnavailableMessage ?? 'Google auth is not configured yet',
+                        isError: true,
+                      );
+                    },
               ),
               const SizedBox(height: AppSpacing.md),
               Row(
@@ -76,7 +88,7 @@ class AuthPanel extends StatelessWidget {
                       horizontal: AppSpacing.md,
                     ),
                     child: Text(
-                      'OR EMAIL',
+                      emailDividerLabel ?? 'Or email',
                       style: AppTextStyles.labelCaps.copyWith(
                         color: AppColors.outline,
                       ),
@@ -211,8 +223,9 @@ class AuthTextField extends StatelessWidget {
 }
 
 class _GoogleButton extends StatelessWidget {
-  const _GoogleButton({required this.onPressed});
+  const _GoogleButton({required this.label, required this.onPressed});
 
+  final String label;
   final VoidCallback onPressed;
 
   @override
@@ -241,23 +254,23 @@ class _GoogleButton extends StatelessWidget {
               child: const Center(
                 child: Text(
                   'G',
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Text(
-            'Continue with Google',
-            style: AppTextStyles.bodySmall.copyWith(
-              fontWeight: FontWeight.w600,
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              label,
+              style: AppTextStyles.bodySmall.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }

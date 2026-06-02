@@ -5,8 +5,10 @@ import 'package:expenses_tracker/core/theme/app_colors.dart';
 import 'package:expenses_tracker/core/theme/app_spacing.dart';
 import 'package:expenses_tracker/core/theme/app_text_styles.dart';
 import 'package:expenses_tracker/core/widgets/app_background.dart';
+import 'package:expenses_tracker/core/widgets/app_toast.dart';
 import 'package:expenses_tracker/app/routes.dart';
 import 'package:expenses_tracker/features/auth/auth_bloc/auth_bloc.dart';
+import 'package:expenses_tracker/l10n/app_localizations.dart';
 import 'widgets/auth_panel.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -29,12 +31,11 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _onLogin() {
+    final l10n = AppLocalizations.of(context)!;
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter email and password')),
-      );
+      showAppToast(context, l10n.authEnterEmailPassword, isError: true);
       return;
     }
     context.read<AuthBloc>().add(
@@ -48,14 +49,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthAuthenticated) {
-          context.go(AppRoutes.home);
+          context.go(AppRoutes.splash);
         } else if (state is AuthFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
+          showAppToast(context, _localizedAuthMessage(l10n, state.message), isError: true);
         }
       },
       child: Scaffold(
@@ -85,26 +85,29 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   AuthPanel(
-                    title: 'Welcome Back',
-                    subtitle: 'Log in to manage your financial insights.',
-                    primaryButtonLabel: 'Log In',
+                    title: l10n.loginTitle,
+                    subtitle: l10n.loginSubtitle,
+                    primaryButtonLabel: l10n.loginButton,
                     showGoogleButton: true,
+                    googleButtonLabel: l10n.loginGoogleButton,
+                    googleUnavailableMessage: l10n.authGoogleNotConfigured,
+                    emailDividerLabel: l10n.authOrEmail,
                     onGoogleSignIn: _onGoogleSignIn,
-                    footerLabel: "Don't have an account?",
-                    footerActionLabel: 'Sign up',
+                    footerLabel: l10n.loginFooterLabel,
+                    footerActionLabel: l10n.signUpAction,
                     onFooterAction: () {
                       context.go(AppRoutes.signUp);
                     },
                     onPrimaryAction: _onLogin,
                     children: [
                       AuthTextField(
-                        hintText: 'Email / \u0627\u0644\u0628\u0631\u064A\u062F \u0627\u0644\u0625\u0644\u0643\u062A\u0631\u0648\u0646\u064A',
+                        hintText: l10n.loginEmail,
                         prefixIcon: Icons.mail_outline,
                         controller: _emailController,
                       ),
                       const SizedBox(height: AppSpacing.md),
                       AuthTextField(
-                        hintText: 'Password / \u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631',
+                        hintText: l10n.loginPassword,
                         prefixIcon: Icons.lock_outline,
                         obscureText: _obscurePassword,
                         controller: _passwordController,
@@ -125,20 +128,16 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: () {
                             final email = _emailController.text.trim();
                             if (email.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Enter your email first')),
-                              );
+                              showAppToast(context, l10n.authEnterEmailFirst, isError: true);
                               return;
                             }
                             context.read<AuthBloc>().add(
                               AuthPasswordResetRequested(email),
                             );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Password reset email sent if account exists')),
-                            );
+                            showAppToast(context, l10n.authPasswordResetSent);
                           },
                           child: Text(
-                            'Forgot password?',
+                            l10n.forgotPassword,
                             style: AppTextStyles.bodySmall.copyWith(
                               color: AppColors.primary,
                               fontWeight: FontWeight.w600,
@@ -155,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const Icon(Icons.shield_outlined, size: 16, color: AppColors.outline),
                       const SizedBox(width: AppSpacing.xs),
                       Text(
-                        'Secure private expense tracking.',
+                        l10n.securePrivateExpenseTracking,
                         style: AppTextStyles.labelCaps.copyWith(
                           color: AppColors.outline,
                         ),
@@ -169,5 +168,28 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  String _localizedAuthMessage(AppLocalizations l10n, String message) {
+    switch (message) {
+      case 'The email address is not valid.':
+        return l10n.authErrorInvalidEmail;
+      case 'This account has been disabled.':
+        return l10n.authErrorUserDisabled;
+      case 'Email or password is incorrect.':
+        return l10n.authErrorWrongPassword;
+      case 'An account already exists for this email.':
+        return l10n.authErrorEmailInUse;
+      case 'Password must be at least 6 characters.':
+        return l10n.authErrorWeakPasswordMin;
+      case 'Check your internet connection.':
+        return l10n.authErrorNetwork;
+      case 'This sign-in method is not enabled.':
+        return l10n.authErrorOperationNotAllowed;
+      case 'Too many attempts. Try again later.':
+        return l10n.authErrorTooManyRequests;
+      default:
+        return l10n.authErrorGeneral;
+    }
   }
 }

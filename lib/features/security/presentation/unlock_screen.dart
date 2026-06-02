@@ -2,6 +2,7 @@ import 'package:expenses_tracker/core/theme/app_colors.dart';
 import 'package:expenses_tracker/core/theme/app_spacing.dart';
 import 'package:expenses_tracker/core/theme/app_text_styles.dart';
 import 'package:expenses_tracker/core/widgets/app_background.dart';
+import 'package:expenses_tracker/core/widgets/app_toast.dart';
 import 'package:expenses_tracker/core/widgets/gradient_button.dart';
 import 'package:expenses_tracker/features/security/cubit/app_lock_cubit.dart';
 import 'package:flutter/material.dart';
@@ -31,12 +32,7 @@ class _UnlockScreenState extends State<UnlockScreen> {
           child: BlocConsumer<AppLockCubit, AppLockState>(
             listener: (context, state) {
               if (state.message != null && state.message!.isNotEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message!),
-                    backgroundColor: AppColors.error,
-                  ),
-                );
+                showAppToast(context, state.message!, isError: true);
               }
             },
             builder: (context, state) {

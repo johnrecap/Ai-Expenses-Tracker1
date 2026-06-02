@@ -32,6 +32,11 @@ export interface ReceiptExtractionDependencies {
 
 const requestType: AiRequestType = "receipt_extraction";
 const maxReceiptBase64Length = 6 * 1024 * 1024;
+const allowedReceiptMimeTypes = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
 
 export async function handleReceiptExtraction(
   request: Request,
@@ -140,23 +145,30 @@ export async function handleReceiptExtraction(
 }
 
 export function validateReceiptRequestBody(body: unknown): AiReceiptRequestBody {
+  const candidate =
+    body && typeof body === "object" && !Array.isArray(body)
+      ? (body as Record<string, unknown>)
+      : {};
   const base = validateParseRequestBody({
-    ...(body && typeof body === "object" && !Array.isArray(body) ? body : {}),
+    ...candidate,
+    imageBase64: undefined,
     input: "receipt",
+  }, {
+    maxInputChars: 50,
+    maxPayloadBytes: 16 * 1024,
   });
-  const candidate = body as Record<string, unknown>;
   const imageBase64 = readTrimmedString(candidate.imageBase64);
   if (!imageBase64 || imageBase64.length < 20) {
     throw new AiGatewayError("invalid_request", "Receipt image is required.", 400);
   }
   if (imageBase64.length > maxReceiptBase64Length) {
-    throw new AiGatewayError("invalid_request", "Receipt image is too large.", 400);
+    throw new AiGatewayError("invalid_request", "Receipt image is too large.", 413);
   }
-  const mimeType = readTrimmedString(candidate.mimeType);
-  if (!mimeType || !mimeType.startsWith("image/")) {
+  const mimeType = readTrimmedString(candidate.mimeType)?.toLowerCase();
+  if (!mimeType || !allowedReceiptMimeTypes.has(mimeType)) {
     throw new AiGatewayError(
       "invalid_request",
-      "Valid image mime type is required.",
+      "Supported receipt image type is required.",
       400,
     );
   }

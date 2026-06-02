@@ -2,6 +2,7 @@ import 'package:expenses_tracker/core/theme/app_colors.dart';
 import 'package:expenses_tracker/core/theme/app_spacing.dart';
 import 'package:expenses_tracker/core/theme/app_text_styles.dart';
 import 'package:expenses_tracker/core/widgets/app_background.dart';
+import 'package:expenses_tracker/core/widgets/app_toast.dart';
 import 'package:expenses_tracker/core/widgets/gradient_button.dart';
 import 'package:expenses_tracker/features/security/cubit/app_lock_cubit.dart';
 import 'package:flutter/material.dart';
@@ -23,11 +24,14 @@ class CreatePinScreen extends StatefulWidget {
 
 class _CreatePinScreenState extends State<CreatePinScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _currentPinController = TextEditingController();
   final _pinController = TextEditingController();
   final _confirmPinController = TextEditingController();
+  bool _verifiedWithBiometrics = false;
 
   @override
   void dispose() {
+    _currentPinController.dispose();
     _pinController.dispose();
     _confirmPinController.dispose();
     super.dispose();
@@ -49,9 +53,7 @@ class _CreatePinScreenState extends State<CreatePinScreen> {
         child: BlocConsumer<AppLockCubit, AppLockState>(
           listener: (context, state) {
             if (state.message != null && state.message!.isNotEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message!), backgroundColor: AppColors.error),
-              );
+              showAppToast(context, state.message!, isError: true);
             }
           },
           builder: (context, state) {
@@ -89,6 +91,55 @@ class _CreatePinScreenState extends State<CreatePinScreen> {
                       key: _formKey,
                       child: Column(
                         children: [
+                          if (widget.changeExistingPin) ...[
+                            TextFormField(
+                              controller: _currentPinController,
+                              obscureText: true,
+                              keyboardType: TextInputType.number,
+                              maxLength: 8,
+                              textAlign: TextAlign.center,
+                              enabled: !_verifiedWithBiometrics,
+                              style: AppTextStyles.titleMedium.copyWith(letterSpacing: 6),
+                              decoration: InputDecoration(
+                                labelText: 'Current PIN',
+                                labelStyle: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.onSurfaceVariant,
+                                ),
+                                hintText: 'â€¢â€¢â€¢â€¢',
+                                counterText: '',
+                                filled: true,
+                                fillColor: AppColors.surfaceContainerLow,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                    color: AppColors.primary,
+                                    width: 2,
+                                  ),
+                                ),
+                              ),
+                              validator: _verifiedWithBiometrics ? null : _validatePin,
+                            ),
+                            if (state.biometricEnabled) ...[
+                              const SizedBox(height: AppSpacing.sm),
+                              TextButton.icon(
+                                onPressed: state.isBusy ? null : _verifyWithBiometrics,
+                                icon: const Icon(Icons.fingerprint, color: AppColors.primary),
+                                label: Text(
+                                  _verifiedWithBiometrics
+                                      ? 'Biometrics Verified'
+                                      : 'Verify with Biometrics',
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: AppSpacing.md),
+                          ],
                           TextFormField(
                             controller: _pinController,
                             obscureText: true,
@@ -98,7 +149,9 @@ class _CreatePinScreenState extends State<CreatePinScreen> {
                             style: AppTextStyles.titleMedium.copyWith(letterSpacing: 6),
                             decoration: InputDecoration(
                               labelText: 'PIN',
-                              labelStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant),
+                              labelStyle: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.onSurfaceVariant,
+                              ),
                               hintText: '••••',
                               counterText: '',
                               filled: true,
@@ -124,7 +177,9 @@ class _CreatePinScreenState extends State<CreatePinScreen> {
                             style: AppTextStyles.titleMedium.copyWith(letterSpacing: 6),
                             decoration: InputDecoration(
                               labelText: 'Confirm PIN',
-                              labelStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant),
+                              labelStyle: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.onSurfaceVariant,
+                              ),
                               hintText: '••••',
                               counterText: '',
                               filled: true,
@@ -148,8 +203,8 @@ class _CreatePinScreenState extends State<CreatePinScreen> {
                       label: state.isBusy
                           ? 'Saving...'
                           : widget.changeExistingPin
-                              ? 'Save New PIN'
-                              : 'Enable App Lock',
+                          ? 'Save New PIN'
+                          : 'Enable App Lock',
                       onPressed: state.isBusy ? () {} : () => _savePin(),
                     ),
                     const SizedBox(height: AppSpacing.lg),
@@ -184,9 +239,20 @@ class _CreatePinScreenState extends State<CreatePinScreen> {
     final cubit = context.read<AppLockCubit>();
     final pin = _pinController.text.trim();
     final saved = widget.changeExistingPin
-        ? await cubit.changePin(pin)
+        ? await cubit.changePin(
+            newPin: pin,
+            currentPin: _verifiedWithBiometrics ? null : _currentPinController.text.trim(),
+          )
         : await cubit.enableLockWithPin(pin);
     if (!mounted || !saved || !widget.popOnSave) return;
     Navigator.pop(context, true);
+  }
+
+  Future<void> _verifyWithBiometrics() async {
+    final verified = await context.read<AppLockCubit>().verifyCurrentLockWithBiometrics();
+    if (!mounted) return;
+    setState(() {
+      _verifiedWithBiometrics = verified;
+    });
   }
 }

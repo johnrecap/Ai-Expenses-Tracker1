@@ -1,13 +1,17 @@
-# UI-Only Flutter Implementation Plan: [FEATURE]
+# Production Flutter Implementation Plan: [FEATURE]
 
 **Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
 
 **Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
 
 **Note**: This template is filled in by the `/speckit-plan` command. This
-workspace is a UI-only Flutter prototype. Plans must not introduce backend,
-Firebase, real auth, database, API calls, OCR, AI-service calls, persistence,
-WebView, or HTML-rendering work.
+workspace is a production Flutter expense tracker. Plans may include Flutter UI,
+local Drift/SQLite persistence, state management, routing, local notifications,
+security/app lock, monetization, analytics, and server-side AI gateway work
+when owned by the active feature. Production financial app data remains
+local-only by default; Firestore/PostgreSQL/VPS sync must not be used for
+app-owned financial data unless a separate approved plan changes that decision.
+WebView/HTML rendering and hardcoded secrets remain forbidden.
 
 ## Mandatory First Read And Skill Gate
 
@@ -25,8 +29,8 @@ Before writing this plan, the agent MUST:
 
 ## Summary
 
-[Extract from feature spec: primary UI requirement + technical approach from
-research]
+[Extract from feature spec: primary product requirement + technical approach
+from research]
 
 ## Why
 
@@ -35,53 +39,64 @@ and what implementation risk it removes.]
 
 ## Expected Result
 
-[List the concrete screens, routes, widgets, mock data, assets, and tests that
-will exist when this plan is complete.]
+[List the concrete screens, routes, widgets, data behavior, services, worker
+contracts, assets, and tests that will exist when this plan is complete.]
 
 ## Source References
 
-[List exact Stitch folders, screenshots, HTML files, design-system docs, and
-spec files that workers must read before editing.]
+[List exact app files, package files, worker files, design-system docs, specs,
+screenshots, and test files that workers must read before editing.]
 
 ## Technical Context
 
 **Language/Version**: Flutter [version] / Dart [version]
 
-**Primary Dependencies**: Flutter SDK, Material widgets, optional `go_router`,
-optional `intl`, optional FlutterGen-generated assets
+**Primary Dependencies**: Flutter SDK, BLoC/Cubit, GoRouter, Drift/SQLite,
+local notifications, Firebase Auth only when needed for AI gateway
+identity/quota, Cloudflare Worker AI Gateway, purchase/ad SDKs only when owned
+by the feature
 
-**Storage**: N/A. Static in-memory mock data only.
+**Storage**: Drift/SQLite is the production financial-data store. Firestore,
+PostgreSQL, and VPS sync are legacy/future infrastructure and not default
+runtime storage for app-owned financial data.
 
-**Testing**: `flutter test`, widget tests for LTR/RTL and required viewports
+**Testing**: focused `flutter test` suites, package-level tests, worker tests,
+widget tests for LTR/RTL and required viewports, touched-file analyzer checks
 
-**Target Platform**: Flutter mobile prototype verified at 360x800, 375x812, and
-390x844
+**Target Platform**: Flutter mobile app verified on narrow mobile viewports
+360x800, 375x812, and 390x844, plus connected Android device checks when
+available
 
-**Project Type**: UI-only Flutter mobile app prototype
+**Project Type**: Production Flutter mobile app with local-only financial data
+and explicit server-side AI actions
 
-**Performance Goals**: smooth scrolling lists, stable bottom sheets, no layout
-jank from repeated widgets, restrained glass effects
+**Performance Goals**: reliable startup reads, durable local saves, fast list
+updates, compact AI requests, smooth scrolling lists, stable bottom sheets, no
+layout jank, and no false success states
 
-**Constraints**: native Flutter widgets only, no WebView, no backend, no remote
-runtime assets, responsive mobile layout, Arabic RTL and English LTR ready
+**Constraints**: native Flutter widgets, no WebView/HTML rendering, no mobile
+secrets, app-owned financial data local-only, explicit AI server calls only,
+responsive mobile layout, Arabic RTL and English LTR ready
 
-**Scale/Scope**: native rebuild of detected Stitch export screens plus
-documented missing/deferred screens
+**Scale/Scope**: the active feature's owned app, package, worker, docs, and
+test files only; avoid broad repo analysis unless the task explicitly owns it
 
 ## Required Plan Detail
 
 Every plan generated for this project must include:
 
 - Why: reason the feature/batch exists and what risk it removes.
-- Expected result: concrete screens, routes, widgets, mock data, assets, or
-  tests produced.
+- Expected result: concrete screens, routes, widgets, data behavior, services,
+  worker contracts, assets, or tests produced.
 - Files and ownership: exact Flutter folders/files to create or modify.
 - Reuse strategy: shared components and tokens to use instead of duplicating UI.
-- Mock data strategy: static models/lists and route IDs required.
+- Data strategy: real local data behavior, allowed fixture/test data, and any
+  unavailable states required. Do not present mock/demo financial data as real.
 - Possible bugs: likely Flutter layout, asset, routing, RTL, and dependency
   failures.
 - Fix strategy: how a worker should diagnose and repair each likely failure.
-- Verification: compile commands, widget tests, viewport checks, and acceptance
+- Verification: focused tests, touched-file analyzer commands, worker checks,
+  compile commands where owned, widget tests, viewport checks, and acceptance
   criteria.
 - Stop condition: what must pass before moving to the next batch.
 
@@ -95,11 +110,14 @@ Required gates for this project:
 - `.agents/skill-matcher.json` was checked.
 - Relevant installed skills were searched before this plan was written.
 - Matching skills are listed in the Mandatory First Read And Skill Gate.
-- UI-only scope is preserved.
+- Production Flutter app scope is preserved.
 - No WebView or HTML rendering is planned.
 - Native Flutter widgets are planned for all screens.
 - Shared components and design tokens are planned before feature screens.
-- Mock data is static and in-memory.
+- Production app-owned financial data remains local-only by default.
+- Any network calls are explicit and limited to AI gateway, ads, purchases,
+  analytics, or quota/abuse protection owned by this feature.
+- No mock/demo financial data is presented as real production data.
 - Responsive checks include 360x800, 375x812, and 390x844.
 - Arabic RTL and English LTR checks are planned.
 - Compile checks are listed for every implementation batch.
@@ -131,7 +149,6 @@ lib/
     layout/
     theme/
     widgets/
-    mock/
   features/
     onboarding/presentation/
     auth/presentation/
@@ -145,13 +162,16 @@ lib/
     ai/presentation/
     settings/presentation/
 test/
+packages/expense_repository/
+workers/ai-gateway/
 assets/images/
 pubspec.yaml
 analysis_options.yaml
 ```
 
 **Structure Decision**: [Document which folders are used by this feature and
-why. Do not add backend/api/database/auth service folders.]
+why. Do not add new backend/sync runtime ownership unless the active feature
+explicitly owns it.]
 
 ## Reuse Strategy
 
@@ -159,32 +179,35 @@ why. Do not add backend/api/database/auth service folders.]
 shared widget that should be created before screen work. Prefer
 `lib/core/widgets/` and `lib/core/theme/` over screen-local duplicated UI.]
 
-## Mock Data Strategy
+## Data Strategy
 
-[Name the static mock models, lists, IDs, and state objects required. Confirm no
-network, database, persistence, or auth services are needed.]
+[Name the production local data behavior, fixture/test data, unavailable states,
+and remote calls allowed by the feature. Confirm app-owned financial data stays
+local-only unless the spec explicitly changes that.]
 
 ## Possible Bugs And Fix Strategy
 
-[List likely failures and repair steps. Include layout overflow, RTL mirroring,
-route mismatches, missing assets, raw duplicated styles, accidental backend
-dependencies, bottom nav overlap, and bottom sheet height issues when relevant.]
+[List likely failures and repair steps. Include local data loss, false save
+success, route mismatches, AI privacy leaks, accidental cloud financial-data
+writes, layout overflow, RTL mirroring, missing assets, raw duplicated styles,
+bottom nav overlap, and bottom sheet height issues when relevant.]
 
 ## Verification Plan
 
-Every implementation batch must run or document why it cannot run:
+Every implementation batch must run focused checks or document why it cannot
+run:
 
 ```powershell
-flutter pub get
-flutter analyze
-flutter test
-flutter build apk --debug
+& 'C:\flutter\bin\flutter.bat' test --no-pub <focused-test-file>
+& 'C:\flutter\bin\flutter.bat' analyze <touched-files-and-tests>
 ```
 
-If Android build tooling is unavailable, record the exact failure and run:
+Run wider checks only for final release-readiness tasks or when explicitly
+owned:
 
 ```powershell
-flutter build web
+& 'C:\flutter\bin\flutter.bat' test
+& 'C:\flutter\bin\flutter.bat' build apk --debug
 ```
 
 Visual checks:
@@ -198,24 +221,26 @@ Visual checks:
 390x844 RTL
 ```
 
-Forbidden dependency search:
+Forbidden-pattern search for local-only/AI privacy tasks:
 
 ```powershell
-rg -n "firebase|Firebase|http|dio|WebView|webview|sqflite|shared_preferences|supabase|amplify|OAuth|api" lib pubspec.yaml test
+rg -n "FirebaseFirestore|firebaseLegacy|migrationComparison|merchant|receiptText|description" lib packages workers test
 ```
 
 ## Phase 0: Research
 
-[Resolve unknowns about Flutter package choices, chart approach, asset handling,
-fonts, RTL/LTR testing, and responsive verification. Each decision must include
-Decision, Rationale, Alternatives considered.]
+[Resolve unknowns about local data behavior, AI privacy boundaries, feature
+ownership, Flutter package choices, worker validation, RTL/LTR testing, and
+responsive verification. Each decision must include Decision, Rationale,
+Alternatives considered.]
 
 ## Phase 1: Design
 
-[Define mock models, route contracts, component contracts, screen ownership, and
-quickstart verification steps. Contracts for this UI-only app should describe
-routes, widget APIs, mock data shapes, and visual acceptance criteria, not HTTP
-endpoints.]
+[Define data models, route contracts, service/repository contracts, worker
+contracts, component contracts, screen ownership, and quickstart verification
+steps. Contracts should describe the interfaces owned by the active feature:
+local data behavior, AI gateway payloads, route/UI behavior, and visual
+acceptance criteria.]
 
 ## Complexity Tracking
 

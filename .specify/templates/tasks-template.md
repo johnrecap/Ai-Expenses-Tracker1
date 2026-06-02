@@ -1,6 +1,6 @@
 ---
 
-description: "UI-only Flutter task list template for feature implementation"
+description: "Production Flutter task list template for feature implementation"
 ---
 
 # Tasks: [FEATURE NAME]
@@ -10,7 +10,7 @@ description: "UI-only Flutter task list template for feature implementation"
 **Prerequisites**: plan.md (required), spec.md (required), research.md,
 data-model.md, quickstart.md, contracts/ if present
 
-**Project Type**: UI-only Flutter prototype
+**Project Type**: Production Flutter app with local-only financial data and explicit AI/server actions when owned by the feature
 
 ## Mandatory First Read And Skill Gate
 
@@ -29,11 +29,18 @@ code.
 
 ## Non-Negotiable Rules
 
-- UI only: no backend, Firebase, real auth, database, API calls, OCR, AI calls,
-  payment SDKs, notification APIs, or persistence.
+- Production app scope: tasks may touch Flutter UI, Drift/SQLite local
+  persistence, BLoC/Cubit, GoRouter, notifications, app lock, monetization,
+  analytics, tests, and Cloudflare Worker AI Gateway when the feature owns that
+  area.
+- App-owned financial data stays local-only by default; do not write expenses,
+  categories, wallets, budgets, goals, subscriptions, settings, or AI history
+  to Firestore, PostgreSQL, or VPS sync without a separate approved plan.
+- Remote calls are allowed only for explicit AI actions, ads, purchase/restore
+  checks, analytics, and AI quota/abuse protection owned by the task.
 - No WebView and no HTML rendering.
 - Use native Flutter widgets.
-- Use static in-memory mock data.
+- Do not show mock/demo/sample financial data as real production data.
 - Reuse shared components and theme tokens.
 - Responsive for 360x800, 375x812, and 390x844.
 - Arabic RTL and English LTR ready.
@@ -47,10 +54,11 @@ Do not generate vague one-line tasks.
 - [ ] T000 [P?] [Story? or Area] Short action with exact file path
   - Why: Explain the reason this task exists and what risk it removes.
   - Expected result: State the concrete visible or technical outcome.
-  - Inputs: List the specs, screenshots, HTML references, mock data, or design
-    docs needed before editing.
+  - Inputs: List the specs, app files, package files, worker files, screenshots,
+    fixtures, or design docs needed before editing.
   - Implementation notes: Mention component reuse, route impact, responsive
-    behavior, RTL/LTR behavior, and forbidden shortcuts.
+    behavior, RTL/LTR behavior, local-only data rules, AI/privacy boundaries,
+    and forbidden shortcuts.
   - Possible bugs: List likely failures for this task.
   - Fix strategy: Explain how to diagnose and repair those failures.
   - Verification: Name the command, widget test, visual viewport check, or
@@ -80,7 +88,6 @@ lib/
     layout/
     theme/
     widgets/
-    mock/
   features/
     onboarding/presentation/
     auth/presentation/
@@ -94,46 +101,48 @@ lib/
     ai/presentation/
     settings/presentation/
 test/
+packages/expense_repository/
+workers/ai-gateway/
 assets/images/
 pubspec.yaml
 analysis_options.yaml
 ```
 
-Do not create `backend/`, `api/`, `services/` for remote calls, database
-migrations, auth middleware, repository layers, or environment configs unless
-the user explicitly changes the UI-only scope.
+Do not create new backend/sync/runtime ownership unless the active Spec Kit
+plan explicitly owns that area. Prefer existing `packages/expense_repository/`
+for local financial data and `workers/ai-gateway/` for AI server calls.
 
 ## Phase 1: Setup And Guardrails
 
-**Purpose**: Create a compiling Flutter baseline and make forbidden work visible
-before screen implementation starts.
+**Purpose**: Establish the feature's owned files, focused checks, and guardrails
+before implementation starts.
 
 Example task shape:
 
-- [ ] T001 [Scaffold] Create Flutter project structure in `lib/`, `test/`, and
-  `pubspec.yaml`
-  - Why: Later UI work needs a real Flutter target for compile checks.
-  - Expected result: The app launches to a placeholder screen.
+- [ ] T001 [Guardrail] Confirm active Spec Kit scope and focused verification commands in `specs/[###-feature]/tasks.md`
+  - Why: Later work needs exact ownership and must avoid broad repo analysis.
+  - Expected result: The task list names owned app/package/worker files and
+    focused checks.
   - Inputs: plan.md project structure, AGENTS.md hard rules.
-  - Implementation notes: Do not overwrite Stitch exports or spec files.
-  - Possible bugs: Project created in a nested folder; generated files overwrite
-    planning docs.
-  - Fix strategy: Move generated Flutter files to the intended root and keep
-    `stitch_ai_expenses_tracker_pro/` unchanged.
-  - Verification: `flutter pub get` succeeds from the workspace root.
+  - Implementation notes: Do not broaden ownership beyond the feature.
+  - Possible bugs: Tasks become too broad or run full-project checks too early.
+  - Fix strategy: split broad tasks into owned file groups and use focused
+    tests first.
+  - Verification: Read the generated task list and confirm every task has exact
+    paths and focused checks.
 
 ## Phase 2: Foundation
 
-**Purpose**: Build shared theme, layout, routes, widgets, mock data, and assets
-that all user stories depend on.
+**Purpose**: Build shared app foundations that all user stories depend on.
 
 Recommended task areas:
 
 - Theme tokens in `lib/core/theme/`.
 - Responsive and directionality helpers in `lib/core/layout/`.
 - Shared widgets in `lib/core/widgets/`.
-- Mock models and mock data in `lib/core/mock/`.
 - Central routes in `lib/app/routes.dart` and `lib/app/router.dart`.
+- Local data contracts in `packages/expense_repository/`.
+- Worker contracts in `workers/ai-gateway/` when AI is owned.
 - Local assets in `assets/images/` and `pubspec.yaml`.
 - Foundational widget/unit tests in `test/core/`.
 
@@ -165,10 +174,11 @@ Each phase must include:
 - **Screens**: Stitch folder names used as source references.
 - **Work areas**: exact Flutter feature folders and tests.
 - **Tasks**: detailed task cards in the required format.
-- **Common bugs and fixes**: batch-level layout, routing, mock data, and RTL
-  risks.
+- **Common bugs and fixes**: batch-level data, routing, privacy, layout, and
+  RTL risks.
 - **Independent test**: how to prove this batch works without later batches.
-- **Acceptance criteria**: compile, UI-only, responsive, and RTL/LTR checks.
+- **Acceptance criteria**: focused tests, touched-file analysis, responsive
+  checks, and RTL/LTR checks.
 - **Stop condition**: what must pass before moving on.
 
 ## Final Phase: Verification And Polish
@@ -177,8 +187,10 @@ Required final tasks:
 
 - [ ] TXXX [Polish] Search for forbidden dependencies and APIs in
   `lib`, `pubspec.yaml`, and `test`
-  - Why: Ensures the prototype stayed UI-only.
-  - Expected result: No forbidden package/import/use remains.
+  - Why: Ensures the app preserved local-only financial data and AI privacy
+    boundaries.
+  - Expected result: No forbidden financial cloud write path or raw AI upload
+    remains in owned production paths.
   - Inputs: AGENTS.md hard rules.
   - Implementation notes: The search can match documentation outside source;
     verify only implementation files.
@@ -186,10 +198,10 @@ Required final tasks:
     variants.
   - Fix strategy: inspect each hit and remove implementation dependencies.
   - Verification:
-    `rg -n "firebase|Firebase|http|dio|WebView|webview|sqflite|shared_preferences|supabase|amplify|OAuth|api" lib pubspec.yaml test`
+    `rg -n "FirebaseFirestore|firebaseLegacy|migrationComparison|merchant|receiptText|description|WebView|webview" lib packages workers test`
 
 - [ ] TXXX [Polish] Run compile and test commands
-  - Why: Confirms the app is shippable as a prototype.
+  - Why: Confirms the owned feature is stable enough to merge.
   - Expected result: Flutter dependency, analyze, test, and debug build checks
     pass or exact environment failures are documented.
   - Inputs: completed Flutter implementation.
@@ -200,8 +212,8 @@ Required final tasks:
   - Fix strategy: fix analyzer findings first, then asset paths, then platform
     setup issues.
   - Verification:
-    `flutter pub get`, `flutter analyze`, `flutter test`,
-    `flutter build apk --debug`.
+    focused `flutter test`, touched-file `flutter analyze`, and wider checks
+    only when owned by the task.
 
 - [ ] TXXX [Polish] Verify visual behavior at required viewports and directions
   - Why: Narrow mobile and RTL issues are the highest UI risk.

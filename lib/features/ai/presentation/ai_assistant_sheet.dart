@@ -1,114 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:expenses_tracker/app/routes.dart';
 import 'package:expenses_tracker/core/theme/app_colors.dart';
 import 'package:expenses_tracker/core/theme/app_spacing.dart';
 import 'package:expenses_tracker/core/theme/app_text_styles.dart';
 import 'package:expenses_tracker/core/widgets/glass_bottom_sheet.dart';
-import 'package:expenses_tracker/features/ai/services/ai_service.dart';
-import 'widgets/chat_bubble.dart';
 
-class AiAssistantSheet extends StatefulWidget {
+class AiAssistantSheet extends StatelessWidget {
   const AiAssistantSheet({super.key});
 
   @override
-  State<AiAssistantSheet> createState() => _AiAssistantSheetState();
-}
-
-class _AiAssistantSheetState extends State<AiAssistantSheet> {
-  final _controller = TextEditingController();
-  final _aiService = const MockAiService();
-  List<AiChatMessage> _messages = [];
-  bool _loading = true;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadHistory();
-  }
-
-  Future<void> _loadHistory() async {
-    try {
-      final history = await _aiService.getChatHistory();
-      if (mounted) {
-        setState(() {
-          _messages = history;
-          _loading = false;
-          _error = null;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _error = 'Failed to load chat history.';
-        });
-      }
-    }
-  }
-
-  Future<void> _sendMessage() async {
-    final text = _controller.text.trim();
-    if (text.isEmpty) return;
-
-    final userMessage = AiChatMessage(
-      id: 'sheet-${_messages.length}',
-      author: 'You',
-      text: text,
-      timestampLabel: 'Now',
-      isUser: true,
-      timestamp: DateTime.now(),
-    );
-
-    setState(() {
-      _messages.add(userMessage);
-      _loading = true;
-      _error = null;
-    });
-    _controller.clear();
-
-    try {
-      final response = await _aiService.sendChatMessage(text);
-      if (mounted) {
-        setState(() {
-          _messages.add(response);
-          _loading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _error = 'Failed to get AI response. Please try again.';
-        });
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final sheetHeight = MediaQuery.sizeOf(context).height * 0.48;
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.7,
+      width: double.infinity,
+      height: sheetHeight.clamp(360.0, 460.0).toDouble(),
       child: GlassBottomSheet(
         padding: EdgeInsets.zero,
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.containerPadding, AppSpacing.sm, AppSpacing.containerPadding, AppSpacing.sm),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.containerPadding,
+                AppSpacing.sm,
+                AppSpacing.containerPadding,
+                AppSpacing.xs,
+              ),
               child: Row(
                 children: [
-                  Text('AI Assistant', style: AppTextStyles.headlineMedium.copyWith(color: AppColors.onSurface)),
-                  const Spacer(),
+                  Expanded(
+                    child: Text(
+                      'AI Assistant',
+                      style: AppTextStyles.headlineMedium.copyWith(color: AppColors.onSurface),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
                   GestureDetector(
                     onTap: () => Navigator.of(context).pop(),
                     child: Container(
-                      width: 32, height: 32,
-                      decoration: const BoxDecoration(color: AppColors.surfaceContainerHigh, shape: BoxShape.circle),
+                      width: 32,
+                      height: 32,
+                      decoration: const BoxDecoration(
+                        color: AppColors.surfaceContainerHigh,
+                        shape: BoxShape.circle,
+                      ),
                       child: const Icon(Icons.close, size: 18, color: AppColors.onSurfaceVariant),
                     ),
                   ),
@@ -117,33 +53,15 @@ class _AiAssistantSheetState extends State<AiAssistantSheet> {
             ),
             const Divider(color: AppColors.surfaceContainerHigh),
             Expanded(
-              child: _buildMessageList(),
+              child: _buildUnavailableState(context),
             ),
-            if (_error != null)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding, vertical: AppSpacing.sm),
-                child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: AppColors.errorContainer.withAlpha(150),
-                    borderRadius: BorderRadius.circular(AppSpacing.md),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.error_outline, size: 18, color: AppColors.error),
-                      const SizedBox(width: AppSpacing.sm),
-                      Expanded(
-                        child: Text(
-                          _error!,
-                          style: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             Container(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.containerPadding, AppSpacing.sm, AppSpacing.containerPadding, AppSpacing.lg),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.containerPadding,
+                AppSpacing.sm,
+                AppSpacing.containerPadding,
+                AppSpacing.md,
+              ),
               decoration: const BoxDecoration(
                 color: AppColors.glassSheetFill,
                 border: Border(top: BorderSide(color: AppColors.surfaceContainerHigh)),
@@ -154,35 +72,32 @@ class _AiAssistantSheetState extends State<AiAssistantSheet> {
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: TextField(
-                      controller: _controller,
+                      enabled: false,
                       style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface),
                       decoration: InputDecoration(
-                        hintText: 'Ask AI...',
+                        hintText: 'Assistant chat is unavailable',
                         hintStyle: AppTextStyles.bodyLarge.copyWith(color: AppColors.outline),
-                        contentPadding: const EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 12),
+                        contentPadding: const EdgeInsetsDirectional.symmetric(
+                          horizontal: AppSpacing.md,
+                          vertical: AppSpacing.sm,
+                        ),
                       ),
-                      onSubmitted: (_) => _sendMessage(),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  if (_loading)
-                    const SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: Padding(
-                        padding: EdgeInsets.all(8),
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    )
-                  else
-                    GestureDetector(
-                      onTap: _sendMessage,
-                      child: Container(
-                        width: 40, height: 40,
-                        decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
-                        child: const Icon(Icons.send, size: 18, color: AppColors.onPrimary),
-                      ),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: const BoxDecoration(
+                      color: AppColors.surfaceContainerHigh,
+                      shape: BoxShape.circle,
                     ),
+                    child: const Icon(
+                      Icons.send,
+                      size: 18,
+                      color: AppColors.outline,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -192,18 +107,43 @@ class _AiAssistantSheetState extends State<AiAssistantSheet> {
     );
   }
 
-  Widget _buildMessageList() {
-    if (_loading && _messages.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    return ListView(
-      padding: const EdgeInsets.all(AppSpacing.containerPadding),
-      children: _messages.map((msg) => ChatBubble(
-        text: msg.text,
-        isUser: msg.isUser,
-        timestamp: msg.timestampLabel,
-      )).toList(),
+  Widget _buildUnavailableState(BuildContext context) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.containerPadding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.chat_bubble_outline,
+              size: 40,
+              color: AppColors.outlineVariant,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'AI assistant is not available yet',
+              style: AppTextStyles.titleMedium.copyWith(color: AppColors.onSurface),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Chat will be enabled when it is connected to the real AI gateway. No demo replies are shown.',
+              style: AppTextStyles.bodySmall.copyWith(color: AppColors.onSurfaceVariant),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            FilledButton.icon(
+              onPressed: () {
+                final router = GoRouter.of(context);
+                Navigator.of(context).pop();
+                router.push(AppRoutes.expensesNewText);
+              },
+              icon: const Icon(Icons.edit_note),
+              label: const Text('Use AI text entry'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -53,7 +53,9 @@ export function buildAdvicePrompt(
 ): string {
   return [
     "You are a concise financial assistant for an expense tracker.",
-    "Use only the provided summary as facts. Do not invent transactions.",
+    "Use only the provided compact summary as facts.",
+    "Do not invent, infer, list, or refer to individual transactions, merchants, descriptions, receipt text, or raw rows.",
+    "If a detail is not in the summary, say the summary is not enough for that detail.",
     "Return short practical advice in the user's locale.",
     "Keep advice under 60 words.",
     `Period: ${request.period}. Today: ${request.now}. Locale: ${request.locale}.`,

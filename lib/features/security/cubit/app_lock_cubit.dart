@@ -6,10 +6,11 @@ part 'app_lock_state.dart';
 
 class AppLockCubit extends Cubit<AppLockState> {
   final AppLockService _appLockService;
+  bool _pinChangeIdentityVerified = false;
 
   AppLockCubit({AppLockService? appLockService})
-      : _appLockService = appLockService ?? AppLockService(),
-        super(const AppLockState.initial());
+    : _appLockService = appLockService ?? AppLockService(),
+      super(const AppLockState.initial());
 
   Future<void> initialize() async {
     emit(state.copyWith(status: AppLockStatus.loading));
@@ -30,13 +31,16 @@ class AppLockCubit extends Cubit<AppLockState> {
       await _appLockService.setupPin(pin);
       final biometricAvailable = await _appLockService.biometricService.isSupported();
       _appLockService.markUnlocked();
-      emit(AppLockState(
-        status: AppLockStatus.unlocked,
-        appLockEnabled: true,
-        biometricEnabled: state.biometricEnabled && biometricAvailable,
-        biometricAvailable: biometricAvailable,
-        hasPin: true,
-      ));
+      emit(
+        AppLockState(
+          status: AppLockStatus.unlocked,
+          appLockEnabled: true,
+          biometricEnabled: state.biometricEnabled && biometricAvailable,
+          biometricAvailable: biometricAvailable,
+          hasPin: true,
+          failedPinAttempts: 0,
+        ),
+      );
       return true;
     } on FormatException catch (error) {
       emit(state.copyWith(status: AppLockStatus.setupRequired, message: error.message));
@@ -47,18 +51,40 @@ class AppLockCubit extends Cubit<AppLockState> {
     }
   }
 
-  Future<bool> changePin(String pin) async {
+  Future<bool> changePin({required String newPin, String? currentPin}) async {
     emit(state.copyWith(status: AppLockStatus.saving, clearMessage: true));
     try {
-      await _appLockService.pinService.setPin(pin);
-      _appLockService.markUnlocked();
+      await _appLockService.changePin(
+        newPin: newPin,
+        currentPin: currentPin,
+        identityVerified: _pinChangeIdentityVerified,
+      );
+      _pinChangeIdentityVerified = false;
       await _loadLockState(lockIfRequired: false);
       return true;
     } on FormatException catch (error) {
       emit(state.copyWith(status: AppLockStatus.unlocked, message: error.message));
       return false;
     } catch (_) {
-      emit(state.copyWith(status: AppLockStatus.unlocked, message: 'Failed to change PIN.'));
+      emit(state.copyWith(status: AppLockStatus.unlocked, message: 'Current PIN is incorrect.'));
+      return false;
+    }
+  }
+
+  Future<bool> verifyCurrentLockWithBiometrics() async {
+    emit(state.copyWith(status: AppLockStatus.unlocking, clearMessage: true));
+    try {
+      final verified = await _appLockService.unlockWithBiometrics();
+      _pinChangeIdentityVerified = verified;
+      emit(
+        state.copyWith(
+          status: AppLockStatus.unlocked,
+          message: verified ? 'Verified.' : 'Use current PIN instead.',
+        ),
+      );
+      return verified;
+    } catch (_) {
+      emit(state.copyWith(status: AppLockStatus.unlocked, message: 'Use current PIN instead.'));
       return false;
     }
   }
@@ -74,15 +100,18 @@ class AppLockCubit extends Cubit<AppLockState> {
   }
 
   Future<void> setBiometricEnabled(bool enabled) async {
+    final fallbackStatus = state.isLocked ? AppLockStatus.locked : AppLockStatus.unlocked;
     emit(state.copyWith(status: AppLockStatus.saving, clearMessage: true));
     try {
       await _appLockService.setBiometricEnabled(enabled);
       await _loadLockState(lockIfRequired: false);
     } catch (_) {
-      emit(state.copyWith(
-        status: AppLockStatus.unlocked,
-        message: enabled ? 'Biometric not available.' : 'Failed to update.',
-      ));
+      emit(
+        state.copyWith(
+          status: fallbackStatus,
+          message: enabled ? 'Biometric verification failed.' : 'Failed to update.',
+        ),
+      );
     }
   }
 
@@ -91,9 +120,17 @@ class AppLockCubit extends Cubit<AppLockState> {
     try {
       final unlocked = await _appLockService.unlockWithPin(pin);
       if (!unlocked) {
-        emit(state.copyWith(status: AppLockStatus.locked, message: 'Incorrect PIN.'));
+        final attempts = state.failedPinAttempts + 1;
+        emit(
+          state.copyWith(
+            status: AppLockStatus.locked,
+            failedPinAttempts: attempts,
+            message: attempts >= 3 ? 'Too many incorrect PIN attempts.' : 'Incorrect PIN.',
+          ),
+        );
         return false;
       }
+      _pinChangeIdentityVerified = false;
       await _loadLockState(lockIfRequired: false);
       return true;
     } catch (_) {
@@ -110,6 +147,7 @@ class AppLockCubit extends Cubit<AppLockState> {
         emit(state.copyWith(status: AppLockStatus.locked, message: 'Use PIN to unlock.'));
         return false;
       }
+      _pinChangeIdentityVerified = false;
       await _loadLockState(lockIfRequired: false);
       return true;
     } catch (_) {
@@ -125,24 +163,29 @@ class AppLockCubit extends Cubit<AppLockState> {
       final biometricAvailable = await _appLockService.biometricService.isSupported();
 
       if (settings.appLockEnabled && !hasPin) {
-        emit(AppLockState(
-          status: AppLockStatus.setupRequired,
-          appLockEnabled: true,
-          biometricEnabled: false,
-          biometricAvailable: biometricAvailable,
-          hasPin: false,
-        ));
+        emit(
+          AppLockState(
+            status: AppLockStatus.setupRequired,
+            appLockEnabled: true,
+            biometricEnabled: false,
+            biometricAvailable: biometricAvailable,
+            hasPin: false,
+          ),
+        );
         return;
       }
 
       final shouldLock = lockIfRequired && await _appLockService.shouldLock();
-      emit(AppLockState(
-        status: shouldLock ? AppLockStatus.locked : AppLockStatus.unlocked,
-        appLockEnabled: settings.appLockEnabled,
-        biometricEnabled: settings.biometricEnabled && biometricAvailable && hasPin,
-        biometricAvailable: biometricAvailable,
-        hasPin: hasPin,
-      ));
+      emit(
+        AppLockState(
+          status: shouldLock ? AppLockStatus.locked : AppLockStatus.unlocked,
+          appLockEnabled: settings.appLockEnabled,
+          biometricEnabled: settings.biometricEnabled && biometricAvailable && hasPin,
+          biometricAvailable: biometricAvailable,
+          hasPin: hasPin,
+          failedPinAttempts: shouldLock ? state.failedPinAttempts : 0,
+        ),
+      );
     } catch (_) {
       emit(state.copyWith(status: AppLockStatus.unlocked, message: 'Failed to load app lock.'));
     }

@@ -1,6 +1,11 @@
 <!--
 Sync Impact Report
-Version change: 2.0.0 -> 2.1.0
+Version change: 2.2.0 -> 2.3.0
+Added sections:
+- Mandatory Discussion And Second Review
+Updated sections:
+- Mandatory Agent Workflow: Added Mohamed discussion and second-agent review gate for non-trivial work.
+Previous 2.1.0 changes:
 Added sections:
 - Security Layer (App Lock: PIN + Biometric)
 - Account Management (Profile, Deletion, Reauthentication)
@@ -13,7 +18,7 @@ Updated sections:
 - Multi-Backend Support: Documented vpsLocalFirst blockers
 - Runtime Modes: Added VPS_API_BASE_URL requirement
 Constitution ratified: 2026-05-28
-Last Amended: 2026-05-29
+Last Amended: 2026-06-01
 -->
 
 # AI Expenses Tracker Constitution
@@ -57,30 +62,78 @@ Rationale: Skills are installed project knowledge. They prevent agents from
 inventing workflows, skipping Spec Kit, or ignoring known Flutter/Dart best
 practices or backend patterns.
 
-### III. Production Flutter App Scope
+### III. Mandatory Discussion And Second Review
+
+Before planning, editing, or running project commands for non-trivial work,
+every agent MUST read `AGENTS.md` and this constitution. For non-trivial
+changes, the agent MUST discuss the request with Mohamed in Egyptian Arabic
+before implementation. The discussion MUST explain the practical goal, expected
+screens/files, main risks, and short execution plan.
+
+Non-trivial changes include UI redesigns, navigation changes, storage/database
+changes, security/account changes, AI gateway or AI behavior changes, Spec Kit
+features, migrations, and changes that touch multiple important files.
+
+Before implementing a non-trivial change, the agent MUST use the
+`second-agent-solution-review` skill as a read-only critique loop. The second
+agent MUST challenge the proposed solution without editing files. The main
+agent MUST summarize accepted objections, rejected objections, and the final
+plan for Mohamed.
+
+If the second review changes the plan, expands scope, or exposes a new
+material risk, the agent MUST get Mohamed's approval before implementation.
+Tiny direct commands, simple answers, and clearly scoped one-line fixes may
+proceed without the full second-review loop, but they still MUST obey the
+project rules. This principle MUST NOT be used as permission for broad repo
+analysis unless Mohamed explicitly asks for it.
+
+Rationale: Mohamed wants fewer rushed changes and fewer hidden assumptions.
+This gate forces practical discussion and an independent critique for important
+work while keeping small tasks fast.
+
+### IV. Production Flutter App Scope
 
 The current product is a **production-grade Flutter expense tracker** with full
-backend integration, AI capabilities, and multi-backend sync support.
+local persistence, AI capabilities, and optional server-side AI protection.
+
+#### Local-Only Production Data Mode
+
+Production app-owned financial data is local-only by default. Expenses,
+categories, category aliases, wallets/accounts, transfers, budgets, saving
+goals, subscriptions/recurring expenses, settings, local AI history, and local
+advice cache MUST be stored on the device and MUST NOT be written to Firestore,
+PostgreSQL, or VPS sync in local-only mode.
+
+Network use is allowed for explicit AI actions, ads, purchase/restore checks,
+and AI gateway quota/abuse protection. AI advice MUST send only a compact
+summary when the user explicitly asks for it; raw transaction lists, merchant
+names, expense descriptions, receipt OCR text, and full histories are forbidden
+by default.
 
 Allowed architecture:
-- Firebase Authentication and Firestore as legacy/primary backend.
-- VPS PostgreSQL backend with local-first sync as secondary/cutover target.
-- Cloudflare Worker AI gateway and Firebase Functions for AI services.
+- Drift/SQLite as the production financial-data store.
+- Firebase Authentication only when needed for AI gateway identity/quota
+  protection or legacy auth screens; it must not own financial app data.
+- Firestore and VPS PostgreSQL only as legacy or future migration code unless a
+  separate approved Spec Kit plan changes the local-only decision.
+- Cloudflare Worker AI gateway for server-side AI calls and quota/abuse
+  protection.
 - `flutter_bloc` for state management with `go_router` for navigation.
 - Real API calls, local database (Drift/SQLite), persistent storage.
 - Push notifications, local auth/biometrics, camera/image picker.
 - In-app purchases, ads (AdMob), premium entitlements.
-- Localization (EN+AR), RTL/LTR support, export (CSV/Excel/PDF).
+- Localization (EN+AR), RTL/LTR support.
 
 Forbidden by default:
 - WebView or HTML rendering packages for UI shortcuts.
 - Hardcoded secrets in source code (use dart-define or secure storage).
 - Direct AI provider keys in Flutter (must route through gateway).
 
-Rationale: The app has graduated from UI prototype to full production
-architecture. Backend integration is now required, not forbidden.
+Rationale: Mohamed selected local-only storage to avoid monthly backend
+maintenance for a small app while keeping AI available on demand. This reduces
+sync complexity, cloud database cost, and privacy risk.
 
-### IV. Spec-driven Full-Stack Implementation
+### V. Spec-driven Full-Stack Implementation
 
 All meaningful work MUST be driven by specs. Plans and tasks MUST cite the
 screen inventory, design system, component map, routes, data models, API
@@ -103,7 +156,7 @@ Rationale: The project spans frontend, backend, AI infrastructure, and sync
 protocols. A spec-driven approach keeps implementation coherent and lets
 different agents work without drifting across layers.
 
-### V. Verification, RTL/LTR, And Responsive Quality
+### VI. Verification, RTL/LTR, And Responsive Quality
 
 Every implementation batch MUST compile before it is considered complete.
 Flutter work MUST be checked with `flutter analyze` and `flutter test` when a
@@ -135,8 +188,10 @@ Primary source references:
 - `stitch_ai_expenses_tracker_pro/lumina_finance/DESIGN.md`: design reference.
 - `specs/`: all Spec Kit artifacts for planned and implemented features.
 - `lib/`: Flutter application source code.
-- `packages/expense_repository/`: Repository package with local/remote implementations.
-- `server/`: VPS backend (Fastify + PostgreSQL + Drizzle ORM).
+- `packages/expense_repository/`: Repository package; production app-data path
+  defaults to local repositories.
+- `server/`: VPS backend (Fastify + PostgreSQL + Drizzle ORM), retained as
+  legacy/future infrastructure and not the default product data store.
 - `functions/`: Firebase Cloud Functions (AI services).
 - `workers/ai-gateway/`: Cloudflare Worker AI gateway.
 - `docs/`: project documentation, runbooks, and implementation plans.
@@ -173,6 +228,10 @@ Before any plan, task generation, or code edit:
 6. Load only relevant `SKILL.md` files.
 7. State which skills are being used, or state that no relevant skill was
    found.
+8. For non-trivial work, discuss the request with Mohamed, then run the
+   `second-agent-solution-review` read-only critique loop before implementation.
+9. If that review changes the plan, expands scope, or exposes a new material
+   risk, get Mohamed's approval before editing files.
 
 For meaningful features:
 1. Use Spec Kit artifacts under `specs/<feature>/`.
@@ -207,8 +266,10 @@ Compliance review:
 - Every final implementation report MUST mention verification commands and any
   blocked checks.
 
-- Firebase Auth remains the identity provider even when app data moves to VPS.
+- Firebase Auth may remain an AI gateway identity/quota mechanism, but
+  app-owned financial data remains local-only unless a later approved Spec Kit
+  plan changes this.
 - **VPS Architecture**: See `specs/023-vps-architecture-fix/spec.md` for 4 documented blockers preventing `vpsLocalFirst` from working. Key issues: in-memory storage, stub repos, VPS not connected, sync pull not applied.
 - **Legacy Feature Port**: See `specs/022-legacy-feature-port/spec.md` for complete list of features ported from old app (security, account, settings, monetization, AI, backup).
 
-**Version**: 2.1.0 | **Ratified**: 2026-05-28 | **Last Amended**: 2026-05-29
+**Version**: 2.3.0 | **Ratified**: 2026-05-28 | **Last Amended**: 2026-06-01

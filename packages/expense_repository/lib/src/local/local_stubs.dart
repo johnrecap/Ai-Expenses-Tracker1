@@ -1,5 +1,4 @@
 import 'package:expense_repository/expense_repository.dart';
-import 'local_store_interface.dart';
 
 class LocalCategoryAliasRepository implements CategoryAliasRepository {
   final LocalStoreInterface store;
@@ -12,7 +11,10 @@ class LocalCategoryAliasRepository implements CategoryAliasRepository {
   Future<void> deleteAlias(String id) async => store.deleteCategoryAlias(id);
 
   @override
-  Future<List<CategoryAlias>> getAliases() async => store.categoryAliases;
+  Future<List<CategoryAlias>> getAliases() async {
+    await store.ready;
+    return store.categoryAliases;
+  }
 
   @override
   Stream<List<CategoryAlias>> watchAliases() => store.watchCategoryAliases();
@@ -32,6 +34,7 @@ class LocalCategoryBudgetRepository implements CategoryBudgetRepository {
     required int month,
     required int year,
   }) async {
+    await store.ready;
     final results = store.categoryBudgets.where((b) =>
         b.categoryId == categoryId && b.month == month && b.year == year).toList();
     return results.isEmpty ? null : results.first;
@@ -41,8 +44,10 @@ class LocalCategoryBudgetRepository implements CategoryBudgetRepository {
   Future<List<CategoryBudget>> getCategoryBudgets({
     required int month,
     required int year,
-  }) async =>
-      store.categoryBudgets.where((b) => b.month == month && b.year == year).toList();
+  }) async {
+    await store.ready;
+    return store.categoryBudgets.where((b) => b.month == month && b.year == year).toList();
+  }
 
   @override
   Stream<List<CategoryBudget>> watchCategoryBudgets({
@@ -67,7 +72,10 @@ class LocalRecurringExpenseRepository implements RecurringExpenseRepository {
   Future<void> delete(String id) async => store.deleteRecurringExpense(id);
 
   @override
-  Future<List<RecurringExpense>> getAll() async => store.recurringExpenses;
+  Future<List<RecurringExpense>> getAll() async {
+    await store.ready;
+    return store.recurringExpenses;
+  }
 
   @override
   Stream<List<RecurringExpense>> watchAll() => store.watchRecurringExpenses();
@@ -81,8 +89,10 @@ class LocalAiActionLogRepository implements AiActionLogRepository {
   Future<void> logAction(AiActionLog l) async => store.upsertAiActionLog(l);
 
   @override
-  Future<List<AiActionLog>> getLogs({int limit = 50}) async =>
-      store.aiActionLogs.take(limit).toList();
+  Future<List<AiActionLog>> getLogs({int limit = 50}) async {
+    await store.ready;
+    return store.aiActionLogs.take(limit).toList();
+  }
 
   @override
   Stream<List<AiActionLog>> watchLogs({int limit = 50}) =>
@@ -103,7 +113,10 @@ class LocalWalletAccountRepository implements WalletAccountRepository {
   Future<void> deleteWallet(String id) async { /* no-op for local */ }
 
   @override
-  Future<List<WalletAccount>> getWallets() async => store.wallets;
+  Future<List<WalletAccount>> getWallets() async {
+    await store.ready;
+    return store.wallets;
+  }
 
   @override
   Stream<List<WalletAccount>> watchWallets() => store.watchWallets();
@@ -117,7 +130,53 @@ class LocalTransferRepository implements TransferRepository {
   Future<void> createTransfer(Transfer t) async => store.upsertTransfer(t);
 
   @override
-  Future<List<Transfer>> getTransfers() async => store.transfers;
+  Future<void> createTransferWithBalanceUpdate({
+    required Transfer transfer,
+    required WalletAccount source,
+    required WalletAccount destination,
+  }) async {
+    if (transfer.fromWalletId == transfer.toWalletId) {
+      throw const WalletTransferException('Choose two different wallets.');
+    }
+    if (transfer.amount <= 0 ||
+        transfer.amount.isNaN ||
+        transfer.amount.isInfinite) {
+      throw const WalletTransferException('Enter a valid transfer amount.');
+    }
+    if (source.walletId != transfer.fromWalletId ||
+        destination.walletId != transfer.toWalletId) {
+      throw const WalletTransferException('Selected wallets do not match transfer.');
+    }
+    if (source.currency != destination.currency) {
+      throw const WalletTransferException(
+        'Transfers need wallets with the same currency.',
+      );
+    }
+    if (source.balance < transfer.amount) {
+      throw const WalletTransferException('Insufficient wallet balance.');
+    }
+
+    final now = DateTime.now();
+    await store.upsertWallet(
+      source.copyWith(
+        balance: source.balance - transfer.amount,
+        updatedAt: now,
+      ),
+    );
+    await store.upsertWallet(
+      destination.copyWith(
+        balance: destination.balance + transfer.amount,
+        updatedAt: now,
+      ),
+    );
+    await store.upsertTransfer(transfer);
+  }
+
+  @override
+  Future<List<Transfer>> getTransfers() async {
+    await store.ready;
+    return store.transfers;
+  }
 
   @override
   Stream<List<Transfer>> watchTransfers() => store.watchTransfers();

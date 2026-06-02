@@ -1,5 +1,4 @@
 import 'package:expense_repository/src/ai_action_log_repo.dart';
-import 'package:expense_repository/src/api/vps_api_client.dart';
 import 'package:expense_repository/src/budget_repo.dart';
 import 'package:expense_repository/src/category_alias_repo.dart';
 import 'package:expense_repository/src/category_budget_repo.dart';
@@ -17,6 +16,7 @@ import 'package:expense_repository/src/firebase/firebase_settings_repo.dart';
 import 'package:expense_repository/src/firebase/firebase_wallet_repo.dart';
 import 'package:expense_repository/src/local/local_repositories.dart';
 import 'package:expense_repository/src/local/drift/drift_store.dart';
+import 'package:expense_repository/src/local/local_store_interface.dart';
 import 'package:expense_repository/src/local/local_stubs.dart';
 import 'package:expense_repository/src/recurring_expense_repo.dart';
 import 'package:expense_repository/src/repository_runtime_mode.dart';
@@ -25,6 +25,8 @@ import 'package:expense_repository/src/settings_repo.dart';
 import 'package:expense_repository/src/sync/migration_comparison_repository.dart';
 import 'package:expense_repository/src/wallet_account_repo.dart';
 import 'auth/auth_repository.dart';
+
+typedef LocalRepositoryStoreFactory = LocalStoreInterface Function(String userId);
 
 class AuthenticatedRepositoryBundle {
   final ExpenseRepository expenseRepository;
@@ -55,10 +57,14 @@ class AuthenticatedRepositoryBundle {
 }
 
 class AuthenticatedRepositoryFactory {
+  static const localOnlyUserId = 'local-only-device';
+
   final RepositoryRuntimeMode runtimeMode;
+  final LocalRepositoryStoreFactory? localStoreFactory;
 
   const AuthenticatedRepositoryFactory({
-    this.runtimeMode = RepositoryRuntimeMode.firebaseLegacy,
+    this.runtimeMode = RepositoryRuntimeMode.localOnly,
+    this.localStoreFactory,
   });
 
   factory AuthenticatedRepositoryFactory.fromEnvironment() {
@@ -72,6 +78,8 @@ class AuthenticatedRepositoryFactory {
     AuthRepository? authRepository,
   }) {
     switch (runtimeMode) {
+      case RepositoryRuntimeMode.localOnly:
+        return _createLocalOnlyBundle(userId: userId);
       case RepositoryRuntimeMode.firebaseLegacy:
         return _createFirebaseLegacyBundle(userId: userId);
       case RepositoryRuntimeMode.vpsLocalFirst:
@@ -79,6 +87,10 @@ class AuthenticatedRepositoryFactory {
       case RepositoryRuntimeMode.migrationComparison:
         return _createMigrationComparisonBundle(userId: userId);
     }
+  }
+
+  AuthenticatedRepositoryBundle createLocalOnly() {
+    return _createLocalOnlyBundle(userId: localOnlyUserId);
   }
 
   AuthenticatedRepositoryBundle _createFirebaseLegacyBundle({required String userId}) {
@@ -98,7 +110,11 @@ class AuthenticatedRepositoryFactory {
   }
 
   AuthenticatedRepositoryBundle _createVpsLocalFirstBundle({required String userId}) {
-    final store = DriftLocalRepositoryStore(userId: userId);
+    return _createLocalOnlyBundle(userId: userId);
+  }
+
+  AuthenticatedRepositoryBundle _createLocalOnlyBundle({required String userId}) {
+    final store = (localStoreFactory ?? _createDefaultLocalStore)(userId);
     return AuthenticatedRepositoryBundle(
       expenseRepository: LocalExpenseRepository(store: store),
       categoryRepository: LocalCategoryRepository(store: store),
@@ -112,6 +128,10 @@ class AuthenticatedRepositoryFactory {
       walletAccountRepository: LocalWalletAccountRepository(store: store),
       transferRepository: LocalTransferRepository(store: store),
     );
+  }
+
+  static LocalStoreInterface _createDefaultLocalStore(String userId) {
+    return DriftLocalRepositoryStore(userId: userId);
   }
 
   AuthenticatedRepositoryBundle _createMigrationComparisonBundle({required String userId}) {

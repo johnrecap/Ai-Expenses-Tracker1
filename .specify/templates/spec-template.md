@@ -22,9 +22,14 @@ Before drafting this specification, the agent MUST:
 **Skills used**: [List exact skill names and why they apply, or state that no
 relevant skill was found.]
 
-**Scope guard**: This project is UI-only Flutter by default. Backend, Firebase,
-real authentication, database, API calls, persistence, WebView, and HTML
-rendering are out of scope unless the user explicitly amends the scope.
+**Scope guard**: This project is a production Flutter expense tracker. Plans may
+cover Flutter UI, Drift/SQLite local storage, BLoC/Cubit, GoRouter, local
+notifications, app lock, purchases/ads, analytics, Firebase Auth for AI gateway
+identity/quota, and Cloudflare Worker AI Gateway when the active feature owns
+that scope. Production app-owned financial data is local-only by default and
+MUST NOT be written to Firestore, PostgreSQL, or VPS sync unless Mohamed
+explicitly approves a separate backend/sync plan. WebView/HTML rendering and
+mobile-embedded secrets remain out of scope.
 
 ## User Scenarios & Testing *(mandatory)*
 

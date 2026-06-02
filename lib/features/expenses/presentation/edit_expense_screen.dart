@@ -5,6 +5,7 @@ import 'package:expenses_tracker/core/theme/app_colors.dart';
 import 'package:expenses_tracker/core/theme/app_spacing.dart';
 import 'package:expenses_tracker/core/theme/app_text_styles.dart';
 import 'package:expenses_tracker/core/widgets/app_background.dart';
+import 'package:expenses_tracker/core/widgets/app_toast.dart';
 import 'package:expenses_tracker/core/widgets/gradient_button.dart';
 import 'package:expense_repository/expense_repository.dart';
 import 'package:expenses_tracker/features/expenses/get_expenses_bloc/get_expenses_bloc.dart';
@@ -67,17 +68,13 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
     final amountText = _amount.text.trim();
     final amount = double.tryParse(amountText);
     if (amount == null || amount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid amount')),
-      );
+      showAppToast(context, 'Please enter a valid amount', isError: true);
       return;
     }
-    final updated = Expense(
-      expenseId: _expense!.expenseId,
-      category: _expense!.category,
+    final updated = _expense!.copyWith(
       amount: amount,
-      date: _expense!.date,
       description: _merchant.text.trim().isNotEmpty ? _merchant.text.trim() : _expense!.description,
+      updatedAt: DateTime.now(),
     );
     context.read<CreateExpenseBloc>().add(UpdateExpense(updated));
   }
@@ -93,7 +90,10 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
               children: [
                 const Icon(Icons.error_outline, size: 48, color: AppColors.outline),
                 const SizedBox(height: AppSpacing.md),
-                Text('Expense not found', style: AppTextStyles.titleMedium.copyWith(color: AppColors.onSurfaceVariant)),
+                Text(
+                  'Expense not found',
+                  style: AppTextStyles.titleMedium.copyWith(color: AppColors.onSurfaceVariant),
+                ),
                 const SizedBox(height: AppSpacing.md),
                 TextButton(
                   onPressed: () {
@@ -115,18 +115,14 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
     return BlocListener<CreateExpenseBloc, CreateExpenseState>(
       listener: (context, state) {
         if (state is CreateExpenseSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Expense updated')),
-          );
+          showAppToast(context, 'Expense updated');
           if (Navigator.canPop(context)) {
             context.pop();
           } else {
             context.go('/expenses');
           }
         } else if (state is CreateExpenseFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
+          showAppToast(context, state.message, isError: true);
         }
       },
       child: Scaffold(
@@ -150,12 +146,22 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
                         child: Container(
                           width: 40,
                           height: 40,
-                          decoration: const BoxDecoration(color: AppColors.surfaceContainerHigh, shape: BoxShape.circle),
-                          child: const Icon(Icons.arrow_back, size: 20, color: AppColors.onSurfaceVariant),
+                          decoration: const BoxDecoration(
+                            color: AppColors.surfaceContainerHigh,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back,
+                            size: 20,
+                            color: AppColors.onSurfaceVariant,
+                          ),
                         ),
                       ),
                       const Spacer(),
-                      Text('Edit Expense', style: AppTextStyles.titleMedium.copyWith(color: AppColors.onSurface)),
+                      Text(
+                        'Edit Expense',
+                        style: AppTextStyles.titleMedium.copyWith(color: AppColors.onSurface),
+                      ),
                       const Spacer(),
                       const SizedBox(width: 40),
                     ],

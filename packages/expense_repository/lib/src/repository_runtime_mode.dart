@@ -1,4 +1,5 @@
 enum RepositoryRuntimeMode {
+  localOnly,
   firebaseLegacy,
   vpsLocalFirst,
   migrationComparison;
@@ -8,19 +9,22 @@ enum RepositoryRuntimeMode {
   static RepositoryRuntimeMode fromEnvironment({
     String value = const String.fromEnvironment(
       environmentKey,
-      defaultValue: 'firebaseLegacy',
+      defaultValue: 'localOnly',
     ),
   }) {
     switch (value.trim()) {
+      case 'localOnly':
+      case 'local':
+      case '':
+        return RepositoryRuntimeMode.localOnly;
       case 'vpsLocalFirst':
       case 'vps':
         return RepositoryRuntimeMode.vpsLocalFirst;
       case 'migrationComparison':
       case 'comparison':
         return RepositoryRuntimeMode.migrationComparison;
-      case 'firebaseLegacy':
       case 'firebase':
-      case '':
+      case 'firebaseLegacy':
         return RepositoryRuntimeMode.firebaseLegacy;
       default:
         throw UnsupportedError('Unknown repository runtime mode: $value');
@@ -28,4 +32,5 @@ enum RepositoryRuntimeMode {
   }
 
   bool get usesFirebasePrimary => this == RepositoryRuntimeMode.firebaseLegacy;
+  bool get allowsUnauthenticatedCoreApp => this == RepositoryRuntimeMode.localOnly;
 }

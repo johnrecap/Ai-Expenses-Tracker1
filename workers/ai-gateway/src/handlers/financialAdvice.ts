@@ -30,6 +30,21 @@ export interface FinancialAdviceDependencies {
 }
 
 const requestType: AiRequestType = "financial_advice";
+const maxAdvicePayloadBytes = 25 * 1024;
+const forbiddenRawKeyFragments = [
+  "transaction",
+  "transactions",
+  "expense",
+  "expenses",
+  "merchant",
+  "description",
+  "receipt",
+  "rawtext",
+  "raw_text",
+  "ocr",
+  "email",
+  "phone",
+];
 
 export async function handleFinancialAdvice(
   request: Request,
@@ -144,6 +159,10 @@ export function validateAdviceRequestBody(
     throw new AiGatewayError("invalid_request", "Request body is required.", 400);
   }
   const candidate = body as Record<string, unknown>;
+  const payloadBytes = new TextEncoder().encode(JSON.stringify(candidate)).length;
+  if (payloadBytes > maxAdvicePayloadBytes) {
+    throw new AiGatewayError("invalid_request", "Advice payload is too large.", 413);
+  }
   if (candidate.period !== "week" && candidate.period !== "month") {
     throw new AiGatewayError("invalid_request", "Supported period is required.", 400);
   }
@@ -158,6 +177,14 @@ export function validateAdviceRequestBody(
   ) {
     throw new AiGatewayError("invalid_request", "Spending summary is required.", 400);
   }
+  const forbiddenKey = findForbiddenRawKey(candidate.summary);
+  if (forbiddenKey) {
+    throw new AiGatewayError(
+      "invalid_request",
+      "Advice requests must contain summary-only data.",
+      400,
+    );
+  }
 
   return {
     period: candidate.period,
@@ -167,6 +194,32 @@ export function validateAdviceRequestBody(
     clientRequestId: readTrimmedString(candidate.clientRequestId),
     summary: candidate.summary as Record<string, unknown>,
   };
+}
+
+function findForbiddenRawKey(value: unknown): string | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  if (Array.isArray(value)) {
+    if (value.length > 25) return "largeArray";
+    for (const item of value) {
+      const forbidden = findForbiddenRawKey(item);
+      if (forbidden) return forbidden;
+    }
+    return undefined;
+  }
+
+  for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
+    const normalized = key.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (
+      forbiddenRawKeyFragments.some((fragment) =>
+        normalized.includes(fragment.replace(/[^a-z0-9]/g, "")),
+      )
+    ) {
+      return key;
+    }
+    const forbidden = findForbiddenRawKey(item);
+    if (forbidden) return forbidden;
+  }
+  return undefined;
 }
 
 async function parseJsonBody(request: Request): Promise<unknown> {

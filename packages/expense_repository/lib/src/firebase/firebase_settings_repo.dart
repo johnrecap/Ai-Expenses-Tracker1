@@ -7,8 +7,8 @@ class FirebaseSettingsRepository implements SettingsRepository {
   final FirebaseFirestore _firestore;
 
   FirebaseSettingsRepository({required this.userId, FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance,
-        assert(userId.isNotEmpty);
+    : _firestore = firestore ?? FirebaseFirestore.instance,
+      assert(userId.isNotEmpty);
 
   DocumentReference<Map<String, dynamic>> get _doc =>
       _firestore.collection('users/$userId/settings').doc(docId);
@@ -30,9 +30,11 @@ class FirebaseSettingsRepository implements SettingsRepository {
   }
 
   UserSettings _toModel(UserSettingsEntity e) => UserSettings(
-    userId: e.userId, appDisplayName: e.appDisplayName,
+    userId: e.userId,
+    appDisplayName: e.appDisplayName,
     languagePreference: LanguagePreference.fromStorageValue(e.languagePreference),
-    baseCurrency: e.baseCurrency, supportedCurrencies: e.supportedCurrencies,
+    baseCurrency: e.baseCurrency,
+    supportedCurrencies: e.supportedCurrencies,
     conversionRates: e.conversionRates,
     defaultPaymentMethod: PaymentMethod.fromStorageValue(e.defaultPaymentMethod),
     notificationSettings: e.notificationSettings,
@@ -53,7 +55,9 @@ class FirebaseSettingsRepository implements SettingsRepository {
   @override
   Future<void> updateBaseCurrency(String currencyCode) async {
     final current = await getSettings();
-    await saveSettings(current.copyWith(baseCurrency: currencyCode.trim().toUpperCase(), updatedAt: DateTime.now()));
+    await saveSettings(
+      current.copyWith(baseCurrency: currencyCode.trim().toUpperCase(), updatedAt: DateTime.now()),
+    );
   }
 
   @override
@@ -70,6 +74,10 @@ class FirebaseSettingsRepository implements SettingsRepository {
 
   @override
   Future<UserSettings> ensureDefaultSettings() async {
+    final snapshot = await _doc.get();
+    if (snapshot.exists && snapshot.data() != null) {
+      return _toModel(UserSettingsEntity.fromDocument(snapshot.data()!));
+    }
     final defaults = UserSettings.defaults(userId: userId);
     await saveSettings(defaults);
     return defaults;

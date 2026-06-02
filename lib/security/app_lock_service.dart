@@ -15,9 +15,9 @@ class AppLockSettings {
   });
 
   const AppLockSettings.defaults()
-      : appLockEnabled = false,
-        biometricEnabled = false,
-        lockTimeoutSeconds = defaultLockTimeoutSeconds;
+    : appLockEnabled = false,
+      biometricEnabled = false,
+      lockTimeoutSeconds = defaultLockTimeoutSeconds;
 
   AppLockSettings copyWith({
     bool? appLockEnabled,
@@ -46,9 +46,9 @@ class AppLockService {
     AppLockStorage? storage,
     PinService? pinService,
     BiometricAuthenticator? biometricService,
-  })  : _storage = storage ?? const SecureAppLockStorage(),
-        pinService = pinService ?? PinService(storage: storage),
-        biometricService = biometricService ?? BiometricService();
+  }) : _storage = storage ?? const SecureAppLockStorage(),
+       pinService = pinService ?? PinService(storage: storage),
+       biometricService = biometricService ?? BiometricService();
 
   Future<AppLockSettings> getSettings() async {
     final enabled = await _readBool(_lockEnabledKey);
@@ -59,8 +59,9 @@ class AppLockService {
     return AppLockSettings(
       appLockEnabled: enabled,
       biometricEnabled: biometricEnabled,
-      lockTimeoutSeconds:
-          timeoutSeconds < 0 ? AppLockSettings.defaultLockTimeoutSeconds : timeoutSeconds,
+      lockTimeoutSeconds: timeoutSeconds < 0
+          ? AppLockSettings.defaultLockTimeoutSeconds
+          : timeoutSeconds,
     );
   }
 
@@ -79,6 +80,12 @@ class AppLockService {
     if (enabled && !await biometricService.isSupported()) {
       throw StateError('Biometric authentication is not available.');
     }
+    if (enabled && !await pinService.hasPin()) {
+      throw StateError('A PIN is required before biometrics can be enabled.');
+    }
+    if (enabled && !await biometricService.authenticate()) {
+      throw StateError('Biometric authentication was not verified.');
+    }
     await _writeBool(_biometricEnabledKey, enabled);
   }
 
@@ -90,6 +97,21 @@ class AppLockService {
   Future<void> setupPin(String pin) async {
     await pinService.setPin(pin);
     await setLockEnabled(true);
+  }
+
+  Future<void> changePin({
+    required String newPin,
+    String? currentPin,
+    bool identityVerified = false,
+  }) async {
+    if (!identityVerified) {
+      final verified = await pinService.verifyPin(currentPin ?? '');
+      if (!verified) {
+        throw StateError('Current PIN is incorrect.');
+      }
+    }
+    await pinService.setPin(newPin);
+    markUnlocked();
   }
 
   Future<bool> shouldLock({DateTime? now}) async {
@@ -121,8 +143,7 @@ class AppLockService {
     _lastUnlockedAt = now ?? DateTime.now();
   }
 
-  Future<bool> _readBool(String key) async =>
-      (await _storage.read(key: key)) == 'true';
+  Future<bool> _readBool(String key) async => (await _storage.read(key: key)) == 'true';
 
   Future<void> _writeBool(String key, bool value) =>
       _storage.write(key: key, value: value.toString());

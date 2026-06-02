@@ -8,6 +8,7 @@ class AppLockState extends Equatable {
   final bool biometricEnabled;
   final bool biometricAvailable;
   final bool hasPin;
+  final int failedPinAttempts;
   final String? message;
 
   const AppLockState({
@@ -16,16 +17,18 @@ class AppLockState extends Equatable {
     required this.biometricEnabled,
     required this.biometricAvailable,
     required this.hasPin,
+    this.failedPinAttempts = 0,
     this.message,
   });
 
   const AppLockState.initial()
-      : status = AppLockStatus.initial,
-        appLockEnabled = false,
-        biometricEnabled = false,
-        biometricAvailable = false,
-        hasPin = false,
-        message = null;
+    : status = AppLockStatus.initial,
+      appLockEnabled = false,
+      biometricEnabled = false,
+      biometricAvailable = false,
+      hasPin = false,
+      failedPinAttempts = 0,
+      message = null;
 
   bool get isLocked => status == AppLockStatus.locked;
   bool get isBusy =>
@@ -39,6 +42,7 @@ class AppLockState extends Equatable {
     bool? biometricEnabled,
     bool? biometricAvailable,
     bool? hasPin,
+    int? failedPinAttempts,
     String? message,
     bool clearMessage = false,
   }) {
@@ -48,17 +52,19 @@ class AppLockState extends Equatable {
       biometricEnabled: biometricEnabled ?? this.biometricEnabled,
       biometricAvailable: biometricAvailable ?? this.biometricAvailable,
       hasPin: hasPin ?? this.hasPin,
+      failedPinAttempts: failedPinAttempts ?? this.failedPinAttempts,
       message: clearMessage ? null : message ?? this.message,
     );
   }
 
   @override
   List<Object?> get props => [
-        status,
-        appLockEnabled,
-        biometricEnabled,
-        biometricAvailable,
-        hasPin,
-        message,
-      ];
+    status,
+    appLockEnabled,
+    biometricEnabled,
+    biometricAvailable,
+    hasPin,
+    failedPinAttempts,
+    message,
+  ];
 }

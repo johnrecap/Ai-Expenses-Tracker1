@@ -75,14 +75,51 @@ class FirebaseTransferRepository implements TransferRepository {
   CollectionReference<Map<String, dynamic>> get _col =>
       _firestore.collection('users/$userId/transfers');
 
+  CollectionReference<Map<String, dynamic>> get _walletCol =>
+      _firestore.collection('users/$userId/wallets');
+
   @override
   Future<void> createTransfer(Transfer transfer) async {
-    await _col.doc(transfer.transferId).set({
-      'transferId': transfer.transferId, 'userId': transfer.userId,
-      'fromWalletId': transfer.fromWalletId, 'toWalletId': transfer.toWalletId,
-      'amount': transfer.amount, 'note': transfer.note,
-      'date': Timestamp.fromDate(transfer.date),
-      'createdAt': Timestamp.fromDate(transfer.createdAt),
+    await _col.doc(transfer.transferId).set(_transferToDoc(transfer));
+  }
+
+  @override
+  Future<void> createTransferWithBalanceUpdate({
+    required Transfer transfer,
+    required WalletAccount source,
+    required WalletAccount destination,
+  }) async {
+    _validateTransfer(transfer, source, destination);
+
+    final sourceRef = _walletCol.doc(source.walletId);
+    final destinationRef = _walletCol.doc(destination.walletId);
+    final transferRef = _col.doc(transfer.transferId);
+
+    await _firestore.runTransaction((transaction) async {
+      final sourceSnapshot = await transaction.get(sourceRef);
+      final destinationSnapshot = await transaction.get(destinationRef);
+
+      if (!sourceSnapshot.exists || !destinationSnapshot.exists) {
+        throw const WalletTransferException('Wallet no longer exists.');
+      }
+
+      final currentSource = _walletFromDoc(sourceSnapshot.data()!);
+      final currentDestination = _walletFromDoc(destinationSnapshot.data()!);
+      _validateTransfer(transfer, currentSource, currentDestination);
+
+      final now = DateTime.now();
+      final sourceBalance = currentSource.balance - transfer.amount;
+      final destinationBalance = currentDestination.balance + transfer.amount;
+
+      transaction.update(sourceRef, {
+        'balance': sourceBalance,
+        'updatedAt': Timestamp.fromDate(now),
+      });
+      transaction.update(destinationRef, {
+        'balance': destinationBalance,
+        'updatedAt': Timestamp.fromDate(now),
+      });
+      transaction.set(transferRef, _transferToDoc(transfer));
     });
   }
 
@@ -111,5 +148,53 @@ class FirebaseTransferRepository implements TransferRepository {
       date: ts(d['date']),
       createdAt: ts(d['createdAt']),
     );
+  }
+
+  Map<String, dynamic> _transferToDoc(Transfer transfer) => {
+    'transferId': transfer.transferId, 'userId': userId,
+    'fromWalletId': transfer.fromWalletId,
+    'toWalletId': transfer.toWalletId,
+    'amount': transfer.amount, 'note': transfer.note,
+    'date': Timestamp.fromDate(transfer.date),
+    'createdAt': Timestamp.fromDate(transfer.createdAt),
+  };
+
+  WalletAccount _walletFromDoc(Map<String, dynamic> d) {
+    DateTime ts(dynamic v) => v is Timestamp ? v.toDate() : DateTime.now();
+    return WalletAccount(
+      walletId: d['walletId'] as String? ?? '',
+      userId: d['userId'] as String? ?? '',
+      name: d['name'] as String? ?? '',
+      type: d['type'] as String? ?? 'cash',
+      balance: (d['balance'] as num?)?.toDouble() ?? 0,
+      currency: d['currency'] as String? ?? 'EGP',
+      icon: d['icon'] as String? ?? '',
+      color: d['color'] as int? ?? 0xFF6C63FF,
+      createdAt: ts(d['createdAt']),
+      updatedAt: ts(d['updatedAt']),
+    );
+  }
+
+  void _validateTransfer(
+    Transfer transfer,
+    WalletAccount source,
+    WalletAccount destination,
+  ) {
+    if (transfer.fromWalletId == transfer.toWalletId) {
+      throw const WalletTransferException('Choose two different wallets.');
+    }
+    if (transfer.amount <= 0 || transfer.amount.isNaN || transfer.amount.isInfinite) {
+      throw const WalletTransferException('Enter a valid transfer amount.');
+    }
+    if (source.walletId != transfer.fromWalletId ||
+        destination.walletId != transfer.toWalletId) {
+      throw const WalletTransferException('Selected wallets do not match transfer.');
+    }
+    if (source.currency != destination.currency) {
+      throw const WalletTransferException('Transfers need wallets with the same currency.');
+    }
+    if (source.balance < transfer.amount) {
+      throw const WalletTransferException('Insufficient wallet balance.');
+    }
   }
 }
